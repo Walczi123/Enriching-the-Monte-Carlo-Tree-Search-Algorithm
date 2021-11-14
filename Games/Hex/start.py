@@ -15,7 +15,7 @@ if __name__ == "__main__":
     MODE = "man_vs_cpu"
     GAME_COUNT, N_GAMES = 0, 200
 
-    game = Game(board_size=BOARD_SIZE, itermax=ITERMAX, mode="man_vs_cpu", blue_starts=True)
+    game = Game(board_size=BOARD_SIZE, itermax=ITERMAX, mode=MODE, blue_starts=True)
     game.get_game_info([BOARD_SIZE, ITERMAX, MODE, GAME_COUNT])
     while not game.winner:
         game.play()

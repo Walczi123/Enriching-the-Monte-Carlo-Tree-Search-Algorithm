@@ -3,16 +3,18 @@ import sys
 import pygame
 from rich.console import Console
 from rich.table import Table
+from Games.game import BaseGame
 
 from logic import Logic
 from ui import UI
 
 
-class Game:
+class Game(BaseGame):
     def __init__(self, board_size: int, itermax: int, mode: str, blue_starts: bool = True):
         # Select mode
         self.modes = {"cpu_vs_cpu": 0,
-                      "man_vs_cpu": 0}
+                      "man_vs_cpu": 0,
+                      "man_vs_man": 0}
         self.modes[mode] = 1
         # Instantiate classes
         self.ui = UI(board_size)
@@ -91,12 +93,17 @@ class Game:
             print("Player {} wins!".format(self.winner))
             return True
 
-    def play(self):
+    def play_with_ui(self):
         self.ui.draw_board()
 
-        if self.modes["man_vs_cpu"]:
+        if self.modes["man_vs_cpu"] or self.modes["man_vs_man"]:
             self.node = self.ui.get_node_hover()
 
         pygame.display.update()
         self.ui.clock.tick(30)
         self.handle_events()
+
+    def play_without_ui(self):
+        pass
+
+        
