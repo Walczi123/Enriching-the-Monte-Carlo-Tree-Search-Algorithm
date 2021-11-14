@@ -1,4 +1,4 @@
-class Game:
+class BaseGame():
     def __init__(self, first_player, second_player, use_gui):
         self.announcement = 'Don\'t use base class.'
         self.name = "Base Game Class"
