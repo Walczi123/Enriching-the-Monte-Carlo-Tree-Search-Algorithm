@@ -2,17 +2,19 @@ from typing import Union
 
 import numpy as np
 
-from mcts import MCTS
+from const import BLUE_PLAYER, COLOR_BLUE, COLOR_RED, RED_PLAYER
+
+
 
 
 class Logic:
-    def __init__(self, ui, itermax):
+    def __init__(self, ui, board_size):
         self.ui = ui
-        self.itermax = itermax
+        self.board_size = board_size
 
         self.GAME_OVER = False
         self.MCTS_GAME_OVER = False
-        self.logger = np.zeros(shape=(self.ui.board_size, self.ui.board_size), dtype=np.int8)
+        self.logger = np.zeros(shape=(self.board_size, self.board_size), dtype=np.int8)
 
     def get_possible_moves(self, board: np.ndarray):
         x, y = np.where(board == 0)
@@ -22,12 +24,13 @@ class Logic:
 
     def make_move(self, coordinates: tuple, player: Union[int, None]):
         x, y = coordinates
-        node = x * self.ui.board_size + y
+        node = x * self.board_size + y
 
-        if player is None:
-            self.ui.color[node] = self.ui.green
-        else:
-            self.ui.color[node] = self.ui.blue if player is self.ui.BLUE_PLAYER else self.ui.red
+        if self.ui is not None:
+            if player is None:
+                self.ui.color[node] = self.ui.green
+            else:
+                self.ui.color[node] = COLOR_BLUE if player is BLUE_PLAYER else COLOR_RED
 
     def is_game_over(self, player: int, board: np.ndarray, mcts_mode: bool = False):
         """
@@ -40,10 +43,10 @@ class Logic:
             else:
                 self.MCTS_GAME_OVER = True
 
-        for _ in range(self.ui.board_size):
-            if player is self.ui.BLUE_PLAYER:
+        for _ in range(self.board_size):
+            if player is BLUE_PLAYER:
                 border = (_, 0)
-            if player is self.ui.RED_PLAYER:
+            if player is RED_PLAYER:
                 border = (0, _)
 
             path = self.traverse(border, player, board, {}, mcts_mode)
@@ -57,11 +60,11 @@ class Logic:
 
     def is_border(self, node: tuple, player: int):
         x, y = node
-        if player is self.ui.BLUE_PLAYER:
-            if y == self.ui.board_size - 1:
+        if player is BLUE_PLAYER:
+            if y == self.board_size - 1:
                 return True
-        elif player is self.ui.RED_PLAYER:
-            if x == self.ui.board_size - 1:
+        elif player is RED_PLAYER:
+            if x == self.board_size - 1:
                 return True
 
     def traverse(self, node: tuple, player: int, board: np.ndarray, visited: dict, mcts_mode: bool):
@@ -103,7 +106,7 @@ class Logic:
         """
         Returns True if node exists.
         """
-        return all(0 <= _ < self.ui.board_size for _ in coordinates)
+        return all(0 <= _ < self.board_size for _ in coordinates)
 
     def is_node_free(self, coordinates: tuple, board: np.ndarray):
         """
@@ -113,23 +116,18 @@ class Logic:
 
         return True if not board[x][y] else False
 
-    def get_action(self, node: Union[int, None], player: int) -> int:
-        # Human player
-        if player is self.ui.BLUE_PLAYER:
-            x, y = self.ui.get_true_coordinates(node)
-            # Debug: random player
-            # x, y = choice(self.get_possible_moves(self.logger))
-            # self.mcts = MCTS(logic=self, ui=self.ui, board_state=self.logger, starting_player=self.ui.BLUE_PLAYER)
-            # x, y = self.mcts.start(itermax=self.itermax, verbose=False)
+    def get_action(self, player: int, coordinates: tuple) -> int:
+        (x, y) = coordinates
+        
+        assert self.is_node_free((x, y), self.logger), "node is busy"
+        self.make_move((x, y), player)
+        self.logger[x][y] = player
 
-        # AI player
-        if player is self.ui.RED_PLAYER:
-            # Debug: random player
-            # x, y = choice(self.get_possible_moves(self.logger))
-            # MCTS player
-            self.mcts = MCTS(logic=self, ui=self.ui, board_state=self.logger, starting_player=self.ui.RED_PLAYER)
-            x, y = self.mcts.start(itermax=self.itermax, verbose=True, show_predictions=True)
+        return self.is_game_over(player, self.logger)
 
+    def check_and_make_action(self, player: int, coordinates: tuple) -> int:
+        (x, y) = coordinates
+        
         assert self.is_node_free((x, y), self.logger), "node is busy"
         self.make_move((x, y), player)
         self.logger[x][y] = player

@@ -27,7 +27,7 @@ class Queen(Piece):
 
     def draw(self, surface, hex_pos):
         image = \
-            pg.image.load('images/{}.png'.format(type(self).__name__))
+            pg.image.load('games/hive/images/{}.png'.format(type(self).__name__))
         (x, y) = hex_pos
         pos = (x - 16, y - 14)
         surface.blit(image, pos)
@@ -49,7 +49,7 @@ class Ant(Piece):
 
     def draw(self, surface, hex_pos):
         image = \
-            pg.image.load('images/{}.png'.format(type(self).__name__))
+            pg.image.load('games/hive/images/{}.png'.format(type(self).__name__))
         (x, y) = hex_pos
         pos = (x - 16, y - 17)
         surface.blit(image, pos)
@@ -68,7 +68,7 @@ class Spider(Piece):
 
     def draw(self, surface, hex_pos):
         image = \
-            pg.image.load('images/{}.png'.format(type(self).__name__))
+            pg.image.load('games/hive/images/{}.png'.format(type(self).__name__))
         (x, y) = hex_pos
         pos = (x - 16, y - 17)
         surface.blit(image, pos)
@@ -88,7 +88,7 @@ class Beetle(Piece):
 
     def draw(self, surface, hex_pos):
         image = \
-            pg.image.load('images/{}.png'.format(type(self).__name__))
+            pg.image.load('games/hive/images/{}.png'.format(type(self).__name__))
         (x, y) = hex_pos
         pos = (x - 16, y - 16)
         surface.blit(image, pos)
@@ -114,7 +114,7 @@ class Grasshopper(Piece):
 
     def draw(self, surface, hex_pos):
         image = \
-            pg.image.load('images/{}.png'.format(type(self).__name__))
+            pg.image.load('games/hive/images/{}.png'.format(type(self).__name__))
         (x, y) = hex_pos
         pos = (x - 12, y - 14)
         surface.blit(image, pos)

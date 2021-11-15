@@ -100,7 +100,7 @@ class MCTS:
         output = [(node.wins, node.visits, node.move) for node in root_node.children]
         if verbose:
             self.print_output(output, result)
-        if show_predictions:
+        if self.ui is not None and show_predictions:
             # Get a temporary board state to get the possible moves
             temp_state = self.state
             x, y = result
