@@ -1,6 +1,5 @@
-from othello import start
-import othello2 as ot
-import globals as cdf
+import games.othello.msi2.othello2 as ot
+import games.othello.msi2.globals as cdf
 import copy 
 
 from time import *
@@ -37,8 +36,7 @@ def run_game(f1, f2, n_iterations=DEPTH, printfinalResult=False, printSteps=Fals
 
         if not(ot.must_pass(g.board.placements, g.board.player)):
             placements_to_pass = copy.deepcopy(g.board.placements)
-            x, y = eval(
-                str(f1(placements_to_pass, g.board.player, n_iterations)))
+            x, y = f1(placements_to_pass, g.board.player, n_iterations, ot.get_result, ot.get_all_posible_moves, ot.change_player, ot.board_move2)
 
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
@@ -52,8 +50,7 @@ def run_game(f1, f2, n_iterations=DEPTH, printfinalResult=False, printSteps=Fals
 
         if not(ot.must_pass(g.board.placements, g.board.player)):
             placements_to_pass = copy.deepcopy(g.board.placements)
-            x, y = eval(
-                str(f2(placements_to_pass, g.board.player, n_iterations)))
+            x, y = f2(placements_to_pass, g.board.player, n_iterations, ot.get_result, ot.get_all_posible_moves, ot.change_player, ot.board_move2)
             g.board.oldplacements, g.board.placements = ot.board_move(g.board.placements, g.board.player, x, y)
             if printSteps:
                 print("1 ", x, y)
@@ -98,8 +95,8 @@ def drawGridBackground(outline=True):
 	g.screen.update()
 
 
-if __name__ == "__main__":
-    # result = run_game(MCTS_RAVE, MCTS_MAST,  n_iterations=800, printfinalResult=True, printSteps=True)
-    # print(result)
+# if __name__ == "__main__":
+#     # result = run_game(MCTS_RAVE, MCTS_MAST,  n_iterations=800, printfinalResult=True, printSteps=True)
+#     # print(result)
 
-    start()
+#     start()

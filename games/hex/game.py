@@ -85,7 +85,6 @@ class Game():
         # Forbid playing on already busy node
         try:
             coordinates = self.player_make_move(player, node)
-            print('coordinates',coordinates)
             self.winner = self.logic.get_action(player, coordinates)
         except AssertionError:
             return False

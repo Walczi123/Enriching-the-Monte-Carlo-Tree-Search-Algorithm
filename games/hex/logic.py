@@ -2,7 +2,7 @@ from typing import Union
 
 import numpy as np
 
-from const import BLUE_PLAYER, COLOR_BLUE, COLOR_RED, RED_PLAYER
+from games.hex.const import BLUE_PLAYER, COLOR_BLUE, COLOR_RED, RED_PLAYER
 
 
 
@@ -27,7 +27,7 @@ class Logic:
         node = x * self.board_size + y
 
         if self.ui is not None:
-            if player is None:
+            if player is None and self.ui.color[node] == 0:
                 self.ui.color[node] = self.ui.green
             else:
                 self.ui.color[node] = COLOR_BLUE if player is BLUE_PLAYER else COLOR_RED
@@ -40,8 +40,6 @@ class Logic:
         if not self.get_possible_moves(board):
             if not mcts_mode:
                 self.GAME_OVER = True
-            else:
-                self.MCTS_GAME_OVER = True
 
         for _ in range(self.board_size):
             if player is BLUE_PLAYER:
@@ -81,8 +79,8 @@ class Logic:
                 if self.is_border(node, player):
                     if not mcts_mode:
                         self.GAME_OVER = True
-                    else:
-                        self.MCTS_GAME_OVER = True
+                    # else:
+                    #     self.MCTS_GAME_OVER = True
 
                 for neighbour in neighbours:
                     self.traverse(neighbour, player, board, visited, mcts_mode)
@@ -127,9 +125,10 @@ class Logic:
 
     def check_and_make_action(self, player: int, coordinates: tuple) -> int:
         (x, y) = coordinates
-        
+   
         assert self.is_node_free((x, y), self.logger), "node is busy"
         self.make_move((x, y), player)
         self.logger[x][y] = player
 
         return self.is_game_over(player, self.logger)
+

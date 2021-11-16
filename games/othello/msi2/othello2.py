@@ -34,7 +34,7 @@ class Board:
 					self.g.screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile {0}-{1}".format(x,y),fill="#111",outline="#111")
 		#Animation of new tiles
 		self.g.screen.update()
-		sleep(0.12)
+		# sleep(0.12)
 		for x in range(8):
 			for y in range(8):
 				if self.placements[x][y] != self.oldplacements[x][y] and self.placements[x][y] == 0:
@@ -44,16 +44,16 @@ class Board:
 					for i in range(21):
 						self.g.screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#000",outline="#000")
 						self.g.screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#111",outline="#111")
-						if i%3==0:
-							sleep(0.01)
+						# if i%3==0:
+							# sleep(0.01)
 						self.g.screen.update()
 						self.g.screen.delete("animated")
 					#Growing
 					for i in reversed(range(21)):
 						self.g.screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#aaa",outline="#aaa")
 						self.g.screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#fff",outline="#fff")
-						if i%3==0:
-							sleep(0.01)
+						# if i%3==0:
+							# sleep(0.01)
 						self.g.screen.update()
 						self.g.screen.delete("animated")
 					self.g.screen.create_oval(54+50*x,54+50*y,96+50*x,96+50*y,tags="tile",fill="#aaa",outline="#aaa")
@@ -67,16 +67,16 @@ class Board:
 					for i in range(21):
 						self.g.screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#aaa",outline="#aaa")
 						self.g.screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#fff",outline="#fff")
-						if i%3==0:
-							sleep(0.01)
+						# if i%3==0:
+							# sleep(0.01)
 						self.g.screen.update()
 						self.g.screen.delete("animated")
 					#Growing
 					for i in reversed(range(21)):
 						self.g.screen.create_oval(54+i+50*x,54+i+50*y,96-i+50*x,96-i+50*y,tags="tile animated",fill="#000",outline="#000")
 						self.g.screen.create_oval(54+i+50*x,52+i+50*y,96-i+50*x,94-i+50*y,tags="tile animated",fill="#111",outline="#111")
-						if i%3==0:
-							sleep(0.01)
+						# if i%3==0:
+							# sleep(0.01)
 						self.g.screen.update()
 						self.g.screen.delete("animated")
 
@@ -86,10 +86,10 @@ class Board:
 		#Drawing of highlight circles
 		#Drawing player sygnalization box
 		if self.player == 0:
-			sleep(0.02)
+			# sleep(0.02)
 			self.g.screen.create_rectangle(60,455,440,465,tags="player_signalization", fill="white")
 		if self.player == 1:
-			sleep(0.02)
+			# sleep(0.02)
 			self.g.screen.create_rectangle(60,455,440,465,tags="player_signalization", fill="black")
 			self.g.screen.create_text(250, 480, tags="player_signalization", anchor="c", text="Thinking...",
                             font=("Consolas", 15), fill="black")
@@ -159,7 +159,7 @@ class Board:
 					self.g.screen.create_oval(54+50*x,54+50*y,96+50*x,96+50*y,tags="tile {0}-{1}".format(x,y),fill="#000",outline="#000")
 					self.g.screen.create_oval(54+50*x,52+50*y,96+50*x,94+50*y,tags="tile {0}-{1}".format(x,y),fill="#111",outline="#111")
 		self.g.screen.update()
-		sleep(sleep_time)
+		# sleep(sleep_time)
 
 def create_start_state():
 	iteration_state = []
@@ -192,6 +192,9 @@ def get_all_moves(iteration_state):
 				moveList.append((x,y))
 	return moveList
 
+def board_move2(state, move, player):
+    return board_move(state, player, move[0], move[1])[1]
+
 def board_move(iteration_state, player,x,y):
 	""" Moves to position and updates 'oldplacements' table
 	"""
@@ -219,6 +222,10 @@ def must_pass(iteration_state, player):
 			if valid(iteration_state, player,x,y):
 				must_pass=False
 	return must_pass
+
+def get_result(self, state, player) -> int:
+	raise ValueError(self.announcement)
+
 
 
 def get_result(iteration_state, player):
@@ -379,6 +386,7 @@ def valid(iteration_state, player, x, y):
 			return False
 		else:
 			return valid
+
 
 def change_player(player):
 	return (player+1)%2

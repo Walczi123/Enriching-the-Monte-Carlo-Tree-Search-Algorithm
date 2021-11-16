@@ -1,6 +1,6 @@
 import random
-from typing import Callable
 from mcts.nodes import Node
+from games.othello.msi2.othello2 import get_all_posible_moves, board_move, change_player
 
 
 def select_uct_child(childNodes):
@@ -18,8 +18,8 @@ def select_uct_child(childNodes):
 	return random.choice(bestChildren)
 
 
-def mcts(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable):
-	rootnode = Node(None, None, initial_state, player, get_result, get_all_posible_moves, change_player)
+def MCTS(initial_state, player, number_of_iteration):
+	rootnode = Node(None, None, initial_state, player)
 	for _ in range(number_of_iteration):
 		node = rootnode
 		iteration_state = node.state
@@ -31,7 +31,7 @@ def mcts(initial_state, player, number_of_iteration, get_result:Callable, get_al
 		# Expansion
 		if node.untried_moves != []:
 			move = random.choice(node.untried_moves)
-			iteration_state = board_move(iteration_state, move, node.player)
+			_, iteration_state = board_move(iteration_state, node.player, move[0], move[1])
 			node = node.add_child(move, iteration_state)
 
 		# Playout
@@ -40,7 +40,7 @@ def mcts(initial_state, player, number_of_iteration, get_result:Callable, get_al
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
 				move = random.choice(all_possible_moves)
-				iteration_state = board_move(iteration_state, move, player)
+				_, iteration_state = board_move(iteration_state, player, move[0], move[1])
 				player = change_player(player)
 				continue
 
@@ -48,7 +48,7 @@ def mcts(initial_state, player, number_of_iteration, get_result:Callable, get_al
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
 				move = random.choice(all_possible_moves)
-				iteration_state = board_move(iteration_state, move, player)
+				_, iteration_state = board_move(iteration_state, player, move[0], move[1])
 				player = change_player(player)
 				continue
 

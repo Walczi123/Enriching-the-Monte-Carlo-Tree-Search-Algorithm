@@ -1,30 +1,34 @@
+from copy import copy, deepcopy
 import sys
+from tkinter.constants import NO
+from colorama.initialise import reset_all
 
 import pygame
 from rich.console import Console
 from rich.table import Table
-from const import BLUE_PLAYER, RED_PLAYER
-from player import Player
+from games.game import BaseGame
+from games.hex.const import BLUE_PLAYER, RED_PLAYER
+from games.hex.player import Player
 
-from logic import Logic
-from ui import UI
+from games.hex.logic import Logic
+from games.hex.ui import UI
 
-from mcts import MCTS
+# from mcts import MCTS
 
 
-class Hex():
-    def __init__(self, board_size: int, player1:Player, player2:Player, use_ui: bool = True):
+class Hex(BaseGame):
+    def __init__(self, board_size: int, player1:Player, player2:Player, use_gui: bool = True):
         self.name = "Hex"
         
         # Mode
         self.player1=player1
         self.player2=player2
 
-        use_ui = use_ui or player1.is_man or player2.is_man
+        use_gui = use_gui or player1.is_man or player2.is_man
 
         # Instantiate classes
         self.ui = None
-        if use_ui:
+        if use_gui:
             pygame.init()
             pygame.display.set_caption("Hex")
             self.ui = UI(board_size)
@@ -35,7 +39,7 @@ class Hex():
         self.winner = 0
         self.turn_state = BLUE_PLAYER
 
-        self.use_ui = use_ui
+        self.use_gui = use_gui
 
     def get_game_info(self, args):
         console = Console()
@@ -67,7 +71,10 @@ class Hex():
         # Forbid playing on already busy node
         try:
             self.winner = self.logic.check_and_make_action(player, move)
+            if self.winner:
+                print('win')
         except AssertionError:
+            print("invalid move")
             return False
 
         return True
@@ -78,7 +85,10 @@ class Hex():
                 return None
             args = (self.ui, node)
         else:
-            args = (self.logic, self.ui, self.logic.logger, 1, 20, True, True)
+            # args = (self.logic, self.ui, self.logic.logger, 1, 20, True, True)
+            # args = (self.logic.logger, player, 20, self.logic.is_game_over, self.logic.get_possible_moves, self.logic.change_player, self.logic.check_and_make_action2)
+            args = (self.logic.logger, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move)
+            
         move = player.make_move(args)
         return move
 
@@ -116,12 +126,11 @@ class Hex():
 
             if (current_player.is_man and cliced) or not current_player.is_man:
                 move = self.player_make_move(current_player, node)
-                self.check_move(move, self.turn_state)
-                current_player = self.swich_player()  
+                if self.check_move(move, self.turn_state):  
+                    current_player = self.swich_player()  
         self.get_winner()
+        pygame.event.wait()
     
-            
-
     def play_without_ui(self):
         print(f'{self.name} starts')
         current_player = self.player1
@@ -133,10 +142,30 @@ class Hex():
 
         self.get_winner()
 
-    def play(self):
-        if self.use_ui:
-            self.play_with_ui()
+    def get_result(self, state, player) -> int:
+        result = self.logic.is_game_over(player, state, True)
+        if result is None:
+            result = 0.5
+        return result
+
+    def get_all_posible_moves(self, iteration_state, player = None) -> list:
+        moves = self.logic.get_possible_moves(iteration_state)
+        return moves
+
+    def change_player(self, player) -> int:
+        if player == 2:
+            return 1
         else:
-            self.play_without_ui()
+            return 2
+
+    def board_move(self, state, move, player):
+        (x, y) = move
+
+        assert self.logic.is_node_free((x, y), state), "node is busy"
+
+        copy_state = deepcopy(state)
+        copy_state[x][y] = player
+
+        return copy_state
 
         
