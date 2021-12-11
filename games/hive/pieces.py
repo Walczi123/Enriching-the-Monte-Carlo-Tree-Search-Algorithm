@@ -1,17 +1,22 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+
+import os
 import numpy as np
+
+from games.hive.const import ANT_AMOUNT, BEETLE_AMOUNT, GRASSHOPPER_AMOUNT, QUEEN_AMOUNT, SPIDER_AMOUNT
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame as pg
-from move_checker import axial_distance, move_is_not_blocked_or_jump, \
-    path_exists, is_straight_line
-from settings import PIECE_WHITE
+# from move_checker import axial_distance, move_is_not_blocked_or_jump, \
+#     path_exists, is_straight_line
 
-
+PIECE_WHITE = (250, 250, 250)
 class Piece:
 
     def __init__(self, color=PIECE_WHITE):
         self.old_pos = None
         self.color = color
+        self.amount = 0
 
     def update_pos(self, pos):
         self.old_pos = pos
@@ -24,6 +29,7 @@ class Queen(Piece):
 
     def __init__(self, color=PIECE_WHITE):
         super().__init__(color)
+        self.amount = QUEEN_AMOUNT
 
     def draw(self, surface, hex_pos):
         image = \
@@ -32,20 +38,21 @@ class Queen(Piece):
         pos = (x - 16, y - 14)
         surface.blit(image, pos)
 
-    def move_is_valid(self, state, old_tile, new_tile):
-        dist = axial_distance(old_tile.axial_coords,
-                              new_tile.axial_coords)
-        if dist == 1 and move_is_not_blocked_or_jump(state, old_tile,
-                new_tile):
-            return True
-        else:
-            return False
+    # def move_is_valid(self, state, old_tile, new_tile):
+    #     dist = axial_distance(old_tile.axial_coords,
+    #                           new_tile.axial_coords)
+    #     if dist == 1 and move_is_not_blocked_or_jump(state, old_tile,
+    #             new_tile):
+    #         return True
+    #     else:
+    #         return False
 
 
 class Ant(Piece):
 
     def __init__(self, color=PIECE_WHITE):
         super().__init__(color)
+        self.amount = ANT_AMOUNT
 
     def draw(self, surface, hex_pos):
         image = \
@@ -54,17 +61,18 @@ class Ant(Piece):
         pos = (x - 16, y - 17)
         surface.blit(image, pos)
 
-    def move_is_valid(self, state, old_tile, new_tile):
-        if path_exists(state, old_tile, new_tile):
-            return True
-        else:
-            return False
+    # def move_is_valid(self, state, old_tile, new_tile):
+    #     if path_exists(state, old_tile, new_tile):
+    #         return True
+    #     else:
+    #         return False
 
 
 class Spider(Piece):
 
     def __init__(self, color=PIECE_WHITE):
         super().__init__(color)
+        self.amount = SPIDER_AMOUNT
 
     def draw(self, surface, hex_pos):
         image = \
@@ -73,18 +81,19 @@ class Spider(Piece):
         pos = (x - 16, y - 17)
         surface.blit(image, pos)
 
-    def move_is_valid(self, state, old_tile, new_tile):
-        if path_exists(state, old_tile, new_tile, spider=True) \
-            and move_is_not_blocked_or_jump(state, old_tile, new_tile):
-            return True
-        else:
-            return False
+    # def move_is_valid(self, state, old_tile, new_tile):
+    #     if path_exists(state, old_tile, new_tile, spider=True) \
+    #         and move_is_not_blocked_or_jump(state, old_tile, new_tile):
+    #         return True
+    #     else:
+    #         return False
 
 
 class Beetle(Piece):
 
     def __init__(self, color=PIECE_WHITE):
         super().__init__(color)
+        self.amount = BEETLE_AMOUNT
 
     def draw(self, surface, hex_pos):
         image = \
@@ -93,24 +102,25 @@ class Beetle(Piece):
         pos = (x - 16, y - 16)
         surface.blit(image, pos)
 
-    def move_is_valid(self, state, old_tile, new_tile):
-        dist = axial_distance(old_tile.axial_coords,
-                              new_tile.axial_coords)
-        if dist == 1 and (move_is_not_blocked_or_jump(state, old_tile,
-                          new_tile) or new_tile.has_pieces()
-                          or len(old_tile.pieces) > 1):
+    # def move_is_valid(self, state, old_tile, new_tile):
+    #     dist = axial_distance(old_tile.axial_coords,
+    #                           new_tile.axial_coords)
+    #     if dist == 1 and (move_is_not_blocked_or_jump(state, old_tile,
+    #                       new_tile) or new_tile.has_pieces()
+    #                       or len(old_tile.pieces) > 1):
 
-            # can't slide into a blocked hex but it can go up or down into one
+    #         # can't slide into a blocked hex but it can go up or down into one
 
-            return True
-        else:
-            return False
+    #         return True
+    #     else:
+    #         return False
 
 
 class Grasshopper(Piece):
 
     def __init__(self, color=PIECE_WHITE):
         super().__init__(color)
+        self.amount = GRASSHOPPER_AMOUNT
 
     def draw(self, surface, hex_pos):
         image = \
@@ -119,33 +129,33 @@ class Grasshopper(Piece):
         pos = (x - 12, y - 14)
         surface.blit(image, pos)
 
-    def move_is_valid(self, state, old_tile, new_tile):
+    # def move_is_valid(self, state, old_tile, new_tile):
 
-        # dist > 1, straight line, must hop over pieces
+    #     # dist > 1, straight line, must hop over pieces
 
-        dist = axial_distance(old_tile.axial_coords,
-                              new_tile.axial_coords)
+    #     dist = axial_distance(old_tile.axial_coords,
+    #                           new_tile.axial_coords)
 
-        if dist > 1:
-            visited = [old_tile]
-            queue = [old_tile]
-            while queue and new_tile not in visited:
-                current_tile = queue.pop(0)
-                for neighbor_tile in [x for x in
-                        current_tile.adjacent_tiles if x.has_pieces()
-                        and is_straight_line(old_tile.axial_coords,
-                        x.axial_coords)]:
-                    if neighbor_tile not in visited:
-                        visited.append(neighbor_tile)
-                        queue.append(neighbor_tile)
+    #     if dist > 1:
+    #         visited = [old_tile]
+    #         queue = [old_tile]
+    #         while queue and new_tile not in visited:
+    #             current_tile = queue.pop(0)
+    #             for neighbor_tile in [x for x in
+    #                     current_tile.adjacent_tiles if x.has_pieces()
+    #                     and is_straight_line(old_tile.axial_coords,
+    #                     x.axial_coords)]:
+    #                 if neighbor_tile not in visited:
+    #                     visited.append(neighbor_tile)
+    #                     queue.append(neighbor_tile)
 
-            # have to check last tile seperately bc it will never have a piece
+    #         # have to check last tile seperately bc it will never have a piece
 
-            for penultimate_tile in [x for x in new_tile.adjacent_tiles
-                    if x.has_pieces()]:
-                if penultimate_tile in visited \
-                    and is_straight_line(old_tile.axial_coords,
-                        new_tile.axial_coords):
-                    return True
-        else:
-            return False
+    #         for penultimate_tile in [x for x in new_tile.adjacent_tiles
+    #                 if x.has_pieces()]:
+    #             if penultimate_tile in visited \
+    #                 and is_straight_line(old_tile.axial_coords,
+    #                     new_tile.axial_coords):
+    #                 return True
+    #     else:
+    #         return False

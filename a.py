@@ -1,9 +1,5 @@
-class A(object):
-    def fun(self):
-        print("asdada")
+a = dict()
+a[(0,0)] = 1
+a[(0,1)] = 1
 
-def f(function):
-    function()
-
-a = A()
-f(a.fun)
+print((0,0) in a.keys())
