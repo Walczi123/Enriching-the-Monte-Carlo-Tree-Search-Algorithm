@@ -1,9 +1,12 @@
-from games.othello.msi2.start import run_game
-
-from mcts.mcts import mcts
-
-
+from games.hex.player import MCTS_Player, Man_Player
+from games.othello.othello import Othello
+from games.othello.player import Man_Player, Random_Player
 
 if __name__ == "__main__":
-    result = run_game(mcts, mcts,  n_iterations=800, printfinalResult=True, printSteps=True)
-    print(result)
+    p1 = Random_Player(0.03)
+    p2 = Random_Player(0.03)
+    # p2 = MCTS_Player(10)
+
+    game = Othello(use_ui=True, player1= p1, player2=p2)
+    game.play()
+

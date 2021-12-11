@@ -23,6 +23,7 @@ class Hex(BaseGame):
         # Mode
         self.player1=player1
         self.player2=player2
+        self.turn_state = 1
 
         use_gui = use_gui or player1.is_man or player2.is_man
 
@@ -97,11 +98,11 @@ class Hex(BaseGame):
 
     def swich_player(self):
         # Next turn
-        if self.turn_state is BLUE_PLAYER:
-            self.turn_state = RED_PLAYER
+        if self.turn_state is 1:
+            self.turn_state = 2
             return self.player2
         else:
-            self.turn_state = BLUE_PLAYER
+            self.turn_state = 1
             return self.player1
 
     def get_winner(self):
