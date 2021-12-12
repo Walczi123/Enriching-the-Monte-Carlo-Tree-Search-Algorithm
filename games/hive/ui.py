@@ -29,9 +29,10 @@ class UI:
 
         self.border = 2
         self.pieces = list([Queen(), Ant(), Grasshopper(), Spider(), Beetle()])
+        self.amount_pieces = len(self.pieces)
 
 
-    def draw_board(self, board:dict, amount_available_white_pieces, amount_available_black_pieces):
+    def draw_board(self, board:dict, amount_available_white_pieces, amount_available_black_pieces, selected_piece):
         # Board
         for j in range(0, self.len_pixel_y):
             for k in range(0, self.len_pixel_x):
@@ -39,12 +40,18 @@ class UI:
                     coordinates = (self.pixel_x[k] + self.hex_radius, self.pixel_y[j])
                 else:
                     coordinates = (self.pixel_x[k], self.pixel_y[j])
-     
+                
                 pygame.draw.polygon(self.screen, (255,255,255), self.get_hex_points(coordinates))
                 # print coordiantes
-                # self.screen.blit(self.fonts.render(f'({k - self.center_x}, {j - self.center_y})', True, (150,150,150)), (coordinates[0] - 13, coordinates[1] - 6 ))
-                if (k - self.center_x, j - self.center_y) in board.keys():
-                    board[k - self.center_x, j - self.center_y].draw(self.screen, coordinates)
+                self.screen.blit(self.fonts.render(f'({k - self.center_x}, {j - self.center_y})', True, (150,150,150)), (coordinates[0] - 13, coordinates[1] - 6 ))
+                piece_coordinates = (k - self.center_x, j - self.center_y)
+                if piece_coordinates in board.keys():
+                    piece = board[k - self.center_x, j - self.center_y]
+                    if piece.color[0]//128 == 0:
+                        pygame.draw.polygon(self.screen, (50,50,50), self.get_hex_points(coordinates))
+                    if selected_piece is not None and not selected_piece[0] and selected_piece[1] == piece_coordinates:
+                        pygame.draw.polygon(self.screen, (255,0,0), self.get_hex_points(coordinates))
+                    piece.draw(self.screen, coordinates)
                     
         # Inventory
         pygame.draw.rect(self.screen, (50, 50, 50), [0, self.board_height, self.board_width, self.inv_height])
@@ -58,22 +65,27 @@ class UI:
         # Black
         black_inv = [self.board_width//2 + self.border ,self.board_height + self.border ,self.board_width//2 - (2*self.border),self.inv_height - (2*self.border)]
         pygame.draw.rect(self.screen, (125, 125, 125), black_inv)
-        black_inv_border = (black_inv[0] + self.border, black_inv[1] + self.border)
 
-        pieces_amount = len(self.pieces)
-
-        for i in range(pieces_amount):
+        for i in range(self.amount_pieces):
             piece_amount = self.pieces[i].amount
 
-            w_coordinates = [white_inv_border[0] + (i * white_inv[2] // pieces_amount), white_inv_border[1], white_inv[2] // pieces_amount - self.border, white_inv[3] - self.border]
-            pygame.draw.rect(self.screen, (220, 220, 220), w_coordinates)    
+            w_coordinates = [white_inv_border[0] + (i * white_inv[2] // self.amount_pieces), white_inv_border[1], white_inv[2] // self.amount_pieces - self.border, white_inv[3] - self.border]
+            if selected_piece is not None and selected_piece[0] and selected_piece[1][0] == 0 and  selected_piece[1][1] == i:
+                w_color = (220, 0, 0)
+            else:
+                w_color = (220, 220, 220)
+            pygame.draw.rect(self.screen, w_color, w_coordinates)    
             for j in range(1, amount_available_white_pieces[i] + 1):
-                self.pieces[i].draw(self.screen, (w_coordinates[0] + white_inv[2] //(pieces_amount*2), w_coordinates[1] + (j * (white_inv[3] // (piece_amount + 1)))))
+                self.pieces[i].draw(self.screen, (w_coordinates[0] + white_inv[2] //(self.amount_pieces*2), w_coordinates[1] + (j * (white_inv[3] // (piece_amount + 1)))))
 
-            b_coordinates = [white_inv_border[0] + (i * white_inv[2] // pieces_amount) + self.board_width//2, white_inv_border[1], white_inv[2] // pieces_amount - self.border, white_inv[3] - self.border]
-            pygame.draw.rect(self.screen, (50, 50, 50), b_coordinates)
+            b_coordinates = [white_inv_border[0] + (i * white_inv[2] // self.amount_pieces) + self.board_width//2, white_inv_border[1], white_inv[2] // self.amount_pieces - self.border, white_inv[3] - self.border]
+            if selected_piece is not None and selected_piece[0] and selected_piece[1][0] == 1 and  selected_piece[1][1] == i:
+                b_color = (50, 0, 0)
+            else:
+                b_color = (50, 50, 50)
+            pygame.draw.rect(self.screen, b_color, b_coordinates)
             for j in range(1, amount_available_black_pieces[i] + 1):
-                self.pieces[i].draw(self.screen, (b_coordinates[0] + white_inv[2] //(pieces_amount*2), b_coordinates[1] + (j * (white_inv[3] // (piece_amount + 1)))))
+                self.pieces[i].draw(self.screen, (b_coordinates[0] + white_inv[2] //(self.amount_pieces*2), b_coordinates[1] + (j * (white_inv[3] // (piece_amount + 1)))))
 
 
     def get_hex_points(self, coord_pair):
@@ -96,6 +108,12 @@ class UI:
 
     def get_coordiantes(self, pos):
         x_pos, y_pos = pos
-        x = min(range(self.len_pixel_x), key=lambda i: abs(self.pixel_x[i]-x_pos))
-        y = min(range(self.len_pixel_y), key=lambda i: abs(self.pixel_y[i]-y_pos))
-        return x, y
+        if y_pos < self.board_height:
+            x = min(range(self.len_pixel_x), key=lambda i: abs(self.pixel_x[i]-x_pos)) - self.center_x
+            y = min(range(self.len_pixel_y), key=lambda i: abs(self.pixel_y[i]-y_pos)) - self.center_y
+            return True, (x, y) 
+        else:
+            y = x_pos // (self.board_width//(self.amount_pieces * 2))
+            x = y // self.amount_pieces
+            y -= x * self.amount_pieces
+            return False, (x, y) 
