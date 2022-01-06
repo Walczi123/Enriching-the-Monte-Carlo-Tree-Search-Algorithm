@@ -1,12 +1,14 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 import numpy as np
-import tile
 import pieces
+PIECE_WHITE = (250, 250, 250)
+PIECE_BLACK = (50, 50, 50)
+
+import tile
 from settings import PIECE_WHITE, PIECE_BLACK
 
-
-def is_valid_move(state, old_tile, new_tile):
+def is_valid_move(state, move):
     base_move_check = new_tile is not None and new_tile.coords \
         != old_tile.coords and (not new_tile.has_pieces()
                                 or type(state.moving_piece)

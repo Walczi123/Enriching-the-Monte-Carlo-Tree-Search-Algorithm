@@ -5,6 +5,8 @@ import os
 import numpy as np
 
 from games.hive.const import ANT_AMOUNT, BEETLE_AMOUNT, GRASSHOPPER_AMOUNT, QUEEN_AMOUNT, SPIDER_AMOUNT
+from games.hive.common_functions import cube_to_axial, evenr_to_axial, neighbours, find_pieces_around
+from games.hive.state import State
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame as pg
 # from move_checker import axial_distance, move_is_not_blocked_or_jump, \
@@ -21,8 +23,8 @@ class Piece:
     def update_pos(self, pos):
         self.old_pos = pos
 
-    def move_is_valid(self, state, old_tile, new_tile):
-        pass
+    def moves(self, coordinate, state):
+        return iter(())
 
 
 class Queen(Piece):
@@ -37,6 +39,11 @@ class Queen(Piece):
         (x, y) = hex_pos
         pos = (x - 16, y - 14)
         surface.blit(image, pos)
+
+    def moves(self, coordinate, state):
+        if len(find_pieces_around(state, coordinate)) < 4:
+            return trace_coutour(state, coordinate, steps=1)
+        return super().moves(coordinate, state)
 
     # def move_is_valid(self, state, old_tile, new_tile):
     #     dist = axial_distance(old_tile.axial_coords,
@@ -61,11 +68,8 @@ class Ant(Piece):
         pos = (x - 16, y - 17)
         surface.blit(image, pos)
 
-    # def move_is_valid(self, state, old_tile, new_tile):
-    #     if path_exists(state, old_tile, new_tile):
-    #         return True
-    #     else:
-    #         return False
+    def moves(self, coordinate, state):
+        return find_contour(state, exclude=(coordinate,))
 
 
 class Spider(Piece):
@@ -81,12 +85,8 @@ class Spider(Piece):
         pos = (x - 16, y - 17)
         surface.blit(image, pos)
 
-    # def move_is_valid(self, state, old_tile, new_tile):
-    #     if path_exists(state, old_tile, new_tile, spider=True) \
-    #         and move_is_not_blocked_or_jump(state, old_tile, new_tile):
-    #         return True
-    #     else:
-    #         return False
+    def moves(self, coordinate, state):
+        return trace_coutour(state, coordinate, steps=3)
 
 
 class Beetle(Piece):
@@ -116,6 +116,16 @@ class Beetle(Piece):
     #         return False
 
 
+# Hex topology stuff
+offsets = [
+    (0, -1, 1), (1, -1, 0), (1, 0, -1),
+    (0, 1, -1), (-1, 1, 0), (-1, 0, 1)]
+
+def add(c1, c2):
+    x1, y1, z1 = c1
+    x2, y2, z2 = c2
+    return x1 + x2, y1 + y2, z1 + z2
+
 class Grasshopper(Piece):
 
     def __init__(self, color=PIECE_WHITE):
@@ -129,33 +139,41 @@ class Grasshopper(Piece):
         pos = (x - 12, y - 14)
         surface.blit(image, pos)
 
-    # def move_is_valid(self, state, old_tile, new_tile):
+    def moves(self, coordinate, state):
+        c = evenr_to_axial(coordinate)
+        for direction in offsets:
+            p = add(c, direction)
+            # Grasshopper must jump over at least one piece
+            if p in state.board:
+                while p in state.board:
+                    p = add(p, direction)
+                yield cube_to_axial(p)
 
-    #     # dist > 1, straight line, must hop over pieces
 
-    #     dist = axial_distance(old_tile.axial_coords,
-    #                           new_tile.axial_coords)
+def find_contour(state:State, exclude=None):
+        """Returns all contour coordinates of the hive"""
+        contour = set()
+        # All neighbours
+        for coordinate in state.board:
+            if coordinate not in exclude:
+                for neighbour in neighbours(coordinate):
+                    contour.add(neighbour)
+        # ...except non-free
+        contour.difference_update(set(state.board.keys()))
+        return contour
 
-    #     if dist > 1:
-    #         visited = [old_tile]
-    #         queue = [old_tile]
-    #         while queue and new_tile not in visited:
-    #             current_tile = queue.pop(0)
-    #             for neighbor_tile in [x for x in
-    #                     current_tile.adjacent_tiles if x.has_pieces()
-    #                     and is_straight_line(old_tile.axial_coords,
-    #                     x.axial_coords)]:
-    #                 if neighbor_tile not in visited:
-    #                     visited.append(neighbor_tile)
-    #                     queue.append(neighbor_tile)
-
-    #         # have to check last tile seperately bc it will never have a piece
-
-    #         for penultimate_tile in [x for x in new_tile.adjacent_tiles
-    #                 if x.has_pieces()]:
-    #             if penultimate_tile in visited \
-    #                 and is_straight_line(old_tile.axial_coords,
-    #                     new_tile.axial_coords):
-    #                 return True
-    #     else:
-    #         return False
+def trace_coutour(state, coordinate, steps=1):
+    """Returns the two coordinates n steps away from coordinate along
+    the hive contour."""
+    contour = find_contour(state, exclude=(coordinate,))
+    visited = set()
+    todo = [(coordinate, 0)]
+    while todo:
+        c, n = todo.pop()
+        for neighbour in neighbours(c):
+            if neighbour in contour and neighbour not in visited:
+                visited.add(neighbour)
+                if n == steps:
+                    yield c
+                else:
+                    todo.append((neighbour, n + 1))

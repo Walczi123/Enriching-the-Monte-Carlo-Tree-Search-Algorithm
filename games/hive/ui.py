@@ -1,6 +1,7 @@
 from math import ceil, floor
 import numpy as np
 import pygame
+from games.hive.common_functions import axial_to_cube, evenr_to_axial
 from games.hive.pieces import Ant, Beetle, Grasshopper, Queen, Spider
 
 from games.othello.const import BACKGROUND_COLOR, BOARD_COLOR, FRIST_PLAYER_COLOR, SECONF_PLAYER_COLOR
@@ -36,7 +37,7 @@ class UI:
         # Board
         for j in range(0, self.len_pixel_y):
             for k in range(0, self.len_pixel_x):
-                if j % 2 == 1:
+                if j % 2 == 0:
                     coordinates = (self.pixel_x[k] + self.hex_radius, self.pixel_y[j])
                 else:
                     coordinates = (self.pixel_x[k], self.pixel_y[j])
@@ -44,6 +45,8 @@ class UI:
                 pygame.draw.polygon(self.screen, (255,255,255), self.get_hex_points(coordinates))
                 # print coordiantes
                 self.screen.blit(self.fonts.render(f'({k - self.center_x}, {j - self.center_y})', True, (150,150,150)), (coordinates[0] - 13, coordinates[1] - 6 ))
+                p = evenr_to_axial((k - self.center_x, j - self.center_y))
+                self.screen.blit(self.fonts.render(f'({p[0]}, {p[1]}, {p[2]})', True, (150,0,15)), (coordinates[0] - 20, coordinates[1] + 3 ))
                 piece_coordinates = (k - self.center_x, j - self.center_y)
                 if piece_coordinates in board.keys():
                     piece = board[k - self.center_x, j - self.center_y]
@@ -109,11 +112,15 @@ class UI:
     def get_coordiantes(self, pos):
         x_pos, y_pos = pos
         if y_pos < self.board_height:
-            x = min(range(self.len_pixel_x), key=lambda i: abs(self.pixel_x[i]-x_pos)) - self.center_x
             y = min(range(self.len_pixel_y), key=lambda i: abs(self.pixel_y[i]-y_pos)) - self.center_y
+            tmp = 0
+            if y % 2:
+                tmp = self.hex_radius
+            x = min(range(self.len_pixel_x), key=lambda i: abs(self.pixel_x[i]-x_pos + tmp)) - self.center_x
             return True, (x, y) 
         else:
             y = x_pos // (self.board_width//(self.amount_pieces * 2))
             x = y // self.amount_pieces
             y -= x * self.amount_pieces
-            return False, (x, y) 
+            print(x,y)
+            return False, (x, y)

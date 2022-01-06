@@ -1,4 +1,4 @@
-from games.hive.const import QUEEN_AMOUNT
+from games.hive.const import ANT_AMOUNT, BEETLE_AMOUNT, GRASSHOPPER_AMOUNT, QUEEN_AMOUNT, SPIDER_AMOUNT
 
 
 class State:
@@ -9,4 +9,6 @@ class State:
         # Queen, Ant, Grasshopper, Spider, Beetle
         self.amount_available_white_pieces = [QUEEN_AMOUNT, ANT_AMOUNT, GRASSHOPPER_AMOUNT, SPIDER_AMOUNT, BEETLE_AMOUNT]
         self.amount_available_black_pieces = [QUEEN_AMOUNT, ANT_AMOUNT, GRASSHOPPER_AMOUNT, SPIDER_AMOUNT, BEETLE_AMOUNT]
+        self.round_counter = 0
+        self.turn_state = 1
 

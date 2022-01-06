@@ -1,6 +1,7 @@
 # from mcts import MCTS
 import random
 from time import sleep
+from games.hive.move_checker import check_move
 from mcts import mcts
 
 
@@ -22,7 +23,6 @@ class MCTS_Player(Player):
     def __init__(self, number_of_iteration:int):
         super().__init__(False)
         self.number_of_iteration = number_of_iteration
-
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
         move = mcts.mcts(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move)
@@ -34,10 +34,16 @@ class Random_Player(Player):
         self.wait_time = wait_time
 
     def make_move(self, args):
-        # (logic, ui, logger, starting_player, itermax, verbose, show_predictions) = args
-        # mcts = MCTS(logic=logic, ui=ui, board_state=logger, starting_player=starting_player)
-        # return mcts.start(itermax=itermax, verbose=verbose, show_predictions=show_predictions)
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = random.choice(get_all_posible_moves(initial_state, player))
-        sleep(self.wait_time)
-        return move
+        
+        available_moves = get_all_posible_moves(initial_state)
+        if len(available_moves) > 0:
+            for m in available_moves:
+                if not check_move(initial_state, m):
+                    print("invalide move generated")
+                    print(m)
+                    print()
+            move = random.choice(available_moves)
+            sleep(self.wait_time)
+            return move
+        return None

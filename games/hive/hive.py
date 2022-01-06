@@ -1,13 +1,16 @@
+from collections import defaultdict
 from copy import deepcopy
 import sys
 import os
 from typing import DefaultDict
+from numpy.core.fromnumeric import reshape
 
 from pygame import color
 from games.hive.const import ANT_AMOUNT, ANT_ID, BEETLE_AMOUNT, BEETLE_ID, GRASSHOPPER_AMOUNT, GRASSHOPPER_ID, QUEEN_AMOUNT, QUEEN_ID, SPIDER_AMOUNT, SPIDER_ID
 
 from games.hive.pieces import Ant, Beetle, Grasshopper, Queen, Spider
-from games.hive.source_.state import State
+from games.hive.move_checker import check_move, neighbours
+from games.hive.state import State
 
 # # Hide Pygame welcome message
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
@@ -22,13 +25,13 @@ class Hive():
         self.player1 = player1
         self.player2 = player2
 
-        # self.state = State()
-        self.board = dict()
-        # self.board[(0,0)] = Queen()
-        # self.board[(2,2)] = Queen((0,0,0))
-        # Queen, Ant, Grasshopper, Spider, Beetle
-        self.amount_available_white_pieces = [QUEEN_AMOUNT, ANT_AMOUNT, GRASSHOPPER_AMOUNT, SPIDER_AMOUNT, BEETLE_AMOUNT]
-        self.amount_available_black_pieces = [QUEEN_AMOUNT, ANT_AMOUNT, GRASSHOPPER_AMOUNT, SPIDER_AMOUNT, BEETLE_AMOUNT]
+        self.state = State()
+        # self.board = dict()
+        # # self.board[(0,0)] = Queen()
+        # # self.board[(2,2)] = Queen((0,0,0))
+        # # Queen, Ant, Grasshopper, Spider, Beetle
+        # self.amount_available_white_pieces = [QUEEN_AMOUNT, ANT_AMOUNT, GRASSHOPPER_AMOUNT, SPIDER_AMOUNT, BEETLE_AMOUNT]
+        # self.amount_available_black_pieces = [QUEEN_AMOUNT, ANT_AMOUNT, GRASSHOPPER_AMOUNT, SPIDER_AMOUNT, BEETLE_AMOUNT]
 
         self.winner = None
 
@@ -50,88 +53,95 @@ class Hive():
         s = deepcopy(state)
         self.check_and_make_move(s, move, player)
         return s
-    
-    def get_all_posible_moves(self, state, player):
-        moveList = []
-        for x in range(8):
-            for y in range(8):
-                    if self.check_move(state, (x,y), player):
-                        moveList.append((x,y))
-        return moveList
-    
+
+    def enumerate_hand(self, state: State, coordinates):
+        """Fora given iterable of coordinates, enumerate all avilable tiles"""
+        result = []
+        if state.turn_state == 1:
+            for x in range(len(state.amount_available_white_pieces)):
+                if state.amount_available_white_pieces[x] > 0:
+                    for c in coordinates:
+                        result.append(((True, (0,x)), c))
+        else:
+            for x in range(len(state.amount_available_black_pieces)):
+                if state.amount_available_black_pieces[x] > 0:
+                    for c in coordinates:
+                        result.append(((True, (1,x)), c))
+        return result
+
     def placeable(self, state):
         """Returns all coordinates where the given player can
         _place_ a tile."""
-        players = DefaultDict(set)
-        for coordinate, value in state.grid.items():
-            player, _ = value
-            for n in self.neighbours(coordinate):
-                players[player].add(n)
+        players = defaultdict(set)
+        for coordinate, piece in state.board.items():
+            player = 2 - piece.color[0]//128
+            for n in neighbours(coordinate):
+                if not n in state.board.keys():
+                    players[player].add(n)
         # All neighbours to any tile placed by current player...
-        coordinates = players[state.player()]
+        coordinates = players[state.turn_state]
         # ...except where the opponent is neighbour...
         for p in players:
-            if p != state.player():
+            if p != state.turn_state:
                 coordinates.difference_update(players[p])
         # ...and you cannot place on top of another tile.
-        coordinates.difference_update(state.grid.keys())
+        coordinates.difference_update(state.board.keys())      
 
-        return coordinates
+        return coordinates   
 
     def one_hive(self, coordinates):
         unvisited = set(coordinates)
         todo = [unvisited.pop()]
         while todo:
             node = todo.pop()
-            for neighbour in self.neighbours(node):
+            for neighbour in neighbours(node):
                 if neighbour in unvisited:
                     unvisited.remove(neighbour)
                     todo.append(neighbour)
         return not unvisited
 
-    def movements(self, state):
-        for coordinate, value in state.grid.items():
-            player, tile = value
-            if player == state.player():
-                coordinates = set(state.grid.keys())
+    def movements(self, state:State):
+        result = []
+        for coordinate, piece in state.board.items():
+            if 2 - piece.color[0]//128 == state.turn_state:
+                coordinates = set(state.board.keys())
                 coordinates.remove(coordinate)
                 if self.one_hive(coordinates):
-                    for target in tile.moves(coordinate, state):
-                        yield ('move', coordinate, target)
-    
-    # def free_piece(self, state, player):
+                    for target in piece.moves(coordinate, state):
+                        result.append(((False, coordinate), target))
+        return result
 
-    def enumerate_hand(self, player, coordinates):
-        """Fora given iterable of coordinates, enumerate all avilable tiles"""
-        for tile, count in player.hand.items():
-            if count > 0:
-                for c in coordinates:
-                    yield 'place', tile, c
-
-    def available_moves(self, state):
-        if not state.grid:
+    def get_all_posible_moves(self, state:State):
+        if not state.board:
             # If nothing is placed, one must place something anywhere
-            anywhere = (0, 0, 0)
-            return self.enumerate_hand(state.player(), [anywhere])
-        if len(state.grid) == 1:
+            anywhere = (0, 0)
+            return self.enumerate_hand(state, [anywhere])
+        if len(state.board) == 1:
             # If single tile is placed, opponent places at neighbour
-            start_tile = next(iter(state.grid))
-            return self.enumerate_hand(state.player(), list(self.neighbours(start_tile)))
+            start_tile = next(iter(state.board))
+            return self.enumerate_hand(state, list(neighbours(start_tile)))
         
         placements = self.placeable(state)
+        if not len(placements):
+            return []
+
         # If queen is still on hand...
-        if state.player().hand[queen] > 0:
+        if state.turn_state == 1:
+            hand = state.amount_available_white_pieces
+        else:
+            hand = state.amount_available_black_pieces
+        if hand[0] > 0:
             # ...it must be placed on round 4
-            if state.round() + 1 == 4:
-                return [('place', queen, c) for c in placements]
+            if state.round_counter + 1 == 4:
+                return [(('True', (state.turn_state-1, QUEEN_ID)), c) for c in placements]
             # ...otherwise only placements...
-            return list(self.enumerate_hand(state.player(), placements))
+            return list(self.enumerate_hand(state, placements))
         # ...but normally placements and movements
-        available = list(self.enumerate_hand(state.player(), placements)) + list(self.movements(state))
+        available = list(self.enumerate_hand(state, placements)) + list(self.movements(state))
         if not available:
             return []
         return available
-
+    
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -144,6 +154,7 @@ class Hive():
                 pygame.quit()
                 sys.exit()
             if (self.player1.is_man or self.player2.is_man) and event.type == pygame.MOUSEBUTTONDOWN :
+            # if event.type == pygame.MOUSEBUTTONDOWN :
                 return self.ui.get_coordiantes(pygame.mouse.get_pos())
         return None
 
@@ -159,25 +170,6 @@ class Hive():
         elif id == BEETLE_ID:
             return Beetle
 
-    def neighbours(self, coordinate):
-        """Returns cube hex neighbours"""
-        neighbours = [
-            (coordinate[0] + 1, coordinate[1]    ),
-            (coordinate[0]    , coordinate[1] + 1),
-            (coordinate[0] - 1, coordinate[1]    ),
-            (coordinate[0]    , coordinate[1] - 1),
-            ]
-        if coordinate[1] % 2:
-            x1 = 1
-            x2 = 1
-        else:
-            x1 = -1
-            x2 = -1
-        neighbours.append((coordinate[0] + x1, coordinate[1] + 1))
-        neighbours.append((coordinate[0] + x2, coordinate[1] + 1))
-        return neighbours
-
-
     def find(self, player, piece_id, board:dict):
         piece = self.id_to_piece(piece_id)
         return [k for k in board.keys() if isinstance(board[k], piece) and 2 - board[k].color[0]//128 == player]
@@ -185,15 +177,15 @@ class Hive():
     def is_looser(self, board:dict, player):
         queen_coordinate = self.find(player, QUEEN_ID, board)
         if queen_coordinate:
-            if all(n in board.keys() for n in self.neighbours(queen_coordinate[0])):
+            if all(n in board.keys() for n in neighbours(queen_coordinate[0])):
                 return True
         return False
 
     def end_condition(self):
-        if self.is_looser(self.board, 1):
+        if self.is_looser(self.state.board, 1):
             self.winner = 2
             return False
-        if self.is_looser(self.board, 2):
+        if self.is_looser(self.state.board, 2):
             self.winner = 1
             return False
         return True
@@ -202,22 +194,10 @@ class Hive():
         if player.is_man:
             args = (selected_piece, coordinates)
         else:
-            args = (self.board, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move)
+            args = (self.state, self.state.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move)
             
         move = player.make_move(args)
         return move
-
-    def check_move(self, board, move, turn_state):
-        if move[0][0]:
-            if turn_state == 1 and self.amount_available_white_pieces[move[0][1][1]] > 0 and not move[1] in board.keys():
-                return True
-            elif turn_state == 2 and self.amount_available_black_pieces[move[0][1][1]] > 0 and not move[1] in board.keys():
-                return True
-        else:
-            if move[0][1] != move[1]:
-                return True
-
-        return False
 
     def get_piece(self, piece, turn_state):
         if turn_state == 1:
@@ -226,49 +206,49 @@ class Hive():
             color = (50, 50, 50)
 
         return self.id_to_piece(piece)(color)
-
-    
-    def make_move(self, board, move, turn_state):
-        print("make_move")
+ 
+    def make_move(self, state, move):
         if move[0][0]:
-            board[move[1]] = self.get_piece(move[0][1][1], turn_state)
-            if turn_state == 1:
-                self.amount_available_white_pieces[move[0][1][1]] -= 1
+            state.board[move[1]] = self.get_piece(move[0][1][1], state.turn_state)
+            if state.turn_state == 1:
+                state.amount_available_white_pieces[move[0][1][1]] -= 1
             else:
-                self.amount_available_black_pieces[move[0][1][1]] -= 1
+                state.amount_available_black_pieces[move[0][1][1]] -= 1
         else:
-            piece = board[move[0][1]]
-            board[move[1]] = piece
-            del board[move[0][1]]
+            piece = state.board[move[0][1]]
+            state.board[move[1]] = piece
+            del state.board[move[0][1]]
 
     def swich_player(self):
         # Next turn
-        if self.turn_state == 1:
-            self.turn_state = 2
+        if self.state.turn_state == 1:
+            self.state.turn_state = 2
             return self.player2
         else:
-            self.turn_state = 1
+            self.state.turn_state = 1
+            self.state.round_counter += 1
             return self.player1
 
-    def check_and_make_move(self, board, move, turn_state):
-        if self.check_move(board, move, turn_state):
-            self.make_move(board, move, turn_state)
+    def check_and_make_move(self, state, move):
+        if check_move(state, move):
+            self.make_move(state, move)
             return True
+        print("invalid move")
         return False
 
     def select_piece_and_coordinates(self, clicked, selected_piece, coordinates):
         if clicked[0] and selected_piece is not None:
             coordinates = deepcopy(clicked[1])
 
-        if clicked[0] and clicked[1] in self.board.keys():
-            piece = self.board[clicked[1]]
-            if piece.color[0]//128 == 2 - self.turn_state :
+        if clicked[0] and clicked[1] in self.state.board.keys():
+            piece = self.state.board[clicked[1]]
+            if piece.color[0]//128 == 2 - self.state.turn_state:
                 if selected_piece is not None and selected_piece[1] == clicked[1]:
                     selected_piece = None
                 else:
                     selected_piece = (False, deepcopy(clicked[1]))
         elif not clicked[0]:
-            if clicked[1][0] + 1 == self.turn_state:
+            if clicked[1][0] + 1 == self.state.turn_state:
                 if selected_piece is not None and selected_piece[1] == clicked[1]:
                     selected_piece = None
                 else:
@@ -284,9 +264,9 @@ class Hive():
         selected_piece = None
         coordinates = None
         current_player = self.player1
-        self.turn_state = 1
+        self.state.turn_state = 1
         while self.end_condition():
-            self.ui.draw_board(self.board, self.amount_available_white_pieces, self.amount_available_black_pieces, selected_piece)
+            self.ui.draw_board(self.state.board, self.state.amount_available_white_pieces, self.state.amount_available_black_pieces, selected_piece)
 
             pygame.display.update()
             self.ui.clock.tick(30)
@@ -294,23 +274,21 @@ class Hive():
             clicked = self.handle_events()
 
             if (current_player.is_man and clicked is not None) or not current_player.is_man:
-                if clicked is not None:
+                if clicked is not None and current_player.is_man:
                     selected_piece, coordinates = self.select_piece_and_coordinates(clicked, selected_piece, coordinates)    
-                if selected_piece is not None and coordinates is not None:
+                if (selected_piece is not None and coordinates is not None) or not current_player.is_man:
                     move = self.player_make_move(current_player, selected_piece, coordinates)
-                    if move is not None and self.check_and_make_move(self.board, move, self.turn_state): 
+                    if (move is not None and self.check_and_make_move(self.state, move)) or (not current_player.is_man and move is None): 
                         selected_piece = None
                         coordinates = None
                         current_player = self.swich_player()  
-                        print('next player')
 
 
 
-        self.ui.draw_board(self.board, self.amount_available_white_pieces, self.amount_available_black_pieces, selected_piece)
+        self.ui.draw_board(self.state.board, self.state.amount_available_white_pieces, self.state.amount_available_black_pieces, selected_piece)
         pygame.display.update()
         pygame.quit()
                          
-
     def play_without_ui(self):
         pass
 
