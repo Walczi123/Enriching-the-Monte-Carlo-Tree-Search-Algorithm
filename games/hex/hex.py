@@ -1,12 +1,13 @@
-from copy import copy, deepcopy
+from copy import deepcopy
 import sys
 from tkinter.constants import NO
-from colorama.initialise import reset_all
+import os
 
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from rich.console import Console
 from rich.table import Table
-from games.game import BaseGame
+from games.game import Game
 from games.hex.const import BLUE_PLAYER, RED_PLAYER
 from games.hex.player import Player
 
@@ -16,8 +17,8 @@ from games.hex.ui import UI
 # from mcts import MCTS
 
 
-class Hex(BaseGame):
-    def __init__(self, board_size: int, player1:Player, player2:Player, use_gui: bool = True):
+class Hex(Game):
+    def __init__(self, player1:Player, player2:Player, use_ui: bool = False, board_size: int = 7):
         self.name = "Hex"
         
         # Mode
@@ -25,11 +26,11 @@ class Hex(BaseGame):
         self.player2=player2
         self.turn_state = 1
 
-        use_gui = use_gui or player1.is_man or player2.is_man
+        use_ui = use_ui or player1.is_man or player2.is_man
 
         # Instantiate classes
         self.ui = None
-        if use_gui:
+        if use_ui:
             pygame.init()
             pygame.display.set_caption("Hex")
             self.ui = UI(board_size)
@@ -40,7 +41,7 @@ class Hex(BaseGame):
         self.winner = 0
         self.turn_state = BLUE_PLAYER
 
-        self.use_gui = use_gui
+        self.use_ui = use_ui
 
     def get_game_info(self, args):
         console = Console()
@@ -72,8 +73,8 @@ class Hex(BaseGame):
         # Forbid playing on already busy node
         try:
             self.winner = self.logic.check_and_make_action(player, move)
-            if self.winner:
-                print('win')
+            # if self.winner:
+            #     print('win')
         except AssertionError:
             print("invalid move")
             return False
@@ -98,7 +99,7 @@ class Hex(BaseGame):
 
     def swich_player(self):
         # Next turn
-        if self.turn_state is 1:
+        if self.turn_state == 1:
             self.turn_state = 2
             return self.player2
         else:
@@ -107,11 +108,11 @@ class Hex(BaseGame):
 
     def get_winner(self):
         if self.winner:
-            print("Player {} wins!".format(self.winner))
+            # print("Player {} wins!".format(self.winner))
             return True
 
     def play_with_ui(self):
-        print(f'{self.name} starts')
+        # print(f'{self.name} starts')
         node = None
         current_player = self.player1
         while not self.end_condition():
@@ -131,9 +132,10 @@ class Hex(BaseGame):
                     current_player = self.swich_player()  
         self.get_winner()
         pygame.event.wait()
+        return self.winner
     
     def play_without_ui(self):
-        print(f'{self.name} starts')
+        # print(f'{self.name} starts')
         current_player = self.player1
         while not self.end_condition():
             # move = current_player.make_move()
@@ -142,6 +144,7 @@ class Hex(BaseGame):
             current_player = self.swich_player()
 
         self.get_winner()
+        return self.winner
 
     def get_result(self, state, player) -> int:
         result = self.logic.is_game_over(player, state, True)

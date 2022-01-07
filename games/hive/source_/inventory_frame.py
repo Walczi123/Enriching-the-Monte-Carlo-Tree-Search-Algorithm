@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame as pg
 from pieces import Queen, Grasshopper, Spider, Beetle, Ant
 from tile import Inventory_Tile

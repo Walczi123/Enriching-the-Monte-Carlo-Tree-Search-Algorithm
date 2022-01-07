@@ -1,7 +1,7 @@
-from math import ceil, floor
 import numpy as np
+import os
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
-from games.hive.common_functions import axial_to_cube, evenr_to_axial
 from games.hive.pieces import Ant, Beetle, Grasshopper, Queen, Spider
 
 from games.othello.const import BACKGROUND_COLOR, BOARD_COLOR, FRIST_PLAYER_COLOR, SECONF_PLAYER_COLOR
@@ -43,17 +43,31 @@ class UI:
                     coordinates = (self.pixel_x[k], self.pixel_y[j])
                 
                 pygame.draw.polygon(self.screen, (255,255,255), self.get_hex_points(coordinates))
+
                 # print coordiantes
                 self.screen.blit(self.fonts.render(f'({k - self.center_x}, {j - self.center_y})', True, (150,150,150)), (coordinates[0] - 13, coordinates[1] - 6 ))
-                p = evenr_to_axial((k - self.center_x, j - self.center_y))
-                self.screen.blit(self.fonts.render(f'({p[0]}, {p[1]}, {p[2]})', True, (150,0,15)), (coordinates[0] - 20, coordinates[1] + 3 ))
+                # p = evenr_to_axial((k - self.center_x, j - self.center_y))
+                # self.screen.blit(self.fonts.render(f'({p[0]}, {p[1]}, {p[2]})', True, (150,0,15)), (coordinates[0] - 20, coordinates[1] + 3 ))
+                
                 piece_coordinates = (k - self.center_x, j - self.center_y)
                 if piece_coordinates in board.keys():
-                    piece = board[k - self.center_x, j - self.center_y]
-                    if piece.color[0]//128 == 0:
-                        pygame.draw.polygon(self.screen, (50,50,50), self.get_hex_points(coordinates))
-                    if selected_piece is not None and not selected_piece[0] and selected_piece[1] == piece_coordinates:
-                        pygame.draw.polygon(self.screen, (255,0,0), self.get_hex_points(coordinates))
+                    pieces = board[k - self.center_x, j - self.center_y]
+                    piece = pieces[-1]
+                    if len(pieces) == 1:
+                        if selected_piece is not None and not selected_piece[0] and selected_piece[1] == piece_coordinates:
+                            pygame.draw.polygon(self.screen, (255,0,0), self.get_hex_points(coordinates))
+                        elif piece.color[0]//128 == 0:
+                            pygame.draw.polygon(self.screen, (50,50,50), self.get_hex_points(coordinates))       
+                    else:
+                        if selected_piece is not None and not selected_piece[0] and selected_piece[1] == piece_coordinates:
+                            pygame.draw.polygon(self.screen, (122,122,122), self.get_hex_points(coordinates))
+                            pygame.draw.polygon(self.screen, (255,0,0), self.get_hex_points(coordinates, self.hex_radius-3))
+                        elif piece.color[0]//128 == 0:
+                            pygame.draw.polygon(self.screen, (122,122,122), self.get_hex_points(coordinates))
+                            pygame.draw.polygon(self.screen, (50,50,50), self.get_hex_points(coordinates, self.hex_radius-3))
+                        else:
+                            pygame.draw.polygon(self.screen, (122,122,122), self.get_hex_points(coordinates))
+                            pygame.draw.polygon(self.screen, (255,255,255), self.get_hex_points(coordinates, self.hex_radius-3))                
                     piece.draw(self.screen, coordinates)
                     
         # Inventory
@@ -91,9 +105,10 @@ class UI:
                 self.pieces[i].draw(self.screen, (b_coordinates[0] + white_inv[2] //(self.amount_pieces*2), b_coordinates[1] + (j * (white_inv[3] // (piece_amount + 1)))))
 
 
-    def get_hex_points(self, coord_pair):
+    def get_hex_points(self, coord_pair, radius=None):
         (x, y) = coord_pair
-        radius = self.hex_radius + 1
+        if radius is None:
+            radius = self.hex_radius + 1
 
         return (  # has to be in counterclockwise order for drawing
             (x, y + radius),  # top
@@ -114,9 +129,10 @@ class UI:
         if y_pos < self.board_height:
             y = min(range(self.len_pixel_y), key=lambda i: abs(self.pixel_y[i]-y_pos)) - self.center_y
             tmp = 0
-            if y % 2:
+            if y % 2 == 0:
                 tmp = self.hex_radius
             x = min(range(self.len_pixel_x), key=lambda i: abs(self.pixel_x[i]-x_pos + tmp)) - self.center_x
+            print(x,y)
             return True, (x, y) 
         else:
             y = x_pos // (self.board_width//(self.amount_pieces * 2))

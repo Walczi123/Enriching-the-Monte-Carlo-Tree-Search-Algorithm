@@ -9,7 +9,8 @@ from pygame import color
 from games.hive.const import ANT_AMOUNT, ANT_ID, BEETLE_AMOUNT, BEETLE_ID, GRASSHOPPER_AMOUNT, GRASSHOPPER_ID, QUEEN_AMOUNT, QUEEN_ID, SPIDER_AMOUNT, SPIDER_ID
 
 from games.hive.pieces import Ant, Beetle, Grasshopper, Queen, Spider
-from games.hive.move_checker import check_move, neighbours
+from games.hive.move_checker import check_move
+from games.hive.common_functions import neighbours
 from games.hive.state import State
 
 # # Hide Pygame welcome message
@@ -26,12 +27,6 @@ class Hive():
         self.player2 = player2
 
         self.state = State()
-        # self.board = dict()
-        # # self.board[(0,0)] = Queen()
-        # # self.board[(2,2)] = Queen((0,0,0))
-        # # Queen, Ant, Grasshopper, Spider, Beetle
-        # self.amount_available_white_pieces = [QUEEN_AMOUNT, ANT_AMOUNT, GRASSHOPPER_AMOUNT, SPIDER_AMOUNT, BEETLE_AMOUNT]
-        # self.amount_available_black_pieces = [QUEEN_AMOUNT, ANT_AMOUNT, GRASSHOPPER_AMOUNT, SPIDER_AMOUNT, BEETLE_AMOUNT]
 
         self.winner = None
 
@@ -51,7 +46,7 @@ class Hive():
 
     def board_move(self, state, move, player):
         s = deepcopy(state)
-        self.check_and_make_move(s, move, player)
+        self.check_and_make_move(s, move)
         return s
 
     def enumerate_hand(self, state: State, coordinates):
@@ -73,11 +68,12 @@ class Hive():
         """Returns all coordinates where the given player can
         _place_ a tile."""
         players = defaultdict(set)
-        for coordinate, piece in state.board.items():
-            player = 2 - piece.color[0]//128
-            for n in neighbours(coordinate):
-                if not n in state.board.keys():
-                    players[player].add(n)
+        for coordinate, pieces in state.board.items():
+            for piece in pieces:
+                player = 2 - piece.color[0]//128
+                for n in neighbours(coordinate):
+                    if not n in state.board.keys():
+                        players[player].add(n)
         # All neighbours to any tile placed by current player...
         coordinates = players[state.turn_state]
         # ...except where the opponent is neighbour...
@@ -102,7 +98,8 @@ class Hive():
 
     def movements(self, state:State):
         result = []
-        for coordinate, piece in state.board.items():
+        for coordinate, pieces in state.board.items():
+            piece = pieces[-1]
             if 2 - piece.color[0]//128 == state.turn_state:
                 coordinates = set(state.board.keys())
                 coordinates.remove(coordinate)
@@ -111,7 +108,7 @@ class Hive():
                         result.append(((False, coordinate), target))
         return result
 
-    def get_all_posible_moves(self, state:State):
+    def get_all_posible_moves(self, state:State, player=None):
         if not state.board:
             # If nothing is placed, one must place something anywhere
             anywhere = (0, 0)
@@ -172,7 +169,7 @@ class Hive():
 
     def find(self, player, piece_id, board:dict):
         piece = self.id_to_piece(piece_id)
-        return [k for k in board.keys() if isinstance(board[k], piece) and 2 - board[k].color[0]//128 == player]
+        return [k for k in board.keys() if isinstance(board[k][-1], piece) and 2 - board[k][-1].color[0]//128 == player]
 
     def is_looser(self, board:dict, player):
         queen_coordinate = self.find(player, QUEEN_ID, board)
@@ -207,17 +204,17 @@ class Hive():
 
         return self.id_to_piece(piece)(color)
  
-    def make_move(self, state, move):
+    def make_move(self, state:State, move):
         if move[0][0]:
-            state.board[move[1]] = self.get_piece(move[0][1][1], state.turn_state)
+            state.add_to_board(move[1], self.get_piece(move[0][1][1], state.turn_state))
             if state.turn_state == 1:
                 state.amount_available_white_pieces[move[0][1][1]] -= 1
             else:
                 state.amount_available_black_pieces[move[0][1][1]] -= 1
         else:
-            piece = state.board[move[0][1]]
-            state.board[move[1]] = piece
-            del state.board[move[0][1]]
+            piece = state.board[move[0][1]][-1]
+            state.add_to_board(move[1], piece)
+            state.remove_from_board(move[0][1], piece)
 
     def swich_player(self):
         # Next turn
@@ -239,9 +236,8 @@ class Hive():
     def select_piece_and_coordinates(self, clicked, selected_piece, coordinates):
         if clicked[0] and selected_piece is not None:
             coordinates = deepcopy(clicked[1])
-
-        if clicked[0] and clicked[1] in self.state.board.keys():
-            piece = self.state.board[clicked[1]]
+        elif clicked[0] and clicked[1] in self.state.board.keys():
+            piece = self.state.board[clicked[1]][-1]
             if piece.color[0]//128 == 2 - self.state.turn_state:
                 if selected_piece is not None and selected_piece[1] == clicked[1]:
                     selected_piece = None
@@ -263,6 +259,7 @@ class Hive():
 
         selected_piece = None
         coordinates = None
+        available_moves_checked = False
         current_player = self.player1
         self.state.turn_state = 1
         while self.end_condition():
@@ -281,13 +278,24 @@ class Hive():
                     if (move is not None and self.check_and_make_move(self.state, move)) or (not current_player.is_man and move is None): 
                         selected_piece = None
                         coordinates = None
+                        available_moves_checked = False
                         current_player = self.swich_player()  
-
+            
+            if not available_moves_checked and current_player.is_man:
+                if len(self.get_all_posible_moves(self.state)) == 0:
+                    print("No available moves for current player")
+                    selected_piece = None
+                    coordinates = None
+                    current_player = self.swich_player()  
+                else:
+                    available_moves_checked = True
 
 
         self.ui.draw_board(self.state.board, self.state.amount_available_white_pieces, self.state.amount_available_black_pieces, selected_piece)
         pygame.display.update()
         pygame.quit()
+
+        print(f"Player {self.winner} wins!")
                          
     def play_without_ui(self):
         pass

@@ -2,13 +2,16 @@ from copy import deepcopy
 import sys
 import os
 
+from games.game import Game
+from games.player import Player
+
 # # Hide Pygame welcome message
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from games.othello.ui import UI
 
-class Othello():
-    def __init__(self, use_ui, player1, player2):
+class Othello(Game):
+    def __init__(self, player1:Player , player2:Player , use_ui:bool = False):
         self.name = "Othello"
         self.use_ui = use_ui
 
@@ -311,6 +314,7 @@ class Othello():
             pygame.event.wait() 
             self.handle_events()
         pygame.quit()
+        return self.winner
                          
 
     def play_without_ui(self):
@@ -324,13 +328,13 @@ class Othello():
             if self.check_and_make_move(self.board, move, self.turn_state):  
                 current_player = self.swich_player()  
 
-        print("winner ", self.winner)
-        # self.print_board()
+        # print("winner ", self.winner)
+        return self.winner
 
 
-    def play(self):
-        if self.use_ui:
-            self.play_with_ui()
-        else:
-            self.play_without_ui()
+    # def play(self):
+    #     if self.use_ui:
+    #         self.play_with_ui()
+    #     else:
+    #         self.play_without_ui()
 

@@ -1,4 +1,6 @@
 from os import stat
+import os
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from tile import Tile, initialize_grid, draw_drag
 from move_checker import is_valid_move, game_is_over, \

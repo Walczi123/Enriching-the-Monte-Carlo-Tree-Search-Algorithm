@@ -5,7 +5,7 @@ import os
 import numpy as np
 
 from games.hive.const import ANT_AMOUNT, BEETLE_AMOUNT, GRASSHOPPER_AMOUNT, QUEEN_AMOUNT, SPIDER_AMOUNT
-from games.hive.common_functions import cube_to_axial, evenr_to_axial, neighbours, find_pieces_around
+from games.hive.common_functions import axial_distance, cube_to_axial, evenr_to_axial, move_does_not_break_hive, neighbours, find_pieces_around, path_exists
 from games.hive.state import State
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame as pg
@@ -45,16 +45,6 @@ class Queen(Piece):
             return trace_coutour(state, coordinate, steps=1)
         return super().moves(coordinate, state)
 
-    # def move_is_valid(self, state, old_tile, new_tile):
-    #     dist = axial_distance(old_tile.axial_coords,
-    #                           new_tile.axial_coords)
-    #     if dist == 1 and move_is_not_blocked_or_jump(state, old_tile,
-    #             new_tile):
-    #         return True
-    #     else:
-    #         return False
-
-
 class Ant(Piece):
 
     def __init__(self, color=PIECE_WHITE):
@@ -69,9 +59,8 @@ class Ant(Piece):
         surface.blit(image, pos)
 
     def moves(self, coordinate, state):
-        return find_contour(state, exclude=(coordinate,))
-
-
+        return [c for c in find_contour(state, exclude=(coordinate,)) if path_exists(state, coordinate, c)]
+         
 class Spider(Piece):
 
     def __init__(self, color=PIECE_WHITE):
@@ -102,19 +91,8 @@ class Beetle(Piece):
         pos = (x - 16, y - 16)
         surface.blit(image, pos)
 
-    # def move_is_valid(self, state, old_tile, new_tile):
-    #     dist = axial_distance(old_tile.axial_coords,
-    #                           new_tile.axial_coords)
-    #     if dist == 1 and (move_is_not_blocked_or_jump(state, old_tile,
-    #                       new_tile) or new_tile.has_pieces()
-    #                       or len(old_tile.pieces) > 1):
-
-    #         # can't slide into a blocked hex but it can go up or down into one
-
-    #         return True
-    #     else:
-    #         return False
-
+    def moves(self, coordinate, state):
+        return [n for n in neighbours(coordinate) if move_does_not_break_hive(state, coordinate, n)]
 
 # Hex topology stuff
 offsets = [
@@ -144,8 +122,8 @@ class Grasshopper(Piece):
         for direction in offsets:
             p = add(c, direction)
             # Grasshopper must jump over at least one piece
-            if p in state.board:
-                while p in state.board:
+            if p in state.board.keys():
+                while p in state.board.keys():
                     p = add(p, direction)
                 yield cube_to_axial(p)
 
@@ -154,7 +132,7 @@ def find_contour(state:State, exclude=None):
         """Returns all contour coordinates of the hive"""
         contour = set()
         # All neighbours
-        for coordinate in state.board:
+        for coordinate in state.board.keys():
             if coordinate not in exclude:
                 for neighbour in neighbours(coordinate):
                     contour.add(neighbour)

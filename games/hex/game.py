@@ -1,5 +1,7 @@
 import sys
+import os
 
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from rich.console import Console
 from rich.table import Table
@@ -131,7 +133,7 @@ class Game():
 
     def get_winner(self):
         if self.winner:
-            print("Player {} wins!".format(self.winner))
+            # print("Player {} wins!".format(self.winner))
             return True
 
     def play_with_ui(self):     

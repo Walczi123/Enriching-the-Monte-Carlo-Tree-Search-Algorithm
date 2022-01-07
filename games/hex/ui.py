@@ -1,6 +1,8 @@
 from math import cos, sin, pi, radians
 
 import numpy as np
+import os
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from pygame import gfxdraw
 from pygame import time

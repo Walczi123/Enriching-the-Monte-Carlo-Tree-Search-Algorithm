@@ -1,5 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
+import os
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame as pg
 from tile import Tile, initialize_grid, draw_drag
 from move_checker import is_valid_move, game_is_over, \
