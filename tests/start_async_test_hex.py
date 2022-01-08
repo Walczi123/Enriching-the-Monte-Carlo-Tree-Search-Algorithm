@@ -9,7 +9,7 @@ from games.player import MCTS_Player
 from tests.code.Test import Test
 
 SEED = 22021070
-REPETITIONS = 3 
+REPETITIONS = 100
 
 def layer_amount(layers):
     return str(len(layers))

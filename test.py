@@ -1,3 +1,4 @@
+import random
 import numpy as np
 from datetime import datetime
 import time
@@ -27,11 +28,13 @@ class Test:
             
 
     def start(self):
-        if self.seed is not None:
-            np.random.seed(self.seed)
         results = []
         game = self.game_type(self.player1(), self.player2())
         for i in range(self.n_repetition):
+            if self.seed is not None:
+                random.seed(self.seed + i)
+                # np.random.seed(self.seed + i)
+            game.restart()
             r = game.play()
             results.append((i, r))
         self.save_to_file(results)

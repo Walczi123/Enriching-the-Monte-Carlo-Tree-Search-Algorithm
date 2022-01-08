@@ -20,7 +20,7 @@ def generate_instances():
     game_types = [Othello, Hex]
     
     for r in itertools.product(game_types, player_types, player_types):
-        result.append(Test(r[0], r[1], r[2], REPETITIONS, seed = SEED))
+        result.append(Test(r[0], r[1], r[2], n_repetition = REPETITIONS, seed = SEED))
 
     expeded_len = (len(player_types) * len(player_types) * len(game_types))
     assert len(result) == expeded_len, f'Incorrect amount of test cases ({len(result)} != {expeded_len})'
@@ -35,12 +35,14 @@ def run_test(test):
 
 def run_tests():
     iterable = generate_instances()
-    # iterable[0].start()
+    
 
     start_time = time.time()
 
+    # iterable[0].start()
+
     max_cpu = multiprocessing.cpu_count()
-    p = multiprocessing.Pool(int(max_cpu/2))
+    p = multiprocessing.Pool(int(max_cpu)-2)
     for _ in tqdm.tqdm(p.imap_unordered(run_test, iterable), total=len(iterable)):
         pass
     p.map_async(run_test, iterable)

@@ -32,6 +32,22 @@ class Othello(Game):
 
         self.winner = None
 
+    def restart(self):
+        self.turn_state = 2
+
+        self.board = []
+        for x in range(8):
+            self.board.append([])
+            for y in range(8):
+                self.board[x].append(None)
+        
+        self.board[3][3] = 1
+        self.board[3][4] = 2
+        self.board[4][3] = 2
+        self.board[4][4] = 1
+
+        self.winner = None
+
     def get_result(self, iteration_state, player):
         player1_score = 0
         player2_score = 0
@@ -322,6 +338,7 @@ class Othello(Game):
         while self.end_condition():
             pos_moves = self.get_all_posible_moves(self.board, self.turn_state)
             if len(pos_moves) == 0:
+                current_player = self.swich_player() 
                 continue
 
             move = self.player_make_move(current_player)

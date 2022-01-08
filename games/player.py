@@ -8,7 +8,7 @@ class Player():
         pass
 
 class MCTS_Player(Player):
-    def __init__(self, number_of_iteration:int = 10):
+    def __init__(self, number_of_iteration:int = 3):
         super().__init__(False)
         self.number_of_iteration = number_of_iteration
 

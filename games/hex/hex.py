@@ -18,7 +18,7 @@ from games.hex.ui import UI
 
 
 class Hex(Game):
-    def __init__(self, player1:Player, player2:Player, use_ui: bool = False, board_size: int = 7):
+    def __init__(self, player1:Player, player2:Player, use_ui: bool = False, board_size: int = 11):
         self.name = "Hex"
         
         # Mode
@@ -29,19 +29,28 @@ class Hex(Game):
         use_ui = use_ui or player1.is_man or player2.is_man
 
         # Instantiate classes
+        self.use_ui = use_ui
         self.ui = None
         if use_ui:
             pygame.init()
             pygame.display.set_caption("Hex")
             self.ui = UI(board_size)
         self.logic = Logic(self.ui, board_size)
+        self.board_size = board_size
 
         # Initialize variables
         self.node = None
         self.winner = 0
         self.turn_state = BLUE_PLAYER
+        
+    def restart(self):
+        self.turn_state = 1
+        self.logic = Logic(self.ui, self.board_size)
 
-        self.use_ui = use_ui
+        # Initialize variables
+        self.node = None
+        self.winner = 0
+        self.turn_state = BLUE_PLAYER
 
     def get_game_info(self, args):
         console = Console()
@@ -130,8 +139,11 @@ class Hex(Game):
                 move = self.player_make_move(current_player, node)
                 if self.check_move(move, self.turn_state):  
                     current_player = self.swich_player()  
+        self.ui.draw_board()
+        pygame.display.update()
         self.get_winner()
-        pygame.event.wait()
+        print("Player {} wins!".format(self.winner))
+        self.wait_for_click()
         return self.winner
     
     def play_without_ui(self):

@@ -114,15 +114,6 @@ class Logic:
 
         return True if not board[x][y] else False
 
-    def get_action(self, player: int, coordinates: tuple) -> int:
-        (x, y) = coordinates
-        
-        assert self.is_node_free((x, y), self.logger), "node is busy"
-        self.make_move((x, y), player)
-        self.logger[x][y] = player
-
-        return self.is_game_over(player, self.logger)
-
     def check_and_make_action(self, player: int, coordinates: tuple) -> int:
         (x, y) = coordinates
    

@@ -1,3 +1,9 @@
+import os
+import sys
+# # Hide Pygame welcome message
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
+import pygame
+from pygame.constants import KEYDOWN, QUIT, K_f
 from games.player import Player
 
 
@@ -8,6 +14,18 @@ class Game():
         self.use_ui = use_ui
         self.player1 = player1
         self.player2 = player2
+
+    def wait_for_click(self):
+        while True:
+            for event in pygame.event.get():
+                if event.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+                if event.type == KEYDOWN or event.type == pygame.MOUSEBUTTONUP:
+                    return
+
+    def restart(self):
+        raise ValueError(self.announcement)
 
     def play_with_ui(self):
         raise ValueError(self.announcement)
