@@ -5,6 +5,7 @@ import time
 from games.game import Game
 from games.player import Player
 
+SEPARATHOR = '\t'
 
 class Test:
     def __init__(self, game_type:Game, player1:Player, player2:Player, n_repetition:int = 1, name:str = None, seed=None):
@@ -39,7 +40,7 @@ class Test:
         file_path = f'./tests/results/{str(self.game_type.__name__).lower()}/{self.name}'
         f = open(file_path, "w")
         print("saving", self.name)
-        f.write(f"Game NO\tWinner\n")
-        results = [f'{str(results[i][0])};{str(results[i][1])}\n' for i in range(len(results))]
+        f.write(f"Game NO{SEPARATHOR}Winner\n")
+        results = [f'{str(results[i][0])}{SEPARATHOR}{str(results[i][1])}\n' for i in range(len(results))]
         f.writelines(results)
         f.close
