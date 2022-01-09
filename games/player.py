@@ -1,4 +1,5 @@
-from mcts import mcts
+from mcts.mcts import mcts
+from mcts.mcts_rave import mcts_rave
 
 class Player():
     def __init__(self, is_man):
@@ -14,5 +15,15 @@ class MCTS_Player(Player):
 
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = mcts.mcts(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move)
+        move = mcts(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move)
         return move
+
+class MCTSRAVE_Player(Player):
+    def __init__(self, number_of_iteration:int = 3):
+        super().__init__(False)
+        self.number_of_iteration = number_of_iteration
+
+    def make_move(self, args):
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
+        move = mcts_rave(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move)
+        return move       

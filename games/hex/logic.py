@@ -1,6 +1,7 @@
 from typing import Union
 
 import numpy as np
+from numpy.core.numeric import full
 
 from games.hex.const import BLUE_PLAYER, COLOR_BLUE, COLOR_RED, RED_PLAYER
 
@@ -55,6 +56,8 @@ class Logic:
                         self.make_move(step, None)
 
                 return player
+        
+
 
     def is_border(self, node: tuple, player: int):
         x, y = node

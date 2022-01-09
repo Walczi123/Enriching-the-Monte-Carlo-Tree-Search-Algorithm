@@ -326,9 +326,7 @@ class Othello(Game):
         pygame.display.update()
 
         print("winner ", self.winner)
-        while 1: 
-            pygame.event.wait() 
-            self.handle_events()
+        self.wait_for_click()
         pygame.quit()
         return self.winner
                          
