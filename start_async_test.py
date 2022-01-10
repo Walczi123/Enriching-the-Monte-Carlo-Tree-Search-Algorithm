@@ -6,7 +6,7 @@ import numpy as np
 
 from games.hex.hex import Hex
 from games.othello.othello import Othello
-from games.player import MCTS_Player
+from games.player import MCTS_Player, MCTSRAVE_Player
 from test import Test
 
 SEED = 22021070
@@ -15,7 +15,7 @@ REPETITIONS = 100
 def generate_instances():
     result = []
 
-    player_types = [MCTS_Player]
+    player_types = [MCTS_Player, MCTSRAVE_Player]
 
     game_types = [Othello, Hex]
     

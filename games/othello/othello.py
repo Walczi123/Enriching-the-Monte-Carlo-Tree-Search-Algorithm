@@ -53,9 +53,9 @@ class Othello(Game):
         player2_score = 0
         for x in range(8):
             for y in range(8):  
-                if iteration_state[x][y] == 0 :
+                if iteration_state[x][y] == 1:
                     player1_score += 1
-                elif iteration_state[x][y] == 1:
+                elif iteration_state[x][y] == 2:
                         player2_score += 1
         if player1_score == player2_score:
             return 0.5

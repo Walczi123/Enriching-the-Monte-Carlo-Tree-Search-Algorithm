@@ -125,7 +125,8 @@ class Hex(Game):
         node = None
         current_player = self.player1
         while not self.end_condition():
-            self.ui.draw_board()
+            dist_board = self.logic.manhattan_distance(self.logic.logger, self.turn_state)
+            self.ui.draw_board(dist_board)
     
             if current_player.is_man:
                 node = self.ui.get_node_hover()

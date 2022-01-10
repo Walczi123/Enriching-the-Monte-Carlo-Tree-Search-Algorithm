@@ -52,7 +52,7 @@ def run_test(test):
 
 def run_tests():
     iterable = generate_instances()
-    iterable[0].start()
+    # iterable[0].start()
 
     # start_time = time.time()
 

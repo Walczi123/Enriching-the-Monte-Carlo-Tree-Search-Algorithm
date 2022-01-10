@@ -1,12 +1,12 @@
+from copy import deepcopy
+from math import inf
 from typing import Union
 
 import numpy as np
-from numpy.core.numeric import full
 
 from games.hex.const import BLUE_PLAYER, COLOR_BLUE, COLOR_RED, RED_PLAYER
 
-
-
+NEIGHBOURS = [(-1, 0), (0, -1), (1, -1), (1, 0), (0, 1), (-1, 1)]
 
 class Logic:
     def __init__(self, ui, board_size):
@@ -15,13 +15,55 @@ class Logic:
 
         self.GAME_OVER = False
         self.MCTS_GAME_OVER = False
-        self.logger = np.zeros(shape=(self.board_size, self.board_size), dtype=np.int8)
+        self.logger = np.zeros(shape=(self.board_size, self.board_size))
+
+        self.distance_board_player1 = np.full((self.board_size, self.board_size), np.inf)     
+        self.distance_board_player2 = np.full((self.board_size, self.board_size), np.inf)   
+
+        # for i in range(self.board_size):
+        #     self.distance_board_player1 = self.update_distance(self.distance_board_player1, i, 0, 1)
+        #     self.distance_board_player1 = self.update_distance(self.distance_board_player1, i, self.board_size-1, 1)
+        # for i in range(self.board_size):
+        #     self.distance_board_player2 = self.update_distance(self.distance_board_player2, 0, i, 1)
+        #     self.distance_board_player2 = self.update_distance(self.distance_board_player2, self.board_size-1, i, 1)
+
+
 
     def get_possible_moves(self, board: np.ndarray):
         x, y = np.where(board == 0)
         free_coordinates = [(i, j) for i, j in zip(x, y)]
 
         return free_coordinates
+
+    def update_distance(self, board, x, y, value):
+        if not (x > -1 and y > -1 and x < self.board_size and y < self.board_size):
+            return board
+            
+        if board[x][y] > value:
+            board[x][y] = value
+        else:
+            return board
+
+        for a,b in NEIGHBOURS:
+            board = self.update_distance(board, x+a, y+b, value+1)
+        
+        return board
+
+
+    def manhattan_distance(self, board, player):
+        if player == 1:
+            distance_board = deepcopy(self.distance_board_player1)
+        else:
+            distance_board = deepcopy(self.distance_board_player2)
+        distance_board[board == (player%2)+1] = None
+        result = np.where(self.logger == player)
+        for r in range(len(result[0])):
+            distance_board = self.update_distance(distance_board, result[0][r], result[1][r], 0)
+
+        return distance_board
+        
+
+
 
     def make_move(self, coordinates: tuple, player: Union[int, None]):
         x, y = coordinates
