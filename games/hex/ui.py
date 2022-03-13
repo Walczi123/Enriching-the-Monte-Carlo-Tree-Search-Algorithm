@@ -148,18 +148,19 @@ class UI:
                 (self.text_offset / 4 + self.hex_radius * _, self.y_offset + (1.75 * self.hex_radius) * _))
             self.screen.blit(text, text_rect)
 
-    def draw_board(self, dist_board, show_mcts_predictions: bool = True):
+    def draw_board(self, dist_board = None, show_mcts_predictions: bool = True):
         counter = 0
         for row in range(self.board_size):
             for column in range(self.board_size):
                 self.draw_hexagon(self.screen, self.black, self.get_coordinates(row, column), counter)
                 (a,b) = self.get_coordinates(row, column)
-                r = dist_board[row][column]
-                try:
-                    r = str(int(r))
-                except:
-                    r = '-'
-                self.screen.blit(self.fonts.render(r, True, (150,150,150)), (a - 10,b - 10))
+                if dist_board is not None:
+                    r = dist_board[row][column]
+                    try:
+                        r = str(int(r))
+                    except:
+                        r = '-'
+                    self.screen.blit(self.fonts.render(r, True, (150,150,150)), (a - 10,b - 10))
                 counter += 1
         self.draw_text()
 

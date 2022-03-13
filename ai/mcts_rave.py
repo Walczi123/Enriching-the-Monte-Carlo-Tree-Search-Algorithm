@@ -1,7 +1,7 @@
 import random
 from typing import Callable
 
-from mcts.nodes import RAVENode
+from ai.nodes import RAVENode
 
 
 

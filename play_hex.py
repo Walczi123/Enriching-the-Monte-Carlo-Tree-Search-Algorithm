@@ -1,8 +1,9 @@
 import os
 import random
-
+from ai.minmax import hex_evaluate
+from games.hex.common import get_dijkstra_score
 from games.hex.player import Man_Player
-from games.player import MCTS_Player, MCTSRAVE_Player
+from games.player import AlphaBeta_Player, MCTS_Player, MCTSRAVE_Player, Random_Player
 
 # # Hide Pygame welcome message
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
@@ -25,7 +26,8 @@ if __name__ == "__main__":
     # p1 = MCTS_Player(ITERMAX)
     # p2 = MCTSRAVE_Player(ITERMAX)
     p1 = Man_Player()
-    p2 = Man_Player()
+    # p2 = Man_Player()
+    p2 = AlphaBeta_Player(get_dijkstra_score)
 
     game = Hex(board_size=BOARD_SIZE, use_ui=True, player1=p1, player2=p2)
     # game = Game(board_size=BOARD_SIZE, use_ui=True, player1=p1, player2=p2, itermax=ITERMAX)

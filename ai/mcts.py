@@ -1,6 +1,6 @@
 import random
 from typing import Callable
-from mcts.nodes import Node
+from ai.nodes import Node
 
 
 def select_uct_child(childNodes):

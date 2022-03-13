@@ -25,7 +25,7 @@ def hex_evaluate(state, player):
     
     return player1_score - player2_score if player == 1 else player2_score - player1_score
 
-def minmax(iteration_state, player, current_player, d: int, alpha: int, beta: int, get_all_posible_moves, board_move, get_result, change_player, evaluate):
+def alpha_beta_minmax(iteration_state, player, current_player, d: int, alpha: int, beta: int, get_all_posible_moves, board_move, get_result, change_player, evaluate):
     if d <= 0:
         return None, evaluate(iteration_state, player), 1
 
@@ -40,7 +40,7 @@ def minmax(iteration_state, player, current_player, d: int, alpha: int, beta: in
     moves = get_all_posible_moves(iteration_state, current_player)
     for move in moves:
         new_state = board_move(iteration_state, move, current_player)
-        _, e, n = minmax(new_state, player, change_player(current_player), d - 1, alpha, beta, get_all_posible_moves, board_move, get_result, change_player, evaluate)
+        _, e, n = alpha_beta_minmax(new_state, player, change_player(current_player), d - 1, alpha, beta, get_all_posible_moves, board_move, get_result, change_player, evaluate)
         if maximizing:
             alpha = f(alpha, e)
         else:
