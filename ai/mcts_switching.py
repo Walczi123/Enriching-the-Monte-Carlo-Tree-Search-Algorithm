@@ -21,7 +21,7 @@ def select_uct_child(childNodes):
 def mcts_switching(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable, strategies:list):
 	switching_mechanism = SwitchingMechanism(strategies)
 	rootnode = Node(None, None, initial_state, player, get_result, get_all_posible_moves, change_player)
-	for _ in range(number_of_iteration):
+	for i in range(number_of_iteration):
 		node = rootnode
 		iteration_state = node.state
 
@@ -31,16 +31,18 @@ def mcts_switching(initial_state, player, number_of_iteration, get_result:Callab
 
 		# Expansion
 		if node.untried_moves != []:
-			move = switching_mechanism.get_move_from_strategy(node.untried_moves)
+			# move = switching_mechanism.get_move_from_strategy(node.untried_moves)
+			move = random.choice(node.untried_moves)
 			iteration_state = board_move(iteration_state, move, node.player)
 			node = node.add_child(move, iteration_state)
 
 		# Playout
 		player = node.player
+		strategy = switching_mechanism.choose_strategy(i)
 		while True:          
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
-				move = switching_mechanism.get_move_from_strategy(all_possible_moves)
+				move = strategy(all_possible_moves)
 				iteration_state = board_move(iteration_state, move, player)
 				player = change_player(player)
 				continue
@@ -48,7 +50,7 @@ def mcts_switching(initial_state, player, number_of_iteration, get_result:Callab
 			player = change_player(player)
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
-				move = switching_mechanism.get_move_from_strategy(all_possible_moves)
+				move = strategy(all_possible_moves)
 				iteration_state = board_move(iteration_state, move, player)
 				player = change_player(player)
 				continue
@@ -57,5 +59,6 @@ def mcts_switching(initial_state, player, number_of_iteration, get_result:Callab
 
 		# Backpropagation
 		node.backpropagation(iteration_state)
+		switching_mechanism.update_strategy_result(strategy, get_result(iteration_state, player))
 
 	return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move

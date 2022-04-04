@@ -1,7 +1,9 @@
 import random
 import numpy as np
 from datetime import datetime
+from csv import writer
 import time
+
 
 from games.game import Game
 from games.player import Player
@@ -23,7 +25,7 @@ class Test:
             if seed is None:
                 name = f'test_{str(self.game_type.__name__).lower()}_{p1}_{p2}-{timestr}'
             else:
-                name = f'test_{str(self.game_type.__name__).lower()}_{p1}_{p2}_{seed}{timestr}'    
+                name = f'test_{str(self.game_type.__name__).lower()}_{p1}_{p2}_{seed}-{timestr}'    
         self.name = name
             
 
@@ -47,3 +49,15 @@ class Test:
         results = [f'{str(results[i][0])}{SEPARATHOR}{str(results[i][1])}\n' for i in range(len(results))]
         f.writelines(results)
         f.close
+
+    def save_to_global_file(self, results):
+        file_path = './tests/all_results.csv'
+        with open(file_path, 'a', newline='') as f_object:  
+            # Pass the CSV  file object to the writer() function
+            writer_object = writer(f_object)
+            # Result - a writer object
+            # Pass the data in the list as an argument into the writerow() function
+            # writer_object.writerow(list_data)  
+            writer_object.writerows(results) 
+            # Close the file object
+            f_object.close()
