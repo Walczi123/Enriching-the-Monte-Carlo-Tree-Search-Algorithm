@@ -4,7 +4,9 @@ from math import inf
 from typing import Callable
 from ai.mcts import mcts
 from ai.mcts_rave import mcts_rave
+from ai.mcts_strategies import mcts_strategy
 from ai.minmax import alpha_beta_minmax
+from strategies.strategies import random_strategy
 
 class Player():
     def __init__(self, is_man):
@@ -40,6 +42,28 @@ class MCTSRAVE_Player(Player):
         move = mcts_rave(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move)
         return move       
 
+class MCTSStrategy_Player(Player):
+    def __init__(self, strategy:Callable, number_of_iteration:int = 100):
+        super().__init__(False)
+        self.strategy = strategy
+        self.number_of_iteration = number_of_iteration
+
+    def make_move(self, args):
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
+        move = mcts(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategy)
+        return move
+
+class MCTSSwitchingStrategy_Player(Player):
+    def __init__(self, strategies:list, number_of_iteration:int = 100):
+        super().__init__(False)
+        self.strategies = strategies
+        self.number_of_iteration = number_of_iteration
+
+    def make_move(self, args):
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
+        move = mcts(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategies)
+        return move
+
 class AlphaBeta_Player(Player):
     def __init__(self, evaluate:Callable, depth:int = 3):
         super().__init__(False)
@@ -52,15 +76,12 @@ class AlphaBeta_Player(Player):
         return move
 
 class Random_Player(Player):
-    def __init__(self, wait_time = 0.1):
+    def __init__(self, wait_time = 0):
         super().__init__(False)
         self.wait_time = wait_time
 
     def make_move(self, args):
-        # (logic, ui, logger, starting_player, itermax, verbose, show_predictions) = args
-        # mcts = MCTS(logic=logic, ui=ui, board_state=logger, starting_player=starting_player)
-        # return mcts.start(itermax=itermax, verbose=verbose, show_predictions=show_predictions)
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = random.choice(get_all_posible_moves(initial_state, player))
+        move = random_strategy(get_all_posible_moves(initial_state, player), board_move, get_all_posible_moves, player, change_player)
         sleep(self.wait_time)
         return move

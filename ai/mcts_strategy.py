@@ -18,7 +18,7 @@ def select_uct_child(childNodes):
 	return random.choice(bestChildren)
 
 
-def mcts_strategies(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable, get_move_from_strategy:Callable):
+def mcts_strategy(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable, get_move_from_strategy:Callable):
 	rootnode = Node(None, None, initial_state, player, get_result, get_all_posible_moves, change_player)
 	for _ in range(number_of_iteration):
 		node = rootnode
@@ -30,7 +30,8 @@ def mcts_strategies(initial_state, player, number_of_iteration, get_result:Calla
 
 		# Expansion
 		if node.untried_moves != []:
-			move = get_move_from_strategy(node.untried_moves)
+			# move = get_move_from_strategy(node.untried_moves)
+			move = random.choice(node.untried_moves)
 			iteration_state = board_move(iteration_state, move, node.player)
 			node = node.add_child(move, iteration_state)
 

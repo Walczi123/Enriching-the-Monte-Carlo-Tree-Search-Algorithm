@@ -30,7 +30,7 @@ class MapBaseHeu_Othello_Player(Player):
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
 
-        usefull = [[],[],[],[],[],[]]
+        usefull = [[],[],[],[],[]]
         for x,y in get_all_posible_moves(initial_state, player):
             # corner places
             if (x % 7 == 0 and y % 7 == 0):
