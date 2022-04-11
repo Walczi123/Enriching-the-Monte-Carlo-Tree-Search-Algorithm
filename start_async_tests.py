@@ -8,7 +8,7 @@ from games.hex.hex import Hex
 from games.othello.othello import Othello
 from games.player import MCTS_Player, MCTSRAVE_Player
 from games.othello.othello_player import MapBaseHeu_Othello_Player
-from test import Test
+from tests import Tests
 
 SEED = 22021070
 REPETITIONS = 5
@@ -16,13 +16,12 @@ REPETITIONS = 5
 def generate_instances():
     result = []
 
-    player_types = [MCTS_Player]
+    player_types = [MapBaseHeu_Othello_Player]
 
     game_types = [Othello]
     
     for r in itertools.product(game_types, player_types, player_types):
-        for i in range(REPETITIONS):
-            result.append(Test(r[0], r[1], r[2], seed = SEED+i))
+        result.append(Tests(r[0], r[1], r[2], n_repetition = REPETITIONS, seed = SEED))
 
     expeded_len = (len(player_types) * len(player_types) * len(game_types))
     assert len(result) == expeded_len, f'Incorrect amount of test cases ({len(result)} != {expeded_len})'

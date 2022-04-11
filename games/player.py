@@ -4,7 +4,7 @@ from math import inf
 from typing import Callable
 from ai.mcts import mcts
 from ai.mcts_rave import mcts_rave
-from ai.mcts_strategies import mcts_strategy
+from ai.mcts_strategy import mcts_strategy
 from ai.minmax import alpha_beta_minmax
 from strategies.strategies import random_strategy
 

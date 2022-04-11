@@ -10,11 +10,12 @@ from games.player import Player
 
 SEPARATHOR = '\t'
 
-class Test:
-    def __init__(self, game_type:Game, player1:Player, player2:Player, name:str = None, seed=None):
+class Tests:
+    def __init__(self, game_type:Game, player1:Player, player2:Player, n_repetition:int = 1, name:str = None, seed=None):
         self.game_type = game_type
         self.player1 = player1
         self.player2 = player2
+        self.n_repetition = n_repetition
         self.seed = seed
 
         if name is None:
@@ -31,12 +32,13 @@ class Test:
     def start(self):
         results = []
         game = self.game_type(self.player1(), self.player2())
-        if self.seed is not None:
-            random.seed(self.seed)
-            # np.random.seed(self.seed + i)
-        game.restart()
-        r = game.play()
-        results.append((r,self.seed))
+        for i in range(self.n_repetition):
+            if self.seed is not None:
+                random.seed(self.seed + i)
+                # np.random.seed(self.seed + i)
+            game.restart()
+            r = game.play()
+            results.append((r,self.seed + i))
         print("saving")
         # self.save_to_file(results)
         self.save_to_global_file(results)

@@ -1,0 +1,16 @@
+game_type,player1,player2,winner,seed
+othello,mcts,mcts,2,22021070
+othello,mcts,mcts,2,22021071
+othello,mcts,mcts,2,22021072
+othello,mcts,mcts,2,22021073
+othello,mcts,mcts,1,22021074
+othello,mapbaseheu,mapbaseheu,2,22021070
+othello,mapbaseheu,mapbaseheu,2,22021071
+othello,mapbaseheu,mapbaseheu,1,22021072
+othello,mapbaseheu,mapbaseheu,1,22021073
+othello,mapbaseheu,mapbaseheu,1,22021074
+othello,mapbaseheu,mapbaseheu,2,22021070
+othello,mapbaseheu,mapbaseheu,2,22021071
+othello,mapbaseheu,mapbaseheu,1,22021072
+othello,mapbaseheu,mapbaseheu,1,22021073
+othello,mapbaseheu,mapbaseheu,1,22021074
