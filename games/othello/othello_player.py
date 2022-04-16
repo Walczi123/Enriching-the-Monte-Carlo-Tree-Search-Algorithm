@@ -8,6 +8,7 @@ class Greedy_Othello_Player(Player):
     def __init__(self, wait_time = 0.1):
         super().__init__(False)
         self.wait_time = wait_time
+        self.name = "greedy"
 
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
@@ -26,6 +27,7 @@ class MapBaseHeu_Othello_Player(Player):
     def __init__(self, wait_time = 0.1):
         super().__init__(False)
         self.wait_time = wait_time
+        self.name = "mapbaseheuothello"
 
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
