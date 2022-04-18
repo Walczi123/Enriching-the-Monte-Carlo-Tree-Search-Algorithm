@@ -40,7 +40,7 @@ def mcts_strategy(initial_state, player, number_of_iteration, get_result:Callabl
 		while True:          
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
-				move = get_move_from_strategy(all_possible_moves)
+				move = get_move_from_strategy(all_possible_moves, iteration_state, board_move, get_all_posible_moves, player, change_player)
 				iteration_state = board_move(iteration_state, move, player)
 				player = change_player(player)
 				continue
@@ -48,7 +48,7 @@ def mcts_strategy(initial_state, player, number_of_iteration, get_result:Callabl
 			player = change_player(player)
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
-				move = get_move_from_strategy(all_possible_moves)
+				move = get_move_from_strategy(all_possible_moves, iteration_state, board_move, get_all_posible_moves, player, change_player)
 				iteration_state = board_move(iteration_state, move, player)
 				player = change_player(player)
 				continue

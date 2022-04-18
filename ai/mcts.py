@@ -18,8 +18,8 @@ def select_uct_child(childNodes):
 	return random.choice(bestChildren)
 
 
-def mcts(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable):
-	rootnode = Node(None, None, initial_state, player, get_result, get_all_posible_moves, change_player)
+def mcts(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable, max_depth:int = 3):
+	rootnode = Node(None, None, initial_state, player, get_result, get_all_posible_moves, change_player, all_posible_moves = None, max_depth = max_depth)
 	for _ in range(number_of_iteration):
 		node = rootnode
 		iteration_state = node.state
@@ -36,7 +36,9 @@ def mcts(initial_state, player, number_of_iteration, get_result:Callable, get_al
 
 		# Playout
 		player = node.player
-		while True:          
+		j = 0
+		while (max_depth < 1 or node.depth + j < max_depth):    
+			j += 1      
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
 				move = random.choice(all_possible_moves)

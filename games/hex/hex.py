@@ -52,18 +52,6 @@ class Hex(Game):
         self.winner = 0
         self.turn_state = BLUE_PLAYER
 
-    def get_game_info(self, args):
-        console = Console()
-
-        table = Table(title="Hex Game", show_header=True, header_style="bold magenta")
-        table.add_column("Parameters", justify="center")
-        table.add_column("Value", justify="right")
-        table.add_row("Board size", str(args[0]))
-        table.add_row("MCTS itermax", str(args[1]))
-        table.add_row("Game", str(args[2]))
-
-        console.print(table)
-
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:

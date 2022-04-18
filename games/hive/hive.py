@@ -19,7 +19,7 @@ import pygame
 from games.hive.ui import UI
 
 class Hive():
-    def __init__(self, use_ui, player1, player2):
+    def __init__(self, use_ui, player1, player2, round_limit:int = 1000):
         self.name = "Hive"
         self.use_ui = use_ui
 
@@ -28,12 +28,13 @@ class Hive():
 
         self.state = State()
 
-        self.winner = None
+        self.winner = 0
+        self.round_limit = round_limit
 
     def get_result(self, iteration_state, player):
-        if self.is_looser(iteration_state, player):
+        if self.is_looser(iteration_state.board, player):
             return 0
-        elif self.is_looser(iteration_state, self.change_player(player)):
+        elif self.is_looser(iteration_state.board, self.change_player(player)):
             return 1
         else: 
             return 0.5
@@ -262,7 +263,9 @@ class Hive():
         available_moves_checked = False
         current_player = self.player1
         self.state.turn_state = 1
+        round_counter = 0
         while self.end_condition():
+            round_counter += 1
             self.ui.draw_board(self.state.board, self.state.amount_available_white_pieces, self.state.amount_available_black_pieces, selected_piece)
 
             pygame.display.update()
@@ -290,19 +293,23 @@ class Hive():
                 else:
                     available_moves_checked = True
 
+            if round_counter >= self.round_limit:
+                break
+
 
         self.ui.draw_board(self.state.board, self.state.amount_available_white_pieces, self.state.amount_available_black_pieces, selected_piece)
         pygame.display.update()
         pygame.quit()
 
         print(f"Player {self.winner} wins!")
+        return self.winner
                          
     def play_without_ui(self):
         pass
 
     def play(self):
         if self.use_ui:
-            self.play_with_ui()
+            return self.play_with_ui()
         else:
-            self.play_without_ui()
+            return self.play_without_ui()
 

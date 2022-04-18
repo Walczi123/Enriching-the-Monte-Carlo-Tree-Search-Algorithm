@@ -14,8 +14,8 @@ class SwitchingMechanism():
 
     def choose_strategy(self, n):
         result = []
-        for i in len(self.strategies):
-            result.append(self.q_table[i] + self.b * sqrt(log(n)/self.__t_table__(i)))
+        for i in range(len(self.strategies)):
+            result.append(self.q_table[i] + self.b * sqrt(log(n+1)/self.__t_table__(i)))
         index = result.index(max(result))
         return self.strategies[index]
 

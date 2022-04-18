@@ -3,7 +3,7 @@ from games.hive.pieces import Ant, Beetle, Grasshopper, Queen, Spider
 from games.hive.state import State
 
 def check_move(state, move):
-    print(f'Move round {state.round_counter} ',move)
+    # print(f'Move round {state.round_counter} ',move)
     if move[0][0]:
         return placement_is_allowed(state, move)
     else:

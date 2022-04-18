@@ -1,3 +1,4 @@
+from copy import deepcopy
 import random
 from typing import Callable
 from ai.nodes import Node
@@ -42,7 +43,7 @@ def mcts_switching(initial_state, player, number_of_iteration, get_result:Callab
 		while True:          
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
-				move = strategy(all_possible_moves)
+				move = strategy(all_possible_moves, iteration_state, board_move, get_all_posible_moves, player, change_player)
 				iteration_state = board_move(iteration_state, move, player)
 				player = change_player(player)
 				continue
@@ -50,7 +51,7 @@ def mcts_switching(initial_state, player, number_of_iteration, get_result:Callab
 			player = change_player(player)
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
-				move = strategy(all_possible_moves)
+				move = strategy(all_possible_moves, iteration_state, board_move, get_all_posible_moves, player, change_player)
 				iteration_state = board_move(iteration_state, move, player)
 				player = change_player(player)
 				continue

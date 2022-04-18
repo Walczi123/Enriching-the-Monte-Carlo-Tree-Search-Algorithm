@@ -1,4 +1,5 @@
 from games.player import Player
+
 class Man_Player(Player):
     def __init__(self):
         super().__init__(True)
