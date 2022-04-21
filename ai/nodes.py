@@ -2,7 +2,7 @@ from math import log, sqrt
 from typing import Callable
 
 class Node:
-    def __init__(self, parent, move, state, player, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, all_posible_moves = None, max_depth: int = -1, parent_depth:int = -1):
+    def __init__(self, parent, move, state, player, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, all_posible_moves = None):
         self.get_result = get_result
         self.get_all_posible_moves = get_all_posible_moves
         self.change_player = change_player
@@ -14,14 +14,10 @@ class Node:
         self.child_nodes = []
         self.player = player
         self.move = move
-        self.max_depth = max_depth
-        self.depth = parent_depth + 1
 
-        self.untried_moves = []
-        if  max_depth <= 0 or max_depth > self.depth:
-            if all_posible_moves is None:
-                all_posible_moves = get_all_posible_moves(state, player)
-            self.untried_moves = all_posible_moves
+        if all_posible_moves is None:
+            all_posible_moves = get_all_posible_moves(state, player)
+        self.untried_moves = all_posible_moves
 
 
     def get_uct_score(self, c: float = sqrt(2)):
@@ -35,11 +31,11 @@ class Node:
             p = self.change_player(player)
             all_posible_moves = self.get_all_posible_moves(state, p)
             if all_posible_moves != []:
-                child = Node(self, move, state, p, self.get_result, self.get_all_posible_moves, self.change_player, all_posible_moves, self.max_depth, self.depth)
+                child = Node(self, move, state, p, self.get_result, self.get_all_posible_moves, self.change_player, all_posible_moves)
             else:
-                child = Node(self, move, state, player, self.get_result, self.get_all_posible_moves, self.change_player, all_posible_moves, self.max_depth, self.depth)
+                child = Node(self, move, state, player, self.get_result, self.get_all_posible_moves, self.change_player, all_posible_moves)
         else:
-            child = Node(self, move, state, player, self.get_result, self.get_all_posible_moves, self.change_player, all_posible_moves, self.max_depth, self.depth)
+            child = Node(self, move, state, player, self.get_result, self.get_all_posible_moves, self.change_player, all_posible_moves)
 
         self.child_nodes.append(child)
         self.untried_moves.remove(move)

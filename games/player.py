@@ -32,28 +32,28 @@ class Man_Player(Player):
 
 
 class MCTS_Player(Player):
-    def __init__(self, number_of_iteration: int = 100):
+    def __init__(self, number_of_iteration: int = 100, max_depth: int = -1):
         super().__init__(False)
         self.name = f"mcts{str(number_of_iteration)}"
         self.number_of_iteration = number_of_iteration
+        self.max_depth = max_depth
 
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = mcts(initial_state, player, self.number_of_iteration,
-                    get_result, get_all_posible_moves, change_player, board_move)
+        move = mcts(initial_state, player, self.number_of_iteration,get_result, get_all_posible_moves, change_player, board_move, self.max_depth)
         return move
 
 
 class MCTSRAVE_Player(Player):
-    def __init__(self, number_of_iteration: int = 100):
+    def __init__(self, number_of_iteration: int = 100, max_depth: int = -1):
         super().__init__(False)
         self.number_of_iteration = number_of_iteration
         self.name = f"mctsrave{str(number_of_iteration)}"
+        self.max_depth = max_depth
 
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = mcts_rave(initial_state, player, self.number_of_iteration,
-                         get_result, get_all_posible_moves, change_player, board_move)
+        move = mcts_rave(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.max_depth)
         return move
 
 

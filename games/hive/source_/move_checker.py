@@ -178,36 +178,36 @@ def move_is_not_blocked_or_jump(state, old_tile, new_tile):  # check for each pa
         return True
 
 
-def path_exists(state, old_tile, new_tile, spider=False):
-    temp_piece = old_tile.pieces[-1]
-    old_tile.remove_piece()
+# def path_exists(state, old_tile, new_tile, spider=False):
+#     temp_piece = old_tile.pieces[-1]
+#     old_tile.remove_piece()
 
-    queue = []
-    queue.append([old_tile])
+#     queue = []
+#     queue.append([old_tile])
 
-    while queue:
-        path = queue.pop(0)
-        current_tile = path[-1]
-        if spider:
-            if current_tile == new_tile and len(path) - 1 == 3:
-                old_tile.add_piece(temp_piece)
-                return True
-        elif current_tile == new_tile:
-            old_tile.add_piece(temp_piece)
-            return True
+#     while queue:
+#         path = queue.pop(0)
+#         current_tile = path[-1]
+#         if spider:
+#             if current_tile == new_tile and len(path) - 1 == 3:
+#                 old_tile.add_piece(temp_piece)
+#                 return True
+#         elif current_tile == new_tile:
+#             old_tile.add_piece(temp_piece)
+#             return True
 
-        for neighbor_tile in [x for x in current_tile.adjacent_tiles
-                              if x.is_hive_adjacent(state)
-                              and not x.has_pieces()]:
-            if neighbor_tile not in path \
-                and move_is_not_blocked_or_jump(state, current_tile,
-                    neighbor_tile):
-                new_path = list(path)
-                new_path.append(neighbor_tile)
-                queue.append(new_path)
+#         for neighbor_tile in [x for x in current_tile.adjacent_tiles
+#                               if x.is_hive_adjacent(state)
+#                               and not x.has_pieces()]:
+#             if neighbor_tile not in path \
+#                 and move_is_not_blocked_or_jump(state, current_tile,
+#                     neighbor_tile):
+#                 new_path = list(path)
+#                 new_path.append(neighbor_tile)
+#                 queue.append(new_path)
 
-    old_tile.add_piece(temp_piece)
-    return False
+#     old_tile.add_piece(temp_piece)
+#     return False
 
 
 def is_straight_line(old_coords, new_coords):

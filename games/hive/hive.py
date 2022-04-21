@@ -2,15 +2,12 @@ from collections import defaultdict
 from copy import deepcopy
 import sys
 import os
-from typing import DefaultDict
-from numpy.core.fromnumeric import reshape
 
-from pygame import color
 from games.hive.const import ANT_AMOUNT, ANT_ID, BEETLE_AMOUNT, BEETLE_ID, GRASSHOPPER_AMOUNT, GRASSHOPPER_ID, QUEEN_AMOUNT, QUEEN_ID, SPIDER_AMOUNT, SPIDER_ID
 
 from games.hive.pieces import Ant, Beetle, Grasshopper, Queen, Spider
 from games.hive.move_checker import check_move
-from games.hive.common_functions import neighbours
+from games.hive.common_functions import neighbours, one_hive
 from games.hive.state import State
 
 # # Hide Pygame welcome message
@@ -45,15 +42,16 @@ class Hive():
         else:
             return 2
 
-    def board_move(self, state, move, player):
+    def board_move(self, state:State, move, player):
         s = deepcopy(state)
+        s.turn_state = player
         self.check_and_make_move(s, move)
         return s
 
-    def enumerate_hand(self, state: State, coordinates):
+    def enumerate_hand(self, state: State, coordinates, player):
         """Fora given iterable of coordinates, enumerate all avilable tiles"""
         result = []
-        if state.turn_state == 1:
+        if player == 1:
             for x in range(len(state.amount_available_white_pieces)):
                 if state.amount_available_white_pieces[x] > 0:
                     for c in coordinates:
@@ -65,7 +63,7 @@ class Hive():
                         result.append(((True, (1,x)), c))
         return result
 
-    def placeable(self, state):
+    def placeable(self, state, current_player):
         """Returns all coordinates where the given player can
         _place_ a tile."""
         players = defaultdict(set)
@@ -76,66 +74,55 @@ class Hive():
                     if not n in state.board.keys():
                         players[player].add(n)
         # All neighbours to any tile placed by current player...
-        coordinates = players[state.turn_state]
+        coordinates = players[current_player]
         # ...except where the opponent is neighbour...
         for p in players:
-            if p != state.turn_state:
+            if p != current_player:
                 coordinates.difference_update(players[p])
         # ...and you cannot place on top of another tile.
         coordinates.difference_update(state.board.keys())      
 
         return coordinates   
 
-    def one_hive(self, coordinates):
-        unvisited = set(coordinates)
-        todo = [unvisited.pop()]
-        while todo:
-            node = todo.pop()
-            for neighbour in neighbours(node):
-                if neighbour in unvisited:
-                    unvisited.remove(neighbour)
-                    todo.append(neighbour)
-        return not unvisited
-
-    def movements(self, state:State):
+    def movements(self, state:State, player):
         result = []
         for coordinate, pieces in state.board.items():
             piece = pieces[-1]
-            if 2 - piece.color[0]//128 == state.turn_state:
+            if 2 - piece.color[0]//128 == player:
                 coordinates = set(state.board.keys())
                 coordinates.remove(coordinate)
-                if self.one_hive(coordinates):
+                if one_hive(coordinates):
                     for target in piece.moves(coordinate, state):
                         result.append(((False, coordinate), target))
         return result
 
     def get_all_posible_moves(self, state:State, player=None):
         if not state.board:
-            # If nothing is placed, one must place something anywhere
+            # Empty board
             anywhere = (0, 0)
-            return self.enumerate_hand(state, [anywhere])
+            return self.enumerate_hand(state, [anywhere], player)
         if len(state.board) == 1:
             # If single tile is placed, opponent places at neighbour
             start_tile = next(iter(state.board))
-            return self.enumerate_hand(state, list(neighbours(start_tile)))
+            return self.enumerate_hand(state, list(neighbours(start_tile)), player)
         
-        placements = self.placeable(state)
+        placements = self.placeable(state, player)
         if not len(placements):
             return []
 
         # If queen is still on hand...
-        if state.turn_state == 1:
+        if player == 1:
             hand = state.amount_available_white_pieces
         else:
             hand = state.amount_available_black_pieces
         if hand[0] > 0:
             # ...it must be placed on round 4
             if state.round_counter + 1 == 4:
-                return [(('True', (state.turn_state-1, QUEEN_ID)), c) for c in placements]
+                return [(('True', (player-1, QUEEN_ID)), c) for c in placements]
             # ...otherwise only placements...
-            return list(self.enumerate_hand(state, placements))
+            return list(self.enumerate_hand(state, placements, player))
         # ...but normally placements and movements
-        available = list(self.enumerate_hand(state, placements)) + list(self.movements(state))
+        available = list(self.enumerate_hand(state, placements, player)) + list(self.movements(state, player))
         if not available:
             return []
         return available
@@ -227,11 +214,16 @@ class Hive():
             self.state.round_counter += 1
             return self.player1
 
-    def check_and_make_move(self, state, move):
+    def check_and_make_move(self, state:State, move):
         if check_move(state, move):
             self.make_move(state, move)
             return True
         print("invalid move")
+        print(state.turn_state)
+        print(self.state.board)
+        print(move)
+        input("asda")
+        raise Exception('invalid move')
         return False
 
     def select_piece_and_coordinates(self, clicked, selected_piece, coordinates):
@@ -305,7 +297,25 @@ class Hive():
         return self.winner
                          
     def play_without_ui(self):
-        pass
+        current_player = self.player1
+        self.state.turn_state = 1
+        round_counter = 0
+        while self.end_condition():
+            pos_moves = self.get_all_posible_moves(self.state, current_player)
+            if len(pos_moves) == 0:
+                current_player = self.swich_player() 
+                continue
+
+            round_counter += 1
+
+            move = self.player_make_move(current_player)
+            if self.check_and_make_move(self.state, move):
+                current_player = self.swich_player()
+
+            if round_counter >= self.round_limit:
+                break
+
+        return self.winner
 
     def play(self):
         if self.use_ui:

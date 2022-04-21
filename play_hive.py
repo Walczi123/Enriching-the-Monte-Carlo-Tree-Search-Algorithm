@@ -5,10 +5,10 @@ from games.player import AlphaBeta_Player, MCTSRAVE_Player, MCTS_Player, Random_
 # from ai.minmax import hive_evaluate
 from strategies.strategies import mobility_strategy, mobility_strategy_vs, random_strategy
 
-
 if __name__ == "__main__":
-    p1 = MCTS_Player(3)
-    p2 = MCTS_Player(3)
-    game = Hive(use_ui=True, player1= p1, player2=p2, round_limit=30)
+    random.seed(1)
+    p1 = MCTSRAVE_Player(max_depth=3)
+    p2 = MCTS_Player(max_depth=3)
+    game = Hive(use_ui=True, player1= p1, player2=p2, round_limit=10)
     game.play()
 

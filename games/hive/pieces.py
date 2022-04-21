@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 import os
 import numpy as np
 
@@ -9,8 +6,6 @@ from games.hive.common_functions import axial_distance, cube_to_axial, evenr_to_
 from games.hive.state import State
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame as pg
-# from move_checker import axial_distance, move_is_not_blocked_or_jump, \
-#     path_exists, is_straight_line
 
 PIECE_WHITE = (250, 250, 250)
 class Piece:

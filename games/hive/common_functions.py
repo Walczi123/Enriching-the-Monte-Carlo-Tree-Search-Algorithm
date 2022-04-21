@@ -96,7 +96,7 @@ def find_pieces_around(state, coordinates):
             res.extend(state.board[n])
     return res
 
-def path_exists(state, coord1, coord2, spider=False):
+def path_exists(state:State, coord1, coord2, spider=False):
     queue = []
     queue.append([coord1])
 
@@ -119,7 +119,7 @@ def path_exists(state, coord1, coord2, spider=False):
 
     return False
 
-def is_hive_adjacent(state, coordinate):
+def is_hive_adjacent(state:State, coordinate):
     if len(state.board) == 0:
         return True
     for piece in state.board.keys():
@@ -134,22 +134,35 @@ def move_does_not_break_hive(state:State, coordinates, additional_coordiantes = 
     if additional_coordiantes is not None:
         copy_state.board[additional_coordiantes] = [None]
 
-    tile_list = list(copy_state.board.keys())
-    visited = []
-    queue = []
+    return one_hive(copy_state.board.keys())
 
-    visited.append(tile_list[0])
-    queue.append(tile_list[0])
+    # tile_list = list(copy_state.board.keys())
+    # visited = []
+    # queue = []
 
-    while queue:
-        current = queue.pop(0)
+    # visited.append(tile_list[0])
+    # queue.append(tile_list[0])
 
-        for neighbor in [x for x in neighbours(current)
-                              if x in copy_state.board.keys()]:
-            if neighbor not in visited:
-                visited.append(neighbor)
-                queue.append(neighbor)
+    # while queue:
+    #     current = queue.pop(0)
 
-    if len(visited) != len(tile_list):
-        return False
-    return True
+    #     for neighbour in [x for x in neighbours(current) if x in tile_list]:
+    #         if neighbour not in visited:
+    #             visited.append(neighbour)
+    #             queue.append(neighbour)
+
+    # if len(visited) != len(tile_list):
+    #     return False
+    # return True
+
+
+def one_hive(coordinates):
+        unvisited = set(coordinates)
+        todo = [unvisited.pop()]
+        while todo:
+            node = todo.pop()
+            for neighbour in neighbours(node):
+                if neighbour in unvisited:
+                    unvisited.remove(neighbour)
+                    todo.append(neighbour)
+        return not unvisited
