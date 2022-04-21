@@ -58,31 +58,31 @@ class MCTSRAVE_Player(Player):
 
 
 class MCTSStrategy_Player(Player):
-    def __init__(self, strategy: Callable, number_of_iteration: int = 100):
+    def __init__(self, strategy: Callable, number_of_iteration: int = 100, max_depth: int = -1):
         super().__init__(False)
         self.strategy = strategy
         self.number_of_iteration = number_of_iteration
         self.name = f"mctsstrategy{str(number_of_iteration)}{self.strategy.__name__}"
+        self.max_depth = max_depth
 
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = mcts_strategy(initial_state, player, self.number_of_iteration, get_result,
-                             get_all_posible_moves, change_player, board_move, self.strategy)
+        move = mcts_strategy(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategy, self.max_depth)
         return move
 
 
 class MCTSSwitchingStrategy_Player(Player):
-    def __init__(self, strategies: list, number_of_iteration: int = 100):
+    def __init__(self, strategies: list, number_of_iteration: int = 100, max_depth: int = -1):
         super().__init__(False)
         self.strategies = strategies
         self.number_of_iteration = number_of_iteration
         strategies_names = ','.join(x.__name__ for x in self.strategies)
         self.name = f"mctsstrategies{str(number_of_iteration)}({strategies_names})"
+        self.max_depth = max_depth
 
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = mcts_switching(initial_state, player, self.number_of_iteration, get_result,
-                              get_all_posible_moves, change_player, board_move, self.strategies)
+        move = mcts_switching(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategies, self.max_depth)
         return move
 
 

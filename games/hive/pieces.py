@@ -1,8 +1,8 @@
 import os
 import numpy as np
 
-from games.hive.const import ANT_AMOUNT, BEETLE_AMOUNT, GRASSHOPPER_AMOUNT, QUEEN_AMOUNT, SPIDER_AMOUNT
-from games.hive.common_functions import axial_distance, cube_to_axial, evenr_to_axial, move_does_not_break_hive, neighbours, find_pieces_around, path_exists
+from games.hive.const import ANT_AMOUNT, ANT_ID, BEETLE_AMOUNT, BEETLE_ID, GRASSHOPPER_AMOUNT, GRASSHOPPER_ID, QUEEN_AMOUNT, QUEEN_ID, SPIDER_AMOUNT, SPIDER_ID
+from games.hive.common_functions import cube_to_axial, evenr_to_axial, move_does_not_break_hive, neighbours, find_pieces_around, path_exists
 from games.hive.state import State
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame as pg
@@ -150,3 +150,15 @@ def trace_coutour(state, coordinate, steps=1):
                     yield c
                 else:
                     todo.append((neighbour, n + 1))
+
+def id_to_piece(id):
+    if id == QUEEN_ID:
+        return Queen
+    elif id == ANT_ID:
+        return Ant
+    elif id == GRASSHOPPER_ID:
+        return Grasshopper
+    elif id == SPIDER_ID:
+        return Spider
+    elif id == BEETLE_ID:
+        return Beetle

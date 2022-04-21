@@ -94,6 +94,11 @@ class Hive():
                 if one_hive(coordinates):
                     for target in piece.moves(coordinate, state):
                         result.append(((False, coordinate), target))
+
+        for r in result:
+            if r[0][1] == r[1]:
+                raise Exception
+
         return result
 
     def get_all_posible_moves(self, state:State, player=None):
@@ -222,7 +227,6 @@ class Hive():
         print(state.turn_state)
         print(self.state.board)
         print(move)
-        input("asda")
         raise Exception('invalid move')
         return False
 

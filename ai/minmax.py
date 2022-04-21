@@ -1,6 +1,5 @@
 from math import inf
 
-
 def othello_evaluate(state, player):
     player1_score = 0
     player2_score = 0

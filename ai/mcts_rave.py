@@ -23,14 +23,13 @@ def mcts_rave(initial_state, player, number_of_iteration, get_result:Callable, g
     rootnode = RAVENode(None, None, initial_state, player, get_result, get_all_posible_moves, change_player)
     for _ in range(number_of_iteration):
         node = rootnode
-        iteration_state = node.state
         moves = []
 
         # Selection
         while node.untried_moves == [] and node.child_nodes != []:
             node = select_rave_child(node.child_nodes)
             moves.append((node.move, node.player))
-            
+        iteration_state = node.state
 
         # Expansion
         if node.untried_moves != []:

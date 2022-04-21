@@ -22,11 +22,11 @@ def mcts(initial_state, player, number_of_iteration, get_result:Callable, get_al
 	rootnode = Node(None, None, initial_state, player, get_result, get_all_posible_moves, change_player, all_posible_moves = None)
 	for _ in range(number_of_iteration):
 		node = rootnode
-		iteration_state = node.state
 
 		# Selection
 		while node.untried_moves == [] and node.child_nodes != []:
 			node = select_uct_child(node.child_nodes)
+		iteration_state = node.state
 
 		# Expansion
 		if node.untried_moves != []:

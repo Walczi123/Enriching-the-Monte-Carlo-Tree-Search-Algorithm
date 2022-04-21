@@ -19,16 +19,16 @@ def select_uct_child(childNodes):
 	return random.choice(bestChildren)
 
 
-def mcts_switching(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable, strategies:list):
+def mcts_switching(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable, strategies:list, max_depth:int = -1):
 	switching_mechanism = SwitchingMechanism(strategies)
 	rootnode = Node(None, None, initial_state, player, get_result, get_all_posible_moves, change_player)
 	for i in range(number_of_iteration):
 		node = rootnode
-		iteration_state = node.state
 
 		# Selection
 		while node.untried_moves == [] and node.child_nodes != []:
 			node = select_uct_child(node.child_nodes)
+		iteration_state = node.state
 
 		# Expansion
 		if node.untried_moves != []:
@@ -40,7 +40,9 @@ def mcts_switching(initial_state, player, number_of_iteration, get_result:Callab
 		# Playout
 		player = node.player
 		strategy = switching_mechanism.choose_strategy(i)
-		while True:          
+		j = 0
+		while (max_depth < 1 or j < max_depth):    
+			j += 1         
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
 				move = strategy(all_possible_moves, iteration_state, board_move, get_all_posible_moves, player, change_player)

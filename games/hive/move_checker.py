@@ -7,7 +7,8 @@ def check_move(state, move):
     if move[0][0]:
         return placement_is_allowed(state, move)
     else:
-        if move[0][1] != move[1] and is_hive_adjacent(state, move[1]) and move_does_not_break_hive(state, move[0][1], move[1]) and queen_is_on_board(state):
+        # if move[0][1] != move[1] and is_hive_adjacent(state, move[1]) and move_does_not_break_hive(state, move[0][1], move[1]) and queen_is_on_board(state):
+        if move[0][1] != move[1] and move_does_not_break_hive(state, move[0][1], move[1]) and queen_is_on_board(state):
             return piece_valid_move(state, move)
     return False
 
