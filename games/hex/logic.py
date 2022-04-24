@@ -181,7 +181,7 @@ class Logic:
 
             path = self.traverse(border, player, board, {}, mcts_mode)
             if path:
-                if not mcts_mode:
+                if self.ui:
                     # Highlights the winning path in green
                     for step in path.keys():
                         x, y = step

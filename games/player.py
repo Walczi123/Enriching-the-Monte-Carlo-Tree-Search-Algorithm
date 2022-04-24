@@ -35,6 +35,8 @@ class MCTS_Player(Player):
     def __init__(self, number_of_iteration: int = 100, max_depth: int = -1):
         super().__init__(False)
         self.name = f"mcts{str(number_of_iteration)}"
+        if max_depth > 0:
+            self.name += f"_{str(max_depth)}"
         self.number_of_iteration = number_of_iteration
         self.max_depth = max_depth
 
@@ -49,6 +51,8 @@ class MCTSRAVE_Player(Player):
         super().__init__(False)
         self.number_of_iteration = number_of_iteration
         self.name = f"mctsrave{str(number_of_iteration)}"
+        if max_depth > 0:
+            self.name += f"_{str(max_depth)}"
         self.max_depth = max_depth
 
     def make_move(self, args):
@@ -61,8 +65,11 @@ class MCTSStrategy_Player(Player):
     def __init__(self, strategy: Callable, number_of_iteration: int = 100, max_depth: int = -1):
         super().__init__(False)
         self.strategy = strategy
-        self.number_of_iteration = number_of_iteration
-        self.name = f"mctsstrategy{str(number_of_iteration)}{self.strategy.__name__}"
+        self.number_of_iteration = number_of_iteration   
+        self.name = f"mctsstrategy{str(number_of_iteration)}"
+        if max_depth > 0:
+            self.name += f"_{str(max_depth)}"
+        self.name += f"({self.strategy.__name__})"
         self.max_depth = max_depth
 
     def make_move(self, args):
@@ -76,8 +83,11 @@ class MCTSSwitchingStrategy_Player(Player):
         super().__init__(False)
         self.strategies = strategies
         self.number_of_iteration = number_of_iteration
-        strategies_names = ','.join(x.__name__ for x in self.strategies)
-        self.name = f"mctsstrategies{str(number_of_iteration)}({strategies_names})"
+        strategies_names = ':'.join(x.__name__ for x in self.strategies)
+        self.name = f"mctsstrategies{str(number_of_iteration)}"
+        if max_depth > 0:
+            self.name += f"_{str(max_depth)}"
+        self.name += f"({strategies_names})"
         self.max_depth = max_depth
 
     def make_move(self, args):

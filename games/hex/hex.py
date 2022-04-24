@@ -3,6 +3,8 @@ import sys
 from tkinter.constants import NO
 import os
 
+from config import BOARD_SIZE
+
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from rich.console import Console
@@ -18,7 +20,7 @@ from games.hex.ui import UI
 
 
 class Hex(Game):
-    def __init__(self, player1:Player, player2:Player, use_ui: bool = False, board_size: int = 11):
+    def __init__(self, player1:Player, player2:Player, use_ui: bool = False, board_size: int = BOARD_SIZE):
         self.name = "Hex"
         
         # Mode

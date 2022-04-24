@@ -2,6 +2,7 @@ from collections import defaultdict
 from copy import deepcopy
 import sys
 import os
+from config import ROUND_LIMIT
 
 from games.hive.const import ANT_AMOUNT, ANT_ID, BEETLE_AMOUNT, BEETLE_ID, GRASSHOPPER_AMOUNT, GRASSHOPPER_ID, QUEEN_AMOUNT, QUEEN_ID, SPIDER_AMOUNT, SPIDER_ID
 
@@ -9,6 +10,7 @@ from games.hive.pieces import Ant, Beetle, Grasshopper, Queen, Spider
 from games.hive.move_checker import check_move
 from games.hive.common_functions import neighbours, one_hive
 from games.hive.state import State
+from games.player import Player
 
 # # Hide Pygame welcome message
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
@@ -16,7 +18,7 @@ import pygame
 from games.hive.ui import UI
 
 class Hive():
-    def __init__(self, use_ui, player1, player2, round_limit:int = 1000):
+    def __init__(self, player1:Player, player2:Player, use_ui: bool = False, round_limit:int = ROUND_LIMIT):
         self.name = "Hive"
         self.use_ui = use_ui
 
@@ -305,7 +307,7 @@ class Hive():
         self.state.turn_state = 1
         round_counter = 0
         while self.end_condition():
-            pos_moves = self.get_all_posible_moves(self.state, current_player)
+            pos_moves = self.get_all_posible_moves(self.state, self.state.turn_state)
             if len(pos_moves) == 0:
                 current_player = self.swich_player() 
                 continue

@@ -11,11 +11,12 @@ SEPARATHOR = '\t'
 
 
 class Test:
-    def __init__(self, game_type: Game, player1: Player, player2: Player, name: str = None, seed=None):
+    def __init__(self, game_type: Game, player1: Player, player2: Player, name: str = None, seed=None, game_limit:int = -1):
         self.game_type = game_type
         self.player1 = player1
         self.player2 = player2
         self.seed = seed
+        self.game_limit = game_limit
 
         if name is None:
             p1 = self.player1.name
@@ -30,7 +31,6 @@ class Test:
         game = self.game_type(self.player1, self.player2)
         if self.seed is not None:
             random.seed(self.seed)
-        game.restart()
         r = game.play()
         result = (r, self.seed)
         print(f"saving {self.name}")
