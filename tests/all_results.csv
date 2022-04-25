@@ -135,3 +135,12 @@ hex,alphabeta3,random,1,22021070
 hex,alphabeta3,mctsstrategy5_2(random_strategy),1,22021070
 hex,mctsstrategies5_2(random_strategy:mobility_strategy),alphabeta3,1,22021070
 hex,alphabeta3,alphabeta3,2,22021070
+hive,mctsstrategy5_2(random_strategy),random,0,22021070
+othello,mctsrave5_2,random,1,22021070
+hive,mctsstrategy5_2(random_strategy),alphabeta3,0,22021070
+hex,mcts5_2,mctsstrategy5_2(random_strategy),2,22021070
+hex,mctsrave5_2,mcts5_2,2,22021070
+hex,mctsrave5_2,random,1,22021070
+othello,mctsrave5_2,mctsstrategy5_2(random_strategy),2,22021070
+othello,greedy,greedy,0,22021070
+hex,random,mctsstrategies5_2(random_strategy:mobility_strategy),2,22021070

@@ -1,14 +1,11 @@
 from copy import deepcopy
 import sys
-from tkinter.constants import NO
 import os
 
 from config import BOARD_SIZE
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
-from rich.console import Console
-from rich.table import Table
 from games.game import Game
 from games.hex.const import BLUE_PLAYER, RED_PLAYER
 from games.player import Player
