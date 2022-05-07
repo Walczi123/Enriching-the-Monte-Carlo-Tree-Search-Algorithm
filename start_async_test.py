@@ -23,6 +23,14 @@ HIVE_PLAYERS = [AlphaBeta_Player(hive_evaluate)]
 HEX_PLAYERS = [AlphaBeta_Player(hex_evaluate)]
 OTHELLO_PLAYERS = [MapBaseHeu_Othello_Player(), Greedy_Othello_Player(), AlphaBeta_Player(othello_evaluate)]
 
+#mcts 1000 - 2000 5000 - 10 000
+#ab 4 - 6 - 8 -10
+# mcst - mctsstrat - strat
+
+# hive - depht - 50 - 100 - 200 - 300
+
+# 
+
 def generate_instances(): 
     result = []
 
