@@ -48,6 +48,8 @@ class Hive():
         s = deepcopy(state)
         s.turn_state = player
         self.check_and_make_move(s, move)
+        if player == 2:
+            s.round_counter += 1
         return s
 
     def enumerate_hand(self, state: State, coordinates, player):
@@ -92,7 +94,8 @@ class Hive():
             piece = pieces[-1]
             if 2 - piece.color[0]//128 == player:
                 coordinates = set(state.board.keys())
-                coordinates.remove(coordinate)
+                if len(pieces) == 1:
+                    coordinates.remove(coordinate)
                 if one_hive(coordinates):
                     for target in piece.moves(coordinate, state):
                         result.append(((False, coordinate), target))
@@ -104,6 +107,8 @@ class Hive():
         return result
 
     def get_all_posible_moves(self, state:State, player=None):
+        if state.round_counter > self.round_limit:
+            return []
         if not state.board:
             # Empty board
             anywhere = (0, 0)
@@ -113,25 +118,25 @@ class Hive():
             start_tile = next(iter(state.board))
             return self.enumerate_hand(state, list(neighbours(start_tile)), player)
         
-        placements = self.placeable(state, player)
-        if not len(placements):
-            return []
-
-        # If queen is still on hand...
         if player == 1:
             hand = state.amount_available_white_pieces
         else:
             hand = state.amount_available_black_pieces
-        if hand[0] > 0:
-            # ...it must be placed on round 4
-            if state.round_counter + 1 == 4:
-                return [(('True', (player-1, QUEEN_ID)), c) for c in placements]
-            # ...otherwise only placements...
-            return list(self.enumerate_hand(state, placements, player))
-        # ...but normally placements and movements
-        available = list(self.enumerate_hand(state, placements, player)) + list(self.movements(state, player))
-        if not available:
-            return []
+        available = []
+        if sum(hand) > 0:
+            placements = self.placeable(state, player)
+            if not len(placements):
+                return []
+            # If queen is still on hand...
+            if hand[0] > 0:
+                # ...it must be placed on round 4
+                if state.round_counter + 1 == 4:
+                    return [(('True', (player-1, QUEEN_ID)), c) for c in placements]
+                # ...otherwise only placements...
+                return list(self.enumerate_hand(state, placements, player))
+            # ...but normally placements and movements
+            available += list(self.enumerate_hand(state, placements, player)) + list(self.movements(state, player))
+        available += list(self.movements(state, player))
         return available
     
     def handle_events(self):
@@ -182,11 +187,11 @@ class Hive():
             return False
         return True
     
-    def player_make_move(self, player, selected_piece = None, coordinates = None):
+    def player_make_move(self, player, selected_piece = None, coordinates = None, all_posible_moves = None):
         if player.is_man:
             args = (selected_piece, coordinates)
         else:
-            args = (self.state, self.state.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move)
+            args = (self.state, self.state.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move, all_posible_moves)
             
         move = player.make_move(args)
         return move
@@ -261,9 +266,10 @@ class Hive():
         available_moves_checked = False
         current_player = self.player1
         self.state.turn_state = 1
-        round_counter = 0
         while self.end_condition():
-            round_counter += 1
+            if self.state.round_counter > self.round_limit:
+                break
+
             self.ui.draw_board(self.state.board, self.state.amount_available_white_pieces, self.state.amount_available_black_pieces, selected_piece)
 
             pygame.display.update()
@@ -283,7 +289,8 @@ class Hive():
                         current_player = self.swich_player()  
             
             if not available_moves_checked and current_player.is_man:
-                if len(self.get_all_posible_moves(self.state)) == 0:
+                pos_moves = self.get_all_posible_moves(self.state, self.state.turn_state)
+                if len(pos_moves) == 0:
                     print("No available moves for current player")
                     selected_piece = None
                     coordinates = None
@@ -291,8 +298,6 @@ class Hive():
                 else:
                     available_moves_checked = True
 
-            if round_counter >= self.round_limit:
-                break
 
 
         self.ui.draw_board(self.state.board, self.state.amount_available_white_pieces, self.state.amount_available_black_pieces, selected_piece)
@@ -305,21 +310,18 @@ class Hive():
     def play_without_ui(self):
         current_player = self.player1
         self.state.turn_state = 1
-        round_counter = 0
         while self.end_condition():
+            if self.state.round_counter > self.round_limit:
+                break
+
             pos_moves = self.get_all_posible_moves(self.state, self.state.turn_state)
-            if len(pos_moves) == 0:
+            if pos_moves == []:
                 current_player = self.swich_player() 
                 continue
 
-            round_counter += 1
-
-            move = self.player_make_move(current_player)
+            move = self.player_make_move(current_player, all_posible_moves=pos_moves)
             if self.check_and_make_move(self.state, move):
                 current_player = self.swich_player()
-
-            if round_counter >= self.round_limit:
-                break
 
         return self.winner
 

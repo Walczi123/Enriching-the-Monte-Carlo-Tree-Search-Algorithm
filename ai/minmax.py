@@ -1,29 +1,5 @@
 from math import inf
 
-def othello_evaluate(state, player):
-    player1_score = 0
-    player2_score = 0
-    for x in range(8):
-        for y in range(8):  
-            if state[x][y] == 1 :
-                player1_score += 1
-            elif state[x][y] == 2:
-                player2_score += 1
-    
-    return player1_score - player2_score if player == 1 else player2_score - player1_score
-
-def hex_evaluate(state, player):
-    player1_score = 0
-    player2_score = 0
-    for x in range(8):
-        for y in range(8):  
-            if state[x][y] == 1 :
-                player1_score += 1
-            elif state[x][y] == 2:
-                player2_score += 1
-    
-    return player1_score - player2_score if player == 1 else player2_score - player1_score
-
 def alpha_beta_minmax(iteration_state, player, current_player, d: int, alpha: int, beta: int, get_all_posible_moves, board_move, get_result, change_player, evaluate):
     if d <= 0:
         return None, evaluate(iteration_state, player), 1

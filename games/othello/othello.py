@@ -166,55 +166,6 @@ class Othello(Game):
         Returns:
             [type]: array - board after move
         """
-        # #Must copy the passedArray so we don't alter the original
-        # # array = deepcopy(state)
-        # #Set colour and set the moved location to be that colour
-        # array[x][y] = colour
-        
-        # #Determining the neighbours to the square
-        # neighbours = []
-        # for i in range(max(0,x-1),min(x+2,8)):
-        #     for j in range(max(0,y-1),min(y+2,8)):
-        #         if array[i][j]!=None:
-        #             neighbours.append([i,j])
-        
-        # #Which tiles to convert
-        # convert = []
-
-        # #For all the generated neighbours, determine if they form a line
-        # #If a line is formed, we will add it to the convert array
-        # for neighbour in neighbours:
-        #     neighX = neighbour[0]
-        #     neighY = neighbour[1]
-        #     #Check if the neighbour is of a different colour - it must be to form a line
-        #     if array[neighX][neighY]!=colour:
-        #         #The path of each individual line
-        #         path = []
-                
-        #         #Determining direction to move
-        #         deltaX = neighX-x
-        #         deltaY = neighY-y
-
-        #         tempX = neighX
-        #         tempY = neighY
-
-        #         #While we are in the bounds of the board
-        #         while 0<=tempX<=7 and 0<=tempY<=7:
-        #             path.append([tempX,tempY])
-        #             value = array[tempX][tempY]
-        #             #If we reach a blank tile, we're done and there's no line
-        #             if value==None:
-        #                 break
-        #             #If we reach a tile of the player's colour, a line is formed
-        #             if value==colour:
-        #                 #Append all of our path nodes to the convert array
-        #                 for node in path:
-        #                     convert.append(node)
-        #                 break
-        #             #Move the tile
-        #             tempX+=deltaX
-        #             tempY+=deltaY
-
         convert = get_pieces_to_reverse(array,  player, x, y)
                     
         #Convert all the appropriate tiles
@@ -258,15 +209,13 @@ class Othello(Game):
             else:
                 return valid
 
-    def player_make_move(self, player, clicked = None):
+    def player_make_move(self, player, clicked = None, all_posible_moves:list = None):
         if player.is_man:
             if clicked is None:
                 return None
             args = clicked
         else:
-            # args = (self.logic, self.ui, self.logic.logger, 1, 20, True, True)
-            # args = (self.logic.logger, player, 20, self.logic.is_game_over, self.logic.get_possible_moves, self.logic.change_player, self.logic.check_and_make_action2)
-            args = (self.board, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move)
+            args = (self.board, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move, all_posible_moves)
             
         move = player.make_move(args)
         return move
@@ -310,7 +259,7 @@ class Othello(Game):
         while self.end_condition():
             pos_moves = self.get_all_posible_moves(self.board, self.turn_state)
             self.ui.draw_board(self.board, pos_moves)
-            if len(pos_moves) == 0:
+            if pos_moves == []:
                 current_player = self.swich_player()
                 continue
 
@@ -320,7 +269,7 @@ class Othello(Game):
             clicked = self.handle_events()
 
             if (current_player.is_man and clicked is not None) or not current_player.is_man:
-                move = self.player_make_move(current_player, clicked)
+                move = self.player_make_move(current_player, clicked, pos_moves)
                 if self.check_and_make_move(self.board, move, self.turn_state):  
                     current_player = self.swich_player()  
 
@@ -337,11 +286,11 @@ class Othello(Game):
         current_player = self.player1
         while self.end_condition():
             pos_moves = self.get_all_posible_moves(self.board, self.turn_state)
-            if len(pos_moves) == 0:
+            if pos_moves == []:
                 current_player = self.swich_player() 
                 continue
 
-            move = self.player_make_move(current_player)
+            move = self.player_make_move(current_player, pos_moves)
             if self.check_and_make_move(self.board, move, self.turn_state):  
                 current_player = self.swich_player()  
 

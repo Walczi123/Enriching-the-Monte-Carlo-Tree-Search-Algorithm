@@ -32,67 +32,54 @@ class Man_Player(Player):
 
 
 class MCTS_Player(Player):
-    def __init__(self, number_of_iteration: int = 100, max_depth: int = -1):
+    def __init__(self, number_of_iteration: int = 100):
         super().__init__(False)
         self.name = f"mcts{str(number_of_iteration)}"
-        if max_depth > 0:
-            self.name += f"_{str(max_depth)}"
         self.number_of_iteration = number_of_iteration
-        self.max_depth = max_depth
 
     def make_move(self, args):
-        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = mcts(initial_state, player, self.number_of_iteration,get_result, get_all_posible_moves, change_player, board_move, self.max_depth)
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves) = args
+        move = mcts(initial_state, player, self.number_of_iteration,get_result, get_all_posible_moves, change_player, board_move, all_posible_moves)
         return move
 
 
 class MCTSRAVE_Player(Player):
-    def __init__(self, number_of_iteration: int = 100, max_depth: int = -1):
+    def __init__(self, number_of_iteration: int = 100):
         super().__init__(False)
         self.number_of_iteration = number_of_iteration
         self.name = f"mctsrave{str(number_of_iteration)}"
-        if max_depth > 0:
-            self.name += f"_{str(max_depth)}"
-        self.max_depth = max_depth
 
     def make_move(self, args):
-        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = mcts_rave(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.max_depth)
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves) = args
+        move = mcts_rave(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves)
         return move
 
 
 class MCTSStrategy_Player(Player):
-    def __init__(self, strategy: Callable, number_of_iteration: int = 100, max_depth: int = -1):
+    def __init__(self, strategy: Callable, number_of_iteration: int = 100):
         super().__init__(False)
         self.strategy = strategy
         self.number_of_iteration = number_of_iteration   
         self.name = f"mctsstrategy{str(number_of_iteration)}"
-        if max_depth > 0:
-            self.name += f"_{str(max_depth)}"
         self.name += f"({self.strategy.__name__})"
-        self.max_depth = max_depth
 
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = mcts_strategy(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategy, self.max_depth)
+        move = mcts_strategy(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategy)
         return move
 
-
 class MCTSSwitchingStrategy_Player(Player):
-    def __init__(self, strategies: list, number_of_iteration: int = 100, max_depth: int = -1):
+    def __init__(self, strategies: list, number_of_iteration: int = 100):
         super().__init__(False)
         self.strategies = strategies
         self.number_of_iteration = number_of_iteration
         strategies_names = ':'.join(x.__name__ for x in self.strategies)
         self.name = f"mctsstrategies{str(number_of_iteration)}"
-        if max_depth > 0:
-            self.name += f"_{str(max_depth)}"
         self.name += f"({strategies_names})"
-        self.max_depth = max_depth
 
     def make_move(self, args):
-        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = mcts_switching(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategies, self.max_depth)
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves) = args
+        move = mcts_switching(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategies, all_posible_moves)
         return move
 
 
@@ -104,7 +91,7 @@ class AlphaBeta_Player(Player):
         self.name = f"alphabeta{str(depth)}"
 
     def make_move(self, args):
-        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves) = args
         move, _, _ = alpha_beta_minmax(initial_state, player, player, 3, -inf, inf,
                                        get_all_posible_moves, board_move, get_result, change_player, self.evaluate)
         return move
@@ -117,7 +104,22 @@ class Random_Player(Player):
         self.name = "random"
 
     def make_move(self, args):
-        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
-        move = random_strategy(get_all_posible_moves(initial_state, player), initial_state, board_move, get_all_posible_moves, player, change_player)
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves) = args
+        if not all_posible_moves:
+            all_posible_moves =  get_all_posible_moves(initial_state, player)   
+        move = random_strategy(all_posible_moves, initial_state, board_move, get_all_posible_moves, player, change_player)
         sleep(self.wait_time)
+        return move
+
+class Strategy_Player(Player):
+    def __init__(self, strategy: Callable):
+        super().__init__(False)
+        self.strategy = strategy
+        self.name = self.strategy.__name__
+
+    def make_move(self, args):
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves) = args
+        if not all_posible_moves:
+            all_posible_moves =  get_all_posible_moves(initial_state, player)   
+        move = self.strategy(all_posible_moves, initial_state, board_move, get_all_posible_moves, player, change_player)
         return move

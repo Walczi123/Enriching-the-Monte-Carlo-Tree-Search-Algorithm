@@ -5,26 +5,28 @@ import itertools
 from ai.minmax import hex_evaluate, othello_evaluate
 import tqdm
 import numpy as np
-from config import MCTS_ITERATIONS, MCTS_MAX_DEPTH
+from config import MCTS_ITERATIONS, REPETITIONS, SEED
 
 from games.hex.hex import Hex
 from games.hive.hive import Hive
 from games.hive.hive_evaluate import hive_evaluate
+from games.hex.evaluate import hex_evaluate
+from games.othello.evaluate import othello_evaluate
 from games.othello.othello import Othello
 from games.player import MCTS_Player, MCTSRAVE_Player, Random_Player, AlphaBeta_Player, MCTSStrategy_Player, MCTSSwitchingStrategy_Player
 from games.othello.othello_player import MapBaseHeu_Othello_Player, Greedy_Othello_Player
 from strategies.strategies import mobility_strategy, random_strategy
 from test import Test
 
-SEED = 22021070
-REPETITIONS = 1
-COMMON_PLAYERS = [MCTS_Player(max_depth=MCTS_MAX_DEPTH, number_of_iteration=MCTS_ITERATIONS), MCTSRAVE_Player(max_depth=MCTS_MAX_DEPTH, number_of_iteration=MCTS_ITERATIONS), Random_Player(), MCTSStrategy_Player(random_strategy, max_depth=MCTS_MAX_DEPTH, number_of_iteration=MCTS_ITERATIONS), MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy], max_depth=MCTS_MAX_DEPTH, number_of_iteration=MCTS_ITERATIONS)]
-HIVE_PLAYERS = [AlphaBeta_Player(hive_evaluate)]
-HEX_PLAYERS = [AlphaBeta_Player(hex_evaluate)]
+
+COMMON_PLAYERS = [MCTS_Player(number_of_iteration=MCTS_ITERATIONS), MCTSRAVE_Player(number_of_iteration=MCTS_ITERATIONS), Random_Player(), MCTSStrategy_Player(random_strategy, number_of_iteration=MCTS_ITERATIONS), MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy], number_of_iteration=MCTS_ITERATIONS)]
+#ab 4 - 6 - 8 -10
+HIVE_PLAYERS = [AlphaBeta_Player(hive_evaluate, 4), AlphaBeta_Player(hive_evaluate, 6), AlphaBeta_Player(hive_evaluate, 8), AlphaBeta_Player(hive_evaluate, 10)]
+HEX_PLAYERS = [AlphaBeta_Player(hex_evaluate, 4), AlphaBeta_Player(hex_evaluate, 6), AlphaBeta_Player(hex_evaluate, 8), AlphaBeta_Player(hex_evaluate, 10)]
 OTHELLO_PLAYERS = [MapBaseHeu_Othello_Player(), Greedy_Othello_Player(), AlphaBeta_Player(othello_evaluate)]
 
 #mcts 1000 - 2000 5000 - 10 000
-#ab 4 - 6 - 8 -10
+
 # mcst - mctsstrat - strat
 
 # hive - depht - 50 - 100 - 200 - 300
@@ -120,15 +122,14 @@ def run_tests():
     # run_test(iterable[0])
 
     max_cpu = multiprocessing.cpu_count()
-    p = multiprocessing.Pool(int(max_cpu)-2)
-    for _ in tqdm.tqdm(p.imap_unordered(run_test, iterable), total=len(iterable)):
+    p = multiprocessing.Pool(int(max_cpu))
+    for _ in tqdm.tqdm(p.imap_unordered(run_test, iterable), total=len(iterable), ):
         pass
     # p.map_async(run_test, iterable)
     p.close()
     p.join()
 
     print("--- %s seconds ---" % (time.time() - start_time))
-
 
 if __name__ == '__main__':
     run_tests()

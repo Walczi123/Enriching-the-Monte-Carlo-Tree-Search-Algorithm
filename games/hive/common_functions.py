@@ -127,13 +127,17 @@ def is_hive_adjacent(state:State, coordinate):
             return True        
     return False
 
-def move_does_not_break_hive(state:State, coordinates, additional_coordiantes = None):
+def is_hive_adjacent_coordinates(coordinates, coordinate):
+    if len(coordinates) == 0:
+        return True
+    for piece in coordinates:
+        if axial_distance(piece, coordinate) == 1:
+            return True        
+    return False
+
+def move_does_not_break_hive(state:State, coordinates):
     copy_state = deepcopy(state)
     copy_state.remove_from_board(coordinates, copy_state.board[coordinates][-1])
-
-    if additional_coordiantes is not None:
-        copy_state.board[additional_coordiantes] = [None]
-
     return one_hive(copy_state.board.keys())
 
     # tile_list = list(copy_state.board.keys())

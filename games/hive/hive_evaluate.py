@@ -10,4 +10,4 @@ def hive_evaluate(state, player):
         player_score = len(find_pieces_around(state, player_queen[0]))
     if oponent_score:
         oponent_score = len(find_pieces_around(state, oponent_queen[0]))
-    return player_score - oponent_score
+    return oponent_score - player_score

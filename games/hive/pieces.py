@@ -2,7 +2,7 @@ import os
 import numpy as np
 
 from games.hive.const import ANT_AMOUNT, ANT_ID, BEETLE_AMOUNT, BEETLE_ID, GRASSHOPPER_AMOUNT, GRASSHOPPER_ID, QUEEN_AMOUNT, QUEEN_ID, SPIDER_AMOUNT, SPIDER_ID
-from games.hive.common_functions import cube_to_axial, evenr_to_axial, move_does_not_break_hive, neighbours, find_pieces_around, path_exists
+from games.hive.common_functions import axial_to_evenr, cube_to_axial, evenr_to_axial, is_hive_adjacent, is_hive_adjacent_coordinates, move_does_not_break_hive, neighbours, find_pieces_around, path_exists
 from games.hive.state import State
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame as pg
@@ -86,8 +86,11 @@ class Beetle(Piece):
         pos = (x - 16, y - 16)
         surface.blit(image, pos)
 
-    def moves(self, coordinate, state):
-        return [n for n in neighbours(coordinate) if move_does_not_break_hive(state, coordinate, n)]
+    def moves(self, coordinate, state:State):
+        coordinates = set(state.board.keys())
+        if len(state.board[coordinate]) == 1:
+            coordinates.remove(coordinate)
+        return [n for n in neighbours(coordinate) if is_hive_adjacent_coordinates(coordinates, n)]
 
 # Hex topology stuff
 offsets = [
@@ -117,10 +120,10 @@ class Grasshopper(Piece):
         for direction in offsets:
             p = add(c, direction)
             # Grasshopper must jump over at least one piece
-            if p in state.board.keys():
-                while p in state.board.keys():
+            if axial_to_evenr(p) in state.board.keys():
+                while axial_to_evenr(p) in state.board.keys():
                     p = add(p, direction)
-                yield cube_to_axial(p)
+                yield axial_to_evenr(p)
 
 
 def find_contour(state:State, exclude=None):

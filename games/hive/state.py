@@ -7,7 +7,7 @@ class State:
         # Queen, Ant, Grasshopper, Spider, Beetle
         self.amount_available_white_pieces = [QUEEN_AMOUNT, ANT_AMOUNT, GRASSHOPPER_AMOUNT, SPIDER_AMOUNT, BEETLE_AMOUNT]
         self.amount_available_black_pieces = [QUEEN_AMOUNT, ANT_AMOUNT, GRASSHOPPER_AMOUNT, SPIDER_AMOUNT, BEETLE_AMOUNT]
-        self.round_counter = 0
+        self.round_counter = 1
         self.turn_state = 1
 
     def add_to_board(self, coordinate, piece):
