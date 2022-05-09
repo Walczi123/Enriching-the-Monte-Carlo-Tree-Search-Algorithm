@@ -13,17 +13,66 @@ from games.hive.hive_evaluate import hive_evaluate
 from games.hex.evaluate import hex_evaluate
 from games.othello.evaluate import othello_evaluate
 from games.othello.othello import Othello
-from games.player import MCTS_Player, MCTSRAVE_Player, Random_Player, AlphaBeta_Player, MCTSStrategy_Player, MCTSSwitchingStrategy_Player
+from games.player import MCTS_Player, MCTSRAVE_Player, Random_Player, AlphaBeta_Player, MCTSStrategy_Player, MCTSSwitchingStrategy_Player, Strategy_Player
 from games.othello.othello_player import MapBaseHeu_Othello_Player, Greedy_Othello_Player
-from strategies.strategies import mobility_strategy, random_strategy
+from strategies.strategies import mobility_strategy, mobility_strategy_vs, random_strategy
 from test import Test
 
 
-COMMON_PLAYERS = [MCTS_Player(number_of_iteration=MCTS_ITERATIONS), MCTSRAVE_Player(number_of_iteration=MCTS_ITERATIONS), Random_Player(), MCTSStrategy_Player(random_strategy, number_of_iteration=MCTS_ITERATIONS), MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy], number_of_iteration=MCTS_ITERATIONS)]
+COMMON_PLAYERS = [MCTS_Player(number_of_iteration=100), MCTSRAVE_Player(number_of_iteration=MCTS_ITERATIONS),
+                Random_Player(), MCTSStrategy_Player(random_strategy, number_of_iteration=MCTS_ITERATIONS), 
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy], number_of_iteration=MCTS_ITERATIONS)]
+
+
+COMMON_PLAYERS = [
+                #MCTS
+                MCTS_Player(number_of_iteration=1000), MCTS_Player(number_of_iteration=2000),
+                MCTS_Player(number_of_iteration=5000), MCTS_Player(number_of_iteration=10000),
+                #MCTS RAVE
+                MCTSRAVE_Player(number_of_iteration=1000), MCTSRAVE_Player(number_of_iteration=2000),
+                MCTSRAVE_Player(number_of_iteration=5000), MCTSRAVE_Player(number_of_iteration=10000),
+                #STRATEGY
+                Strategy_Player(random_strategy),
+                Strategy_Player(mobility_strategy_vs),
+                #MCST STRATEGY
+                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=1000),
+                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=2000),
+                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=3000),
+                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=1000)      
+                ]
+
+HIVE_PLAYERS = [
+                #ALPHA BETA
+                AlphaBeta_Player(hive_evaluate, 4), AlphaBeta_Player(hive_evaluate, 6), 
+                AlphaBeta_Player(hive_evaluate, 8), AlphaBeta_Player(hive_evaluate, 10),
+                #MCST SWITCHING
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=1000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=2000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=5000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=10000)]
+
+HEX_PLAYERS = [
+                #ALPHA BETA
+                AlphaBeta_Player(hex_evaluate, 4), AlphaBeta_Player(hex_evaluate, 6), 
+                AlphaBeta_Player(hex_evaluate, 8), AlphaBeta_Player(hex_evaluate, 10),
+                #MCST SWITCHING
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=1000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=2000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=5000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=10000)]
+
+OTHELLO_PLAYERS = [
+                #ALPHA BETA
+                AlphaBeta_Player(othello_evaluate, 4), AlphaBeta_Player(othello_evaluate, 6),
+                AlphaBeta_Player(othello_evaluate, 8), AlphaBeta_Player(othello_evaluate, 10),
+                #MCST SWITCHING
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=1000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=2000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=5000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs], number_of_iteration=10000),
+                MapBaseHeu_Othello_Player(), Greedy_Othello_Player()]
+
 #ab 4 - 6 - 8 -10
-HIVE_PLAYERS = [AlphaBeta_Player(hive_evaluate, 4), AlphaBeta_Player(hive_evaluate, 6), AlphaBeta_Player(hive_evaluate, 8), AlphaBeta_Player(hive_evaluate, 10)]
-HEX_PLAYERS = [AlphaBeta_Player(hex_evaluate, 4), AlphaBeta_Player(hex_evaluate, 6), AlphaBeta_Player(hex_evaluate, 8), AlphaBeta_Player(hex_evaluate, 10)]
-OTHELLO_PLAYERS = [MapBaseHeu_Othello_Player(), Greedy_Othello_Player(), AlphaBeta_Player(othello_evaluate)]
 
 #mcts 1000 - 2000 5000 - 10 000
 

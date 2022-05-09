@@ -1,4 +1,5 @@
 def hex_evaluate(state, player):
+    raise Exception('not implemented')
     player1_score = 0
     player2_score = 0
     for x in range(8):

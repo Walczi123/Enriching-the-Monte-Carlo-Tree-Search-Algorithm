@@ -18,7 +18,7 @@ from games.hex.ui import UI
 
 class Hex(Game):
     def __init__(self, player1:Player, player2:Player, use_ui: bool = False, board_size: int = BOARD_SIZE):
-        self.name = "Hex"
+        self.name = f"Hex{board_size}"
         
         # Mode
         self.player1=player1
