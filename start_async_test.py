@@ -15,7 +15,7 @@ from games.othello.othello import Othello
 from games.player import MCTS_Player, MCTSRAVE_Player, Random_Player, AlphaBeta_Player, MCTSStrategy_Player, MCTSSwitchingStrategy_Player, Strategy_Player
 from strategies.hex_strategies import evaluatehex_strategy
 from strategies.hive_strategies import evaluatehive_strategy, greedyhive_strategy
-from strategies.othello_strategies import greedyothello_strategy, mapbaseothello_strategy
+from strategies.othello_strategies import evaluateothello_strategy, greedyothello_strategy, mapbaseothello_strategy
 from strategies.strategies import mobility_strategy, mobility_strategy_vs, random_strategy
 from test import Test
 
@@ -101,7 +101,7 @@ OTHELLO_PLAYERS = [
                 #STRATEGY
                 Strategy_Player(mapbaseothello_strategy),
                 Strategy_Player(greedyothello_strategy),
-                Strategy_Player(evaluatehive_strategy),
+                Strategy_Player(evaluateothello_strategy),
                 #MCST STRATEGY
                 MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=1000),
                 MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=2000),
@@ -113,15 +113,15 @@ OTHELLO_PLAYERS = [
                 MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=5000),
                 MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=10000), 
 
-                MCTSStrategy_Player(evaluatehive_strategy, number_of_iteration=1000),
-                MCTSStrategy_Player(evaluatehive_strategy, number_of_iteration=2000),
-                MCTSStrategy_Player(evaluatehive_strategy, number_of_iteration=5000),
-                MCTSStrategy_Player(evaluatehive_strategy, number_of_iteration=10000), 
+                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=1000),
+                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=2000),
+                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=5000),
+                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=10000), 
                 #MCST SWITCHING
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluatehive_strategy], number_of_iteration=1000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluatehive_strategy], number_of_iteration=2000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluatehive_strategy], number_of_iteration=5000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluatehive_strategy], number_of_iteration=10000)]
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=1000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=2000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=5000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=10000)]
 
 #ab 4 - 6 - 8 -10
 
@@ -137,7 +137,7 @@ def generate_instances():
     result = []
 
     # Othello, Hex, Hive
-    game_types = [Othello, Hex, Hive]
+    game_types = [Othello, Hex]
     
     for r in itertools.product(game_types, COMMON_PLAYERS, COMMON_PLAYERS, ROUND_LIMITS):
         for i in range(REPETITIONS):
@@ -209,7 +209,7 @@ def run_tests():
     iterable = generate_instances()
     iterable += generate_specific_instances_othello()
     iterable += generate_specific_instances_hex()
-    iterable += generate_specific_instances_hive()
+    # iterable += generate_specific_instances_hive()
 
 
     # for i in iterable:

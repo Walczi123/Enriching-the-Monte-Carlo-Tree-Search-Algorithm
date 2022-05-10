@@ -145,3 +145,16 @@ othello,mctsrave5_2,mctsstrategy5_2(random_strategy),2,22021070
 othello,greedy,greedy,0,22021070
 hex,random,mctsstrategies5_2(random_strategy:mobility_strategy),2,22021070
 othello,random_strategy,alphabeta4,0,22025001
+othello,greedyothello_strategy,mobility_strategy,2,22025005
+othello,mobility_strategy_vs,alphabeta4,0,22025003
+othello,mobility_strategy,mobility_strategy_vs,0,22025004
+othello,mobility_strategy_vs,random_strategy,1,22025002
+othello,random_strategy,alphabeta10,2,22025003
+othello,alphabeta4,alphabeta10,2,22025004
+hex,mobility_strategy,mobility_strategy_vs,1,22025005
+othello,greedyothello_strategy,mapbaseothello_strategy,2,22025003
+hex,mobility_strategy,mobility_strategy,1,22025004
+hex,random_strategy,mobility_strategy,1,22025004
+othello,mapbaseothello_strategy,mctsrave1000,2,22025005
+othello,greedyothello_strategy,evaluateothello_strategy,2,22025002
+othello,mapbaseothello_strategy,alphabeta8,1,22025003
