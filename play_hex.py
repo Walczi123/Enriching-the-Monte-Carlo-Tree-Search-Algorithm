@@ -25,10 +25,21 @@ if __name__ == "__main__":
     # p2 = MCTSRAVE_Player(ITERMAX)
     # p1 = MCTSSwitchingStrategy_Player([mobility_strategy_vs, random_strategy])
     # p2 = MCTSSwitchingStrategy_Player([mobility_strategy_vs, random_strategy])
-    p1 = Strategy_Player(evaluatehex_strategy)
-    p2 = Strategy_Player(evaluatehex_strategy)
+    p2 = Random_Player()
     # p1 = Man_Player()
     # p2 = Man_Player()
+
+    # p1 = MCTS_Player(number_of_iteration=1)
+    # #MCTS RAVE
+    # p1 = MCTSRAVE_Player(number_of_iteration=1)
+    # #STRATEGY
+    # p1 = Strategy_Player(random_strategy)
+    # p1 = Strategy_Player(mobility_strategy_vs)
+    # p1 = Strategy_Player(mobility_strategy)
+    # #MCST STRATEGY
+    p1 = MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=1)
+    
+    # p1 = MCTSStrategy_Player(mobility_strategy, number_of_iteration=1),
 
     game = Hex(board_size=BOARD_SIZE, use_ui=True, player1=p1, player2=p2)
     print(game.play())

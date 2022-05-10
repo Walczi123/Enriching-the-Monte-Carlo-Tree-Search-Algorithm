@@ -144,3 +144,4 @@ hex,mctsrave5_2,random,1,22021070
 othello,mctsrave5_2,mctsstrategy5_2(random_strategy),2,22021070
 othello,greedy,greedy,0,22021070
 hex,random,mctsstrategies5_2(random_strategy:mobility_strategy),2,22021070
+othello,random_strategy,alphabeta4,0,22025001

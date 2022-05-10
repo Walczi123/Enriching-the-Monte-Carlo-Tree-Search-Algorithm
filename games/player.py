@@ -64,7 +64,7 @@ class MCTSStrategy_Player(Player):
         self.name += f"({self.strategy.__name__})"
 
     def make_move(self, args):
-        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move) = args
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves) = args
         move = mcts_strategy(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategy)
         return move
 
@@ -122,5 +122,4 @@ class Strategy_Player(Player):
         if not all_posible_moves:
             all_posible_moves =  get_all_posible_moves(initial_state, player)   
         move = self.strategy(all_posible_moves, initial_state, board_move, get_all_posible_moves, player, change_player)
-        sleep(0.5)
         return move

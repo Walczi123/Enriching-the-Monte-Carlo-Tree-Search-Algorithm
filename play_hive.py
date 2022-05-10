@@ -9,8 +9,8 @@ import time
 
 if __name__ == "__main__":
     random.seed(456)
-    p1 = MCTS_Player()
-    p2 = MCTS_Player()
+    p1 = MCTS_Player(number_of_iteration=1)
+    p2 = MCTSStrategy_Player(mobility_strategy, number_of_iteration=1)
     game = Hive(use_ui=True, player1= p1, player2=p2, round_limit=50)
     
     start_time = time.time()

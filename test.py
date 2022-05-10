@@ -35,10 +35,15 @@ class Test:
             game = self.game_type(self.player1, self.player2)
         if self.seed is not None:
             random.seed(self.seed)
-        r = game.play()
+        try:
+            r = game.play()
+        except Exception as e:
+            print(f"ERRROOOORRRR {self.name}")
+            raise e
         result = (r, self.seed)
         print(f"saving {self.name}")
         self.save_to_global_file(result)
+
 
     def save_to_file(self, results):
         file_path = f'./tests/results/{str(self.game_type.__name__).lower()}/{self.name}'
