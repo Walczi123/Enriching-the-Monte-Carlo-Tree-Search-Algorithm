@@ -9,8 +9,8 @@ def mobility_strategy(moves, state, board_move, get_all_posible_moves, player, c
     n_moves = []
     for i in range(len(moves)):
         state_after_move = board_move(state, moves[i], player)
-        n_moves.append(len(get_all_posible_moves(state_after_move, player)))
-    index = n_moves.index(max(n_moves))
+        n_moves.append(len(get_all_posible_moves(state_after_move, change_player(player))))
+    index = n_moves.index(min(n_moves))
     return moves[index]
 
 def mobility_strategy_vs(moves, state, board_move, get_all_posible_moves, player, change_player):

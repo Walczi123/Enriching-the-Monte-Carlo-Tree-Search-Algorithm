@@ -39,7 +39,7 @@ def greedyothello_strategy(moves, state, board_move, get_all_posible_moves, play
             get_points = p
     return move
        
-def evaluate_strategy(moves, state, board_move, get_all_posible_moves, player, change_player):
+def evaluateothello_strategy(moves, state, board_move, get_all_posible_moves, player, change_player):
     n_moves = []
     for i in range(len(moves)):
         state_after_move = board_move(state, moves[i], player)

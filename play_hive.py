@@ -1,7 +1,7 @@
 import random
 from config import MCTS_ITERATIONS, ROUND_LIMIT
 from games.hive.hive import Hive
-from games.hive.hive_evaluate import hive_evaluate
+from games.hive.evaluate import hive_evaluate
 from games.hive.hive_player import Man_Player
 from games.player import AlphaBeta_Player, MCTSRAVE_Player, MCTS_Player, Random_Player, MCTSStrategy_Player, MCTSSwitchingStrategy_Player
 from strategies.strategies import mobility_strategy, mobility_strategy_vs, random_strategy

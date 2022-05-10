@@ -1,10 +1,10 @@
 import random
 from games.hive.common_functions import neighbours
 
-from games.hive.hive_evaluate import hive_evaluate
+from games.hive.evaluate import hive_evaluate
 from games.hive.pieces import Queen
      
-def evaluate_strategy(moves, state, board_move, get_all_posible_moves, player, change_player):
+def evaluatehive_strategy(moves, state, board_move, get_all_posible_moves, player, change_player):
     n_moves = []
     for i in range(len(moves)):
         state_after_move = board_move(state, moves[i], player)

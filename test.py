@@ -5,13 +5,14 @@ from csv import writer
 import time
 
 from games.game import Game
+from games.hive.hive import Hive
 from games.player import Player
 
 SEPARATHOR = '\t'
 
 
 class Test:
-    def __init__(self, game_type: Game, player1: Player, player2: Player, name: str = None, seed=None, game_limit:int = -1):
+    def __init__(self, game_type: Game, player1: Player, player2: Player, name: str = None, seed=None, game_limit:int = None):
         self.game_type = game_type
         self.player1 = player1
         self.player2 = player2
@@ -28,7 +29,10 @@ class Test:
         self.name = name
 
     def start(self):
-        game = self.game_type(self.player1, self.player2)
+        if isinstance(self.game_type, Hive):
+            game = self.game_type(self.player1, self.player2, game_limit=self.game_limit)
+        else:
+            game = self.game_type(self.player1, self.player2)
         if self.seed is not None:
             random.seed(self.seed)
         r = game.play()

@@ -1,3 +1,4 @@
+from cmath import inf
 import numpy as np
 
 
@@ -92,3 +93,4 @@ def get_neighbors(coordinates, board_size):
     if cy-1 >= 0: neighbors.append((cx,cy-1))
 
     return neighbors
+

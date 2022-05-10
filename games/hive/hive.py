@@ -18,7 +18,7 @@ import pygame
 from games.hive.ui import UI
 
 class Hive():
-    def __init__(self, player1:Player, player2:Player, use_ui: bool = False, round_limit:int = ROUND_LIMIT):
+    def __init__(self, player1:Player, player2:Player, use_ui: bool = False, round_limit:int = None):
         self.name = f"Hive{round_limit}"
         self.use_ui = use_ui
 

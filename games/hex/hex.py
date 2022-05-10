@@ -83,9 +83,7 @@ class Hex(Game):
                 return None
             args = (self.ui, node)
         else:
-            # args = (self.logic, self.ui, self.logic.logger, 1, 20, True, True)
-            # args = (self.logic.logger, player, 20, self.logic.is_game_over, self.logic.get_possible_moves, self.logic.change_player, self.logic.check_and_make_action2)
-            args = (self.logic.logger, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move)
+            args = (self.logic.logger, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move, None)
             
         move = player.make_move(args)
         return move
