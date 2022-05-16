@@ -137,7 +137,7 @@ def generate_instances():
     result = []
 
     # Othello, Hex, Hive
-    game_types = [Othello, Hex]
+    game_types = [Othello, Hex, Hive]
     
     for r in itertools.product(game_types, COMMON_PLAYERS, COMMON_PLAYERS, ROUND_LIMITS):
         for i in range(REPETITIONS):
@@ -209,7 +209,7 @@ def run_tests():
     iterable = generate_instances()
     iterable += generate_specific_instances_othello()
     iterable += generate_specific_instances_hex()
-    # iterable += generate_specific_instances_hive()
+    iterable += generate_specific_instances_hive()
 
 
     # for i in iterable:

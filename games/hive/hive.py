@@ -18,6 +18,8 @@ import pygame
 from games.hive.ui import UI
 
 class Hive():
+    name = "None"
+    
     def __init__(self, player1:Player, player2:Player, use_ui: bool = False, round_limit:int = None):
         self.name = f"Hive{round_limit}"
         self.use_ui = use_ui
@@ -29,6 +31,7 @@ class Hive():
 
         self.winner = 0
         self.round_limit = round_limit
+        self.set_limit = round_limit is not None
 
     def get_result(self, iteration_state, player):
         if self.is_looser(iteration_state.board, player):
@@ -107,7 +110,7 @@ class Hive():
         return result
 
     def get_all_posible_moves(self, state:State, player=None):
-        if state.round_counter > self.round_limit:
+        if self.set_limit and state.round_counter > self.round_limit:
             return []
         if not state.board:
             # Empty board
@@ -267,7 +270,7 @@ class Hive():
         current_player = self.player1
         self.state.turn_state = 1
         while self.end_condition():
-            if self.state.round_counter > self.round_limit:
+            if self.set_limit and self.state.round_counter > self.round_limit:
                 break
 
             self.ui.draw_board(self.state.board, self.state.amount_available_white_pieces, self.state.amount_available_black_pieces, selected_piece)
@@ -311,7 +314,7 @@ class Hive():
         current_player = self.player1
         self.state.turn_state = 1
         while self.end_condition():
-            if self.state.round_counter > self.round_limit:
+            if self.set_limit and self.state.round_counter > self.round_limit:
                 break
 
             pos_moves = self.get_all_posible_moves(self.state, self.state.turn_state)

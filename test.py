@@ -20,16 +20,21 @@ class Test:
         self.game_limit = game_limit
 
         if name is None:
+            if game_limit is not None and isinstance(self.game_type, Hive):
+                game_name = f"{str(self.game_type.__name__).lower()}{game_limit}"
+            else:
+                game_name = f"{str(self.game_type.__name__).lower()}"
             p1 = self.player1.name
             p2 = self.player2.name
             if seed is None:
-                name = f'test_{str(self.game_type.__name__).lower()}_{p1}_{p2}'
+                name = f'test_{game_name}_{p1}_{p2}'
             else:
-                name = f'test_{str(self.game_type.__name__).lower()}_{p1}_{p2}_{seed}'
+                name = f'test_{game_name}_{p1}_{p2}_{seed}'
         self.name = name
 
     def start(self):
         if isinstance(self.game_type, Hive):
+            print(f"HIVEEEEEE   {self.name}")
             game = self.game_type(self.player1, self.player2, game_limit=self.game_limit)
         else:
             game = self.game_type(self.player1, self.player2)

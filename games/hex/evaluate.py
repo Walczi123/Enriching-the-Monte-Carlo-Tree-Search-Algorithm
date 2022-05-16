@@ -5,6 +5,9 @@ from games.hex.common import get_dijkstra_score
 def hex_evaluate(state, player):
     return get_dijkstra_score(state, player)
 
+def hex_evaluate_both_ways(state, player):
+    return get_dijkstra_score(state, player)
+
 def get_dijkstra_score(board, color): 
     """gets the dijkstra score for a certain color, differs from dijkstra eval in that it only considers the passed color
     Args:
