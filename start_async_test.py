@@ -19,6 +19,8 @@ from strategies.othello_strategies import evaluateothello_strategy, greedyothell
 from strategies.strategies import mobility_strategy, mobility_strategy_vs, random_strategy
 from test import Test
 
+GAME_TYPES = [Othello, Hex, Hive]
+
 COMMON_PLAYERS = [
                 #MCTS
                 MCTS_Player(number_of_iteration=1000), 
@@ -133,11 +135,11 @@ OTHELLO_PLAYERS = [
 
 # 
 
-def generate_instances(): 
+def generate_instances(game_types): 
     result = []
 
     # Othello, Hex, Hive
-    game_types = [Othello, Hex, Hive]
+    # game_types = [Othello, Hex, Hive]
     
     for r in itertools.product(game_types, COMMON_PLAYERS, COMMON_PLAYERS, ROUND_LIMITS):
         for i in range(REPETITIONS):
@@ -206,7 +208,7 @@ def run_test(test):
     test.start()
 
 def run_tests():
-    iterable = generate_instances()
+    iterable = generate_instances(GAME_TYPES)
     iterable += generate_specific_instances_othello()
     iterable += generate_specific_instances_hex()
     iterable += generate_specific_instances_hive()
