@@ -215,8 +215,9 @@ class Othello(Game):
                 return None
             args = clicked
         else:
-            args = (self.board, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move, all_posible_moves)
-            
+            # args = (self.board, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move, all_posible_moves)
+            args = (self.board, self.turn_state, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves)
+
         move = player.make_move(args)
         return move
 
@@ -257,6 +258,7 @@ class Othello(Game):
 
         current_player = self.player1
         while self.end_condition():
+            # print("start player"+str(self.turn_state))
             pos_moves = self.get_all_posible_moves(self.board, self.turn_state)
             self.ui.draw_board(self.board, pos_moves)
             if pos_moves == []:
@@ -304,3 +306,137 @@ class Othello(Game):
     #     else:
     #         self.play_without_ui()
 
+def get_result(state, player):
+    player1_score = 0
+    player2_score = 0
+    for x in range(8):
+        for y in range(8):  
+            if state[x][y] == 1:
+                player1_score += 1
+            elif state[x][y] == 2:
+                    player2_score += 1
+    if player1_score == player2_score:
+        return 0.5
+    if player == 0:
+        if player1_score > player2_score :
+            return 1
+        else :
+            return 0
+    if player1_score < player2_score :
+        return 1
+    else :
+        return 0
+
+def check_for_any_line(state, player, x, y, i, j):
+    """ Check if move creates a line. 
+        So if there is a line from (x,y) to another player's colored disk going through the neighbour (i,j), 
+        where (i,j) has the opponent's color
+
+    Args:
+        colour ([type]): [description]
+        x ([type]): move's x coordinate
+        i ([type]): neighbour's x coordinate 
+
+    Returns:
+        [type]: boolean - true if it forms a correct line
+    """
+    neighX = i
+    neighY = j
+    
+    #If the neighbour colour is equal to your colour, it doesn't form a line
+    #Go onto the next neighbour
+    if state[neighX][neighY]==player:
+        return False
+
+    #Determine the direction of the line
+    deltaX = neighX-x
+    deltaY = neighY-y
+    tempX = neighX
+    tempY = neighY
+    
+    while 0<=tempX<=7 and 0<=tempY<=7:
+        #If an empty space, no line is formed
+        if state[tempX][tempY]==None:
+            return False
+        #If it reaches a piece of the player's colour, it forms a line
+        if state[tempX][tempY] == player:
+            return True
+        #Move the index according to the direction of the line
+        tempX+=deltaX
+        tempY+=deltaY
+    return False
+
+def check_move(state, move, player):
+    """ Check if placing disk on (x,y) is a valid move
+
+    Args:
+        player ([type]): [description]
+        x ([type]): [description]
+        y ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    x, y = move
+    #Sets player colour
+    colour = player
+    #If there's already a piece there, it's an invalid move
+    if state[x][y] != None:
+        return False
+    else:
+        #Generating the list of neighbours
+        neighbour = False
+        neighbours = []
+        valid = False
+        for i in range(max(0,x-1),min(x+2,8)):
+            for j in range(max(0,y-1),min(y+2,8)):
+                if state[i][j]!=None:
+                    neighbour=True
+                    neighbours.append([i,j])
+                    valid = valid or check_for_any_line(state, colour, x, y, i, j)
+        #If there's no neighbours, it's an invalid move
+        if not neighbour:
+            return False
+        else:
+            return valid
+
+def get_all_posible_moves(state, player):
+    moveList = []
+    for x in range(8):
+        for y in range(8):
+                if check_move(state, (x,y), player):
+                    moveList.append((x,y))
+    return moveList
+
+def change_player(player):
+    if player == 2:
+        return 1
+    else:
+        return 2
+
+def move(array,  player, x, y):
+    """ Make move and reverse all influenced oponnent's disks 
+
+    Returns:
+        [type]: array - board after move
+    """
+    convert = get_pieces_to_reverse(array,  player, x, y)
+                
+    #Convert all the appropriate tiles
+    for i,j in convert:
+        array[i][j]=player
+
+    # state = array
+
+def check_and_make_move(state, m, player):
+    if  check_move(state, m, player):
+        # state[move[0]][move[1]] = player
+        move(state, player, m[0], m[1])
+        
+        return True
+    return False
+
+def board_move(state, move, player):
+    s = deepcopy(state)
+    check_and_make_move(s, move, player)
+    return s

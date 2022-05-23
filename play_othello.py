@@ -6,7 +6,9 @@ from strategies.othello_strategies import mapbaseothello_strategy
 from strategies.strategies import mobility_strategy, mobility_strategy_vs, random_strategy
 
 if __name__ == "__main__":
-    p1 = Man_Player()
+    p1 = MCTS_Player(1000)
+    # p1 = Man_Player()
+    # p2 = Man_Player()
     # p2 = Strategy_Player(mapbaseothello_strategy)
     p2 = MCTS_Player(1000)
 
