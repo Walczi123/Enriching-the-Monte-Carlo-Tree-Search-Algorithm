@@ -1,5 +1,4 @@
 import random
-from time import sleep
 
 from games.othello.common import get_pieces_to_reverse
 from games.player import Player

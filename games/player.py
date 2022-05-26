@@ -1,5 +1,4 @@
 import random
-from time import sleep
 from math import inf
 from typing import Callable
 from ai.mcts import mcts
@@ -108,7 +107,6 @@ class Random_Player(Player):
         if not all_posible_moves:
             all_posible_moves =  get_all_posible_moves(initial_state, player)   
         move = random_strategy(all_posible_moves, initial_state, board_move, get_all_posible_moves, player, change_player)
-        sleep(self.wait_time)
         return move
 
 class Strategy_Player(Player):
@@ -122,5 +120,4 @@ class Strategy_Player(Player):
         if not all_posible_moves:
             all_posible_moves =  get_all_posible_moves(initial_state, player)   
         move = self.strategy(all_posible_moves, initial_state, board_move, get_all_posible_moves, player, change_player)
-        sleep(1)
         return move

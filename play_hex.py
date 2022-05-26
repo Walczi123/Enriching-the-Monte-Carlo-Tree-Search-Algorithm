@@ -44,5 +44,5 @@ if __name__ == "__main__":
     p1 = Man_Player()
     p2 = MCTS_Player(1000)
 
-    game = Hex(board_size=11, use_ui=True, player1=p1, player2=p2)
+    game = Hex(board_size=7, use_ui=True, player1=p1, player2=p2)
     print(game.play())

@@ -45,7 +45,7 @@ class UI:
                 pygame.draw.polygon(self.screen, (255,255,255), self.get_hex_points(coordinates))
 
                 # print coordiantes
-                self.screen.blit(self.fonts.render(f'({k - self.center_x}, {j - self.center_y})', True, (150,150,150)), (coordinates[0] - 13, coordinates[1] - 6 ))
+                # self.screen.blit(self.fonts.render(f'({k - self.center_x}, {j - self.center_y})', True, (150,150,150)), (coordinates[0] - 13, coordinates[1] - 6 ))
                 # p = evenr_to_axial((k - self.center_x, j - self.center_y))
                 # self.screen.blit(self.fonts.render(f'({p[0]}, {p[1]}, {p[2]})', True, (150,0,15)), (coordinates[0] - 20, coordinates[1] + 3 ))
                 
