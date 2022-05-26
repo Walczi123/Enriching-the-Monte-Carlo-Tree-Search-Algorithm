@@ -4,148 +4,30 @@ import time
 import itertools
 import tqdm
 import numpy as np
-from config import MCTS_ITERATIONS, REPETITIONS, ROUND_LIMITS, SEED
-
+from config import COMMON_PLAYERS, HEX_PLAYERS, HIVE_PLAYERS, OTHELLO_PLAYERS, REPETITIONS, ROUND_LIMITS, SEED
 from games.hex.hex import Hex
 from games.hive.hive import Hive
-from games.hive.evaluate import hive_evaluate
-from games.hex.evaluate import hex_evaluate
-from games.othello.evaluate import othello_evaluate
 from games.othello.othello import Othello
-from games.player import MCTS_Player, MCTSRAVE_Player, Random_Player, AlphaBeta_Player, MCTSStrategy_Player, MCTSSwitchingStrategy_Player, Strategy_Player
-from strategies.hex_strategies import evaluatehex_strategy
-from strategies.hive_strategies import evaluatehive_strategy, greedyhive_strategy
-from strategies.othello_strategies import evaluateothello_strategy, greedyothello_strategy, mapbaseothello_strategy
-from strategies.strategies import mobility_strategy, mobility_strategy_vs, random_strategy
 from test import Test
 
 GAME_TYPES = [Othello, Hex, Hive]
-
-COMMON_PLAYERS = [
-                #MCTS
-                MCTS_Player(number_of_iteration=1000), 
-                MCTS_Player(number_of_iteration=2000),
-                MCTS_Player(number_of_iteration=5000), 
-                MCTS_Player(number_of_iteration=10000),
-                #MCTS RAVE
-                MCTSRAVE_Player(number_of_iteration=1000), 
-                MCTSRAVE_Player(number_of_iteration=2000),
-                MCTSRAVE_Player(number_of_iteration=5000),
-                MCTSRAVE_Player(number_of_iteration=10000),
-                #STRATEGY
-                Strategy_Player(random_strategy),
-                Strategy_Player(mobility_strategy_vs),
-                Strategy_Player(mobility_strategy),
-                #MCST STRATEGY
-                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=1000),
-                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=2000),
-                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=5000),
-                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=10000),
-                
-                MCTSStrategy_Player(mobility_strategy, number_of_iteration=1000),
-                MCTSStrategy_Player(mobility_strategy, number_of_iteration=2000),
-                MCTSStrategy_Player(mobility_strategy, number_of_iteration=5000),
-                MCTSStrategy_Player(mobility_strategy, number_of_iteration=10000)    
-                ]
-
-HIVE_PLAYERS = [
-                #ALPHA BETA
-                AlphaBeta_Player(hive_evaluate, 4), 
-                AlphaBeta_Player(hive_evaluate, 6), 
-                AlphaBeta_Player(hive_evaluate, 8), 
-                AlphaBeta_Player(hive_evaluate, 10),
-                #STRATEGY
-                Strategy_Player(evaluatehive_strategy),
-                Strategy_Player(greedyhive_strategy),
-                #MCST STRATEGY
-                MCTSStrategy_Player(evaluatehive_strategy, number_of_iteration=1000),
-                MCTSStrategy_Player(evaluatehive_strategy, number_of_iteration=2000),
-                MCTSStrategy_Player(evaluatehive_strategy, number_of_iteration=5000),
-                MCTSStrategy_Player(evaluatehive_strategy, number_of_iteration=10000),
-
-                MCTSStrategy_Player(greedyhive_strategy, number_of_iteration=1000),
-                MCTSStrategy_Player(greedyhive_strategy, number_of_iteration=2000),
-                MCTSStrategy_Player(greedyhive_strategy, number_of_iteration=5000),
-                MCTSStrategy_Player(greedyhive_strategy, number_of_iteration=10000),
-                #MCST SWITCHING
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehive_strategy, greedyhive_strategy], number_of_iteration=1000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehive_strategy, greedyhive_strategy], number_of_iteration=2000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehive_strategy, greedyhive_strategy], number_of_iteration=5000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehive_strategy, greedyhive_strategy], number_of_iteration=10000)]
-
-
-HEX_PLAYERS = [
-                #ALPHA BETA
-                AlphaBeta_Player(hex_evaluate, 4), 
-                AlphaBeta_Player(hex_evaluate, 6), 
-                AlphaBeta_Player(hex_evaluate, 8), 
-                AlphaBeta_Player(hex_evaluate, 10),
-                #STRATEGY
-                Strategy_Player(evaluatehex_strategy),
-                #MCST STRATEGY
-                MCTSStrategy_Player(evaluatehex_strategy, number_of_iteration=1000),
-                MCTSStrategy_Player(evaluatehex_strategy, number_of_iteration=2000),
-                MCTSStrategy_Player(evaluatehex_strategy, number_of_iteration=5000),
-                MCTSStrategy_Player(evaluatehex_strategy, number_of_iteration=10000),
-
-                #MCST SWITCHING
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehex_strategy], number_of_iteration=1000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehex_strategy], number_of_iteration=2000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehex_strategy], number_of_iteration=5000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehex_strategy], number_of_iteration=10000)]
-
-OTHELLO_PLAYERS = [
-                #ALPHA BETA
-                AlphaBeta_Player(othello_evaluate, 4), 
-                AlphaBeta_Player(othello_evaluate, 6),
-                AlphaBeta_Player(othello_evaluate, 8), 
-                AlphaBeta_Player(othello_evaluate, 10),
-                #STRATEGY
-                Strategy_Player(mapbaseothello_strategy),
-                Strategy_Player(greedyothello_strategy),
-                Strategy_Player(evaluateothello_strategy),
-                #MCST STRATEGY
-                MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=1000),
-                MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=2000),
-                MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=5000),
-                MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=10000),  
-
-                MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=1000),
-                MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=2000),
-                MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=5000),
-                MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=10000), 
-
-                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=1000),
-                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=2000),
-                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=5000),
-                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=10000), 
-                #MCST SWITCHING
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=1000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=2000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=5000),
-                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=10000)]
-
-#ab 4 - 6 - 8 -10
-
-#mcts 1000 - 2000 5000 - 10 000
-
-# mcst - mctsstrat - strat
-
-# hive - depht - 50 - 100 - 200 - 300
-
-# 
 
 def generate_instances(game_types): 
     result = []
 
     # Othello, Hex, Hive
     # game_types = [Othello, Hex, Hive]
-    
-    for r in itertools.product(game_types, COMMON_PLAYERS, COMMON_PLAYERS, ROUND_LIMITS):
+    hive_game_counter = 0
+    for r in itertools.product(game_types, COMMON_PLAYERS, COMMON_PLAYERS):
         for i in range(REPETITIONS):
-            result.append(Test(r[0], r[1], r[2], seed = SEED + i, game_limit=r[3]))
+            if r[0] == Hive:
+                hive_game_counter += 1
+                for j in ROUND_LIMITS:                  
+                    result.append(Test(r[0], r[1], r[2], seed = SEED + i, game_limit=j))
+            else:
+                result.append(Test(r[0], r[1], r[2], seed = SEED + i))
 
-    expeded_len = (len(COMMON_PLAYERS) * len(COMMON_PLAYERS) * len(game_types) * len(ROUND_LIMITS)) * REPETITIONS
+    expeded_len = ((len(COMMON_PLAYERS) * len(COMMON_PLAYERS) * len(game_types)) * REPETITIONS) + (hive_game_counter * (len(ROUND_LIMITS)-1))
     assert len(result) == expeded_len, f'Incorrect amount of test cases ({len(result)} != {expeded_len})'
 
     return result
@@ -212,7 +94,6 @@ def run_tests():
     iterable += generate_specific_instances_othello()
     iterable += generate_specific_instances_hex()
     iterable += generate_specific_instances_hive()
-
 
     # for i in iterable:
     #     run_test(i)

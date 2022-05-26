@@ -1,4 +1,5 @@
 import random
+from config import RESULTS_FILE_PATH
 import numpy as np
 from datetime import datetime
 from csv import writer
@@ -20,7 +21,7 @@ class Test:
         self.game_limit = game_limit
 
         if name is None:
-            if game_limit is not None and isinstance(self.game_type, Hive):
+            if game_limit is not None and self.game_type == Hive:
                 game_name = f"{str(self.game_type.__name__).lower()}{game_limit}"
             else:
                 game_name = f"{str(self.game_type.__name__).lower()}"
@@ -33,19 +34,21 @@ class Test:
         self.name = name
 
     def start(self):
-        if isinstance(self.game_type, Hive):
-            print(f"HIVEEEEEE   {self.name}")
+        if self.game_type == Hive:
             game = self.game_type(self.player1, self.player2, game_limit=self.game_limit)
         else:
             game = self.game_type(self.player1, self.player2)
+            
         if self.seed is not None:
             random.seed(self.seed)
         try:
+            start_time = time.time()
             r = game.play()
+            game_time = time.time() - start_time
         except Exception as e:
             print(f"ERRROOOORRRR {self.name}")
             raise e
-        result = (r, self.seed)
+        result = (r, self.seed, game_time)
         print(f"saving {self.name}")
         self.save_to_global_file(result)
 
@@ -61,26 +64,15 @@ class Test:
         f.close
 
     def save_to_global_file(self, result):
-        file_path = './tests/all_results.csv'
-        results_csv = []
+        file_path = RESULTS_FILE_PATH
         # game_type, player1, player2, winner, seed
         p1 = self.player1.name
         p2 = self.player2.name
         result_csv = (str(self.game_type.__name__).lower(),
-                      p1, p2, result[0], result[1])
-
-        # results_csv = results_csv + results_csv
-        print(result)
-        print(result_csv)
+                      p1, p2, result[0], result[1], result[2])
 
         with open(file_path, 'a', newline='') as file:
             print("saving")
             file_writer = writer(file)
             file_writer.writerow(result_csv)
             file.close()
-
-
-# with open('./tests/all_results.csv', 'a', newline='') as file:
-#     file_writer = writer(file)
-#     file_writer.writerow((1,2,3,4,5))
-#     file.close()
