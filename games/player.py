@@ -1,5 +1,4 @@
 import random
-from time import sleep
 from math import inf
 import time
 from typing import Callable
@@ -109,7 +108,6 @@ class Random_Player(Player):
         if not all_posible_moves:
             all_posible_moves =  get_all_posible_moves(initial_state, player)   
         move = random_strategy(all_posible_moves, initial_state, board_move, get_all_posible_moves, player, change_player)
-        sleep(self.wait_time)
         return move
 
 class Strategy_Player(Player):

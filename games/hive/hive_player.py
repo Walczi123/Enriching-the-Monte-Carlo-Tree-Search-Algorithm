@@ -3,7 +3,6 @@ from copy import deepcopy
 from math import inf
 import random
 import sys
-from time import sleep
 from games.hive.common_functions import neighbours
 from games.hive.const import QUEEN_ID
 from games.hive.move_checker import check_move
