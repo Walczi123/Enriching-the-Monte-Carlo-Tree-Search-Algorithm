@@ -215,8 +215,8 @@ class Othello(Game):
                 return None
             args = clicked
         else:
-            # args = (self.board, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move, all_posible_moves)
-            args = (self.board, self.turn_state, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves)
+            args = (self.board, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move, all_posible_moves)
+            # args = (self.board, self.turn_state, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves)
 
         move = player.make_move(args)
         return move
@@ -298,13 +298,6 @@ class Othello(Game):
 
         # print("winner ", self.winner)
         return self.winner
-
-
-    # def play(self):
-    #     if self.use_ui:
-    #         self.play_with_ui()
-    #     else:
-    #         self.play_without_ui()
 
 def get_result(state, player):
     player1_score = 0
@@ -404,8 +397,8 @@ def get_all_posible_moves(state, player):
     moveList = []
     for x in range(8):
         for y in range(8):
-                if check_move(state, (x,y), player):
-                    moveList.append((x,y))
+            if check_move(state, (x,y), player):
+                moveList.append((x,y))
     return moveList
 
 def change_player(player):
