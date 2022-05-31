@@ -18,7 +18,7 @@ class Othello(Game):
 
         self.player1 = player1
         self.player2 = player2
-        self.turn_state = 2
+        self.turn_state = 1
 
         self.board = []
         for x in range(8):
@@ -26,15 +26,15 @@ class Othello(Game):
             for y in range(8):
                 self.board[x].append(None)
         
-        self.board[3][3] = 1
-        self.board[3][4] = 2
-        self.board[4][3] = 2
-        self.board[4][4] = 1
+        self.board[3][3] = 2
+        self.board[3][4] = 1
+        self.board[4][3] = 1
+        self.board[4][4] = 2
 
         self.winner = None
 
     def restart(self):
-        self.turn_state = 2
+        self.turn_state = 1
 
         self.board = []
         for x in range(8):
@@ -42,10 +42,10 @@ class Othello(Game):
             for y in range(8):
                 self.board[x].append(None)
         
-        self.board[3][3] = 1
-        self.board[3][4] = 2
-        self.board[4][3] = 2
-        self.board[4][4] = 1
+        self.board[3][3] = 2
+        self.board[3][4] = 1
+        self.board[4][3] = 1
+        self.board[4][4] = 2
 
         self.winner = None
 
@@ -60,7 +60,7 @@ class Othello(Game):
                         player2_score += 1
         if player1_score == player2_score:
             return 0.5
-        if player == 0:
+        if player == 1:
             if player1_score > player2_score :
                 return 1
             else :
@@ -74,8 +74,8 @@ class Othello(Game):
         moveList = []
         for x in range(8):
             for y in range(8):
-                    if self.check_move(state, (x,y), player):
-                        moveList.append((x,y))
+                if self.check_move(state, (x,y), player):
+                    moveList.append((x,y))
         return moveList
 
     def change_player(self, player) -> int:
@@ -155,6 +155,7 @@ class Othello(Game):
     def check_and_make_move(self, state, move, player):
         if  self.check_move(state, move, player):
             # state[move[0]][move[1]] = player
+
             self.move(state, player, move[0], move[1])
             
             return True
@@ -241,14 +242,14 @@ class Othello(Game):
         first_pos_moves = self.get_all_posible_moves(self.board, 1)
         second_pos_moves = self.get_all_posible_moves(self.board, 2)
         if len(first_pos_moves) != 0 or len(second_pos_moves) != 0 :
+            s1, s2 = self.get_scores()
+            if s1 > s2:     
+                self.winner = 1
+            elif s2 > s1:
+                self.winner = 2
+            else:
+                self.winner = 0
             return True
-        s1, s2 = self.get_scores()
-        if s1 > s2:     
-            self.winner = 1
-        elif s2 > s1:
-            self.winner = 2
-        else:
-            self.winner = 0
         return False
 
     def play_with_ui(self):

@@ -63,16 +63,21 @@ class Test:
         f.writelines(results)
         f.close
 
-    def save_to_global_file(self, result):
-        file_path = RESULTS_FILE_PATH
-        # game_type, player1, player2, winner, seed
+    def get_result_csv(self,result):
+        # game_type, player1, player2, winner, seed, game_time
         p1 = self.player1.name
         p2 = self.player2.name
-        result_csv = (str(self.game_type.__name__).lower(),
+        return (str(self.game_type.__name__).lower(),
                       p1, p2, result[0], result[1], result[2])
 
+    def save_to_global_file(self, result):
+        file_path = RESULTS_FILE_PATH
+        result_csv = self.get_result_csv(result)
+
         with open(file_path, 'a', newline='') as file:
-            print("saving")
             file_writer = writer(file)
             file_writer.writerow(result_csv)
             file.close()
+
+    def is_in_data_frame(self, df):
+        return ((df['game_type'] == str(self.game_type.__name__).lower()) & (df['player1'] == self.player1.name) & (df['player2'] == self.player2.name) & (df['seed'] == self.seed)).any()

@@ -1,10 +1,11 @@
 import multiprocessing
+from cv2 import dft
+import pandas as pd
 import random
 import time
 import itertools
 import tqdm
-import numpy as np
-from config import COMMON_PLAYERS, HEX_PLAYERS, HIVE_PLAYERS, OTHELLO_PLAYERS, REPETITIONS, ROUND_LIMITS, SEED
+from config import COMMON_PLAYERS, HEX_PLAYERS, HIVE_PLAYERS, OTHELLO_PLAYERS, REPETITIONS, RESULTS_FILE_PATH, ROUND_LIMITS, SEED
 from games.hex.hex import Hex
 from games.hive.hive import Hive
 from games.othello.othello import Othello
@@ -30,7 +31,7 @@ def generate_instances(game_types):
     expeded_len = ((len(COMMON_PLAYERS) * len(COMMON_PLAYERS) * len(game_types)) * REPETITIONS) + (hive_game_counter * (len(ROUND_LIMITS)-1))
     assert len(result) == expeded_len, f'Incorrect amount of test cases ({len(result)} != {expeded_len})'
 
-    return result
+    return remove_done_tests(result)
 
 def generate_specific_instances_hex(): 
     result = []
@@ -48,7 +49,7 @@ def generate_specific_instances_hex():
     expeded_len = ((len(COMMON_PLAYERS) * len(HEX_PLAYERS) * 2) + (len(HEX_PLAYERS) * len(HEX_PLAYERS))) * REPETITIONS
     assert len(result) == expeded_len, f'Incorrect amount of hex test cases ({len(result)} != {expeded_len})'
 
-    return result
+    return remove_done_tests(result)
 
 def generate_specific_instances_hive(): 
     result = []
@@ -66,7 +67,7 @@ def generate_specific_instances_hive():
     expeded_len = ((len(COMMON_PLAYERS) * len(HIVE_PLAYERS) * 2 * len(ROUND_LIMITS)) + (len(HIVE_PLAYERS) * len(HIVE_PLAYERS) * len(ROUND_LIMITS))) * REPETITIONS
     assert len(result) == expeded_len, f'Incorrect amount of hive test cases ({len(result)} != {expeded_len})'
 
-    return result
+    return remove_done_tests(result)
 
 def generate_specific_instances_othello(): 
     result = []
@@ -83,7 +84,17 @@ def generate_specific_instances_othello():
     expeded_len = ((len(COMMON_PLAYERS) * len(OTHELLO_PLAYERS) * 2) + (len(OTHELLO_PLAYERS) * len(OTHELLO_PLAYERS))) * REPETITIONS
     assert len(result) == expeded_len, f'Incorrect amount of othello test cases ({len(result)} != {expeded_len})'
 
-    return result
+    return remove_done_tests(result)
+
+def remove_done_tests(iterable):
+    df = pd.read_csv(RESULTS_FILE_PATH, sep=",")
+    return [i for i in iterable if not i.is_in_data_frame(df)]
+
+def take_batch(iterable, batch_size, batch_number):
+    if batch_size>0 and batch_number>0:
+        batches = [iterable[i:i + batch_size] for i in range(0, len(iterable), batch_size)] 
+        return batches[batch_number]
+    return iterable
 
 def run_test(test):
     print(f'start of {test.name}')

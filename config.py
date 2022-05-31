@@ -10,7 +10,7 @@ from strategies.strategies import mobility_strategy, mobility_strategy_vs, rando
 #TESTS
 SEED = 22025001
 REPETITIONS = 1
-RESULTS_FILE_PATH = './all_results.csv'
+RESULTS_FILE_PATH = './all_results_othello_pc.csv'
 
 #MCTS
 MCTS_ITERATIONS = 5
@@ -26,28 +26,28 @@ BOARD_SIZE = 11
 COMMON_PLAYERS = [
                 #MCTS
                 MCTS_Player(number_of_iteration=1000), 
-                # MCTS_Player(number_of_iteration=2000),
-                # MCTS_Player(number_of_iteration=5000), 
-                # MCTS_Player(number_of_iteration=10000),
+                MCTS_Player(number_of_iteration=2000),
+                MCTS_Player(number_of_iteration=5000), 
+                MCTS_Player(number_of_iteration=10000),
                 #MCTS RAVE
                 MCTSRAVE_Player(number_of_iteration=1000), 
-                # MCTSRAVE_Player(number_of_iteration=2000),
-                # MCTSRAVE_Player(number_of_iteration=5000),
-                # MCTSRAVE_Player(number_of_iteration=10000),
+                MCTSRAVE_Player(number_of_iteration=2000),
+                MCTSRAVE_Player(number_of_iteration=5000),
+                MCTSRAVE_Player(number_of_iteration=10000),
                 #STRATEGY
                 Strategy_Player(random_strategy),
                 Strategy_Player(mobility_strategy_vs),
                 Strategy_Player(mobility_strategy),
                 #MCST STRATEGY
                 MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=1000),
-                # MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=2000),
-                # MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=5000),
-                # MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=10000),
+                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=2000),
+                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=5000),
+                MCTSStrategy_Player(mobility_strategy_vs, number_of_iteration=10000),
                 
                 MCTSStrategy_Player(mobility_strategy, number_of_iteration=1000),
-                # MCTSStrategy_Player(mobility_strategy, number_of_iteration=2000),
-                # MCTSStrategy_Player(mobility_strategy, number_of_iteration=5000),
-                # MCTSStrategy_Player(mobility_strategy, number_of_iteration=10000)    
+                MCTSStrategy_Player(mobility_strategy, number_of_iteration=2000),
+                MCTSStrategy_Player(mobility_strategy, number_of_iteration=5000),
+                MCTSStrategy_Player(mobility_strategy, number_of_iteration=10000)    
                 ]
 
 HIVE_PLAYERS = [
@@ -101,33 +101,33 @@ HEX_PLAYERS = [
 OTHELLO_PLAYERS = [
                 #ALPHA BETA
                 AlphaBeta_Player(othello_evaluate, 4), 
-                # AlphaBeta_Player(othello_evaluate, 6),
-                # AlphaBeta_Player(othello_evaluate, 8), 
-                # AlphaBeta_Player(othello_evaluate, 10),
+                AlphaBeta_Player(othello_evaluate, 6),
+                AlphaBeta_Player(othello_evaluate, 8), 
+                AlphaBeta_Player(othello_evaluate, 10),
                 #STRATEGY
                 Strategy_Player(mapbaseothello_strategy),
                 Strategy_Player(greedyothello_strategy),
                 Strategy_Player(evaluateothello_strategy),
                 #MCST STRATEGY
                 MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=1000),
-                # MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=2000),
-                # MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=5000),
-                # MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=10000),  
+                MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=2000),
+                MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=5000),
+                MCTSStrategy_Player(mapbaseothello_strategy, number_of_iteration=10000),  
 
                 MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=1000),
-                # MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=2000),
-                # MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=5000),
-                # MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=10000), 
+                MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=2000),
+                MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=5000),
+                MCTSStrategy_Player(greedyothello_strategy, number_of_iteration=10000), 
 
                 MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=1000),
-                # MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=2000),
-                # MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=5000),
-                # MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=10000), 
+                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=2000),
+                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=5000),
+                MCTSStrategy_Player(evaluateothello_strategy, number_of_iteration=10000), 
                 #MCST SWITCHING
                 MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=1000),
-                # MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=2000),
-                # MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=5000),
-                # MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=10000)
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=2000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=5000),
+                MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, mapbaseothello_strategy, greedyothello_strategy, evaluateothello_strategy], number_of_iteration=10000)
                 ]
 
 #ab 4 - 6 - 8 -10
