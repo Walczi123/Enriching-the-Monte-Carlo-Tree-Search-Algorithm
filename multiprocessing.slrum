@@ -1,0 +1,9 @@
+#!/bin/bash
+#SBATCH --job-name othello_tests
+#SBATCH --time=24:00:00
+#SBATCH --array=1-35%20               
+
+export batch_size=$SLURM_CPUS_PER_TASK # Size of multiprocessing pool
+
+module load python3
+srun python3 start_async_othello_tests.py --batch_size batch_size --batch_number $SLURM_ARRAY_TASK_ID

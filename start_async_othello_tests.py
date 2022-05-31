@@ -15,6 +15,9 @@ def run_tests(batch_size, batch_number):
 
     print(f"batch size: {batch_size}, batch number: {batch_number}")
     iterable = take_batch(iterable, batch_size, batch_number)
+    if iterable == None:
+        print("nothing to test")
+        return
 
     start_time = time.time()
     max_cpu = multiprocessing.cpu_count()

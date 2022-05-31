@@ -1,4 +1,6 @@
+import argparse
 import multiprocessing
+import re
 from cv2 import dft
 import pandas as pd
 import random
@@ -12,6 +14,10 @@ from games.othello.othello import Othello
 from test import Test
 
 GAME_TYPES = [Othello, Hex, Hive]
+
+parser = argparse.ArgumentParser(description='Script to run tests in batchs.')
+parser.add_argument("--batch_size", type=int, default=0)
+parser.add_argument("--batch_number", type=int, default=0)
 
 def generate_instances(game_types): 
     result = []
@@ -93,6 +99,9 @@ def remove_done_tests(iterable):
 def take_batch(iterable, batch_size, batch_number):
     if batch_size>0 and batch_number>0:
         batches = [iterable[i:i + batch_size] for i in range(0, len(iterable), batch_size)] 
+        if len(batches) < batch_number:
+            print(f"Max batch_number:{len(batches)}")
+            return None
         return batches[batch_number]
     return iterable
 
@@ -106,10 +115,11 @@ def run_tests():
     iterable += generate_specific_instances_hex()
     iterable += generate_specific_instances_hive()
 
-    # for i in iterable:
-    #     run_test(i)
-
-    random.shuffle(iterable)
+    print(f"batch size: {batch_size}, batch number: {batch_number}")
+    iterable = take_batch(iterable, batch_size, batch_number)
+    if iterable == None:
+        print("nothing to test")
+        return
 
     start_time = time.time()
 
@@ -126,4 +136,8 @@ def run_tests():
     print("--- %s seconds ---" % (time.time() - start_time))
 
 if __name__ == '__main__':
-    run_tests()
+    args = parser.parse_args()
+
+    batch_size = args.batch_size
+    batch_number = args.batch_number
+    run_tests(batch_size, batch_number)
