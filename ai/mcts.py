@@ -1,3 +1,4 @@
+from copy import deepcopy
 import random
 from typing import Callable
 from ai.nodes import Node
@@ -23,24 +24,26 @@ def mcts(initial_state, player, number_of_iteration, get_result:Callable, get_al
 	for _ in range(number_of_iteration):
 		node = rootnode
 
-		# Selection
+		 # Selection
 		while node.untried_moves == [] and node.child_nodes != []:
 			node = select_uct_child(node.child_nodes)
-		iteration_state = node.state
+		iteration_state = deepcopy(node.state)
 
 		# Expansion
 		if node.untried_moves != []:
 			move = random.choice(node.untried_moves)
-			iteration_state = board_move(iteration_state, move, node.player)
+			board_move(iteration_state, move, node.player)
 			node = node.add_child(move, iteration_state)
+			iteration_state = deepcopy(node.state)
+			
 
 		# Playout
 		player = node.player
-		while True:      
+		while 1:      
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
 				move = random.choice(all_possible_moves)
-				iteration_state = board_move(iteration_state, move, player)
+				board_move(iteration_state, move, player)
 				player = change_player(player)
 				continue
 
@@ -48,13 +51,13 @@ def mcts(initial_state, player, number_of_iteration, get_result:Callable, get_al
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
 				move = random.choice(all_possible_moves)
-				iteration_state = board_move(iteration_state, move, player)
+				board_move(iteration_state, move, player)
 				player = change_player(player)
 				continue
 
 			break
 
-		# Backpropagation
+        # Backpropagation
 		node.backpropagation(iteration_state)
 
 	return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move

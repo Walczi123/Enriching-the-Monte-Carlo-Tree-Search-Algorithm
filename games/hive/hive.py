@@ -48,12 +48,11 @@ class Hive():
             return 2
 
     def board_move(self, state:State, move, player):
-        s = deepcopy(state)
-        s.turn_state = player
-        self.check_and_make_move(s, move)
+        state.turn_state = player
+        self.check_and_make_move(state, move)
         if player == 2:
-            s.round_counter += 1
-        return s
+            state.round_counter += 1
+        return state
 
     def enumerate_hand(self, state: State, coordinates, player):
         """Fora given iterable of coordinates, enumerate all avilable tiles"""

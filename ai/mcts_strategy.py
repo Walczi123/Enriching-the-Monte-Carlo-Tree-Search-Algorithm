@@ -1,3 +1,4 @@
+from copy import deepcopy
 import random
 from typing import Callable
 from ai.nodes import Node
@@ -26,7 +27,7 @@ def mcts_strategy(initial_state, player, number_of_iteration, get_result:Callabl
 		# Selection
 		while node.untried_moves == [] and node.child_nodes != []:
 			node = select_uct_child(node.child_nodes)
-		iteration_state = node.state
+		iteration_state = deepcopy(node.state)
 
 		# Expansion
 		if node.untried_moves != []:
@@ -34,10 +35,11 @@ def mcts_strategy(initial_state, player, number_of_iteration, get_result:Callabl
 			move = random.choice(node.untried_moves)
 			iteration_state = board_move(iteration_state, move, node.player)
 			node = node.add_child(move, iteration_state)
+			iteration_state = deepcopy(node.state)
 
 		# Playout
 		player = node.player
-		while True:    
+		while 1:    
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
 				move = get_move_from_strategy(all_possible_moves, iteration_state, board_move, get_all_posible_moves, player, change_player)

@@ -1,9 +1,5 @@
 import argparse
 import multiprocessing
-import re
-from cv2 import dft
-import pandas as pd
-import random
 import time
 import itertools
 import tqdm
@@ -37,7 +33,7 @@ def generate_instances(game_types):
     expeded_len = ((len(COMMON_PLAYERS) * len(COMMON_PLAYERS) * len(game_types)) * REPETITIONS) + (hive_game_counter * (len(ROUND_LIMITS)-1))
     assert len(result) == expeded_len, f'Incorrect amount of test cases ({len(result)} != {expeded_len})'
 
-    return remove_done_tests(result)
+    return result
 
 def generate_specific_instances_hex(): 
     result = []
@@ -55,7 +51,7 @@ def generate_specific_instances_hex():
     expeded_len = ((len(COMMON_PLAYERS) * len(HEX_PLAYERS) * 2) + (len(HEX_PLAYERS) * len(HEX_PLAYERS))) * REPETITIONS
     assert len(result) == expeded_len, f'Incorrect amount of hex test cases ({len(result)} != {expeded_len})'
 
-    return remove_done_tests(result)
+    return result
 
 def generate_specific_instances_hive(): 
     result = []
@@ -73,7 +69,7 @@ def generate_specific_instances_hive():
     expeded_len = ((len(COMMON_PLAYERS) * len(HIVE_PLAYERS) * 2 * len(ROUND_LIMITS)) + (len(HIVE_PLAYERS) * len(HIVE_PLAYERS) * len(ROUND_LIMITS))) * REPETITIONS
     assert len(result) == expeded_len, f'Incorrect amount of hive test cases ({len(result)} != {expeded_len})'
 
-    return remove_done_tests(result)
+    return result
 
 def generate_specific_instances_othello(): 
     result = []
@@ -90,19 +86,30 @@ def generate_specific_instances_othello():
     expeded_len = ((len(COMMON_PLAYERS) * len(OTHELLO_PLAYERS) * 2) + (len(OTHELLO_PLAYERS) * len(OTHELLO_PLAYERS))) * REPETITIONS
     assert len(result) == expeded_len, f'Incorrect amount of othello test cases ({len(result)} != {expeded_len})'
 
-    return remove_done_tests(result)
+    return result
 
 def remove_done_tests(iterable):
-    df = pd.read_csv(RESULTS_FILE_PATH, sep=",")
-    return [i for i in iterable if not i.is_in_data_frame(df)]
+    done_tests = []
+    with open(RESULTS_FILE_PATH) as file:
+        for line in file:
+            splited_line = line.split(",")
+            done_tests.append((splited_line[0], splited_line[1], splited_line[2], splited_line[4]))
+    
+    return [i for i in iterable if not i.is_done(done_tests)]
 
 def take_batch(iterable, batch_size, batch_number):
     if batch_size>0 and batch_number>0:
-        batches = [iterable[i:i + batch_size] for i in range(0, len(iterable), batch_size)] 
+        batches = take_batches(iterable, batch_size) 
         if len(batches) < batch_number:
             print(f"Max batch_number:{len(batches)}")
             return None
         return batches[batch_number]
+    return iterable
+
+def take_batches(iterable, batch_size):
+    if batch_size>0:
+        batches = [iterable[i:i + batch_size] for i in range(0, len(iterable), batch_size)] 
+        return batches
     return iterable
 
 def run_test(test):
@@ -114,6 +121,8 @@ def run_tests():
     iterable += generate_specific_instances_othello()
     iterable += generate_specific_instances_hex()
     iterable += generate_specific_instances_hive()
+    iterable = remove_done_tests(iterable)
+
 
     print(f"batch size: {batch_size}, batch number: {batch_number}")
     iterable = take_batch(iterable, batch_size, batch_number)

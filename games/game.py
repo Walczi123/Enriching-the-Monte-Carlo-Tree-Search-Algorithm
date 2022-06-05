@@ -16,7 +16,7 @@ class Game():
         self.player2 = player2
 
     def wait_for_click(self):
-        while True:
+        while 1:
             for event in pygame.event.get():
                 if event.type == QUIT:
                     pygame.quit()

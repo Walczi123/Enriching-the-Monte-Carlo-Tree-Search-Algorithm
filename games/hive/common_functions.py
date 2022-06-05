@@ -161,12 +161,12 @@ def move_does_not_break_hive(state:State, coordinates):
 
 
 def one_hive(coordinates):
-        unvisited = set(coordinates)
-        todo = [unvisited.pop()]
-        while todo:
-            node = todo.pop()
-            for neighbour in neighbours(node):
-                if neighbour in unvisited:
-                    unvisited.remove(neighbour)
-                    todo.append(neighbour)
-        return not unvisited
+    unvisited = set(coordinates)
+    todo = [unvisited.pop()]
+    while todo:
+        node = todo.pop()
+        for neighbour in neighbours(node):
+            if neighbour in unvisited:
+                unvisited.remove(neighbour)
+                todo.append(neighbour)
+    return not unvisited

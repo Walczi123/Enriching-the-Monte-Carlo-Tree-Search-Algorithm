@@ -81,3 +81,7 @@ class Test:
 
     def is_in_data_frame(self, df):
         return ((df['game_type'] == str(self.game_type.__name__).lower()) & (df['player1'] == self.player1.name) & (df['player2'] == self.player2.name) & (df['seed'] == self.seed)).any()
+
+    def is_done(self, done_tests):
+        x = (str(self.game_type.__name__).lower(), self.player1.name, self.player2.name, str(self.seed)) in done_tests
+        return x 

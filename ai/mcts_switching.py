@@ -28,7 +28,7 @@ def mcts_switching(initial_state, player, number_of_iteration, get_result:Callab
 		# Selection
 		while node.untried_moves == [] and node.child_nodes != []:
 			node = select_uct_child(node.child_nodes)
-		iteration_state = node.state
+		iteration_state = deepcopy(node.state)
 
 		# Expansion
 		if node.untried_moves != []:
@@ -36,11 +36,12 @@ def mcts_switching(initial_state, player, number_of_iteration, get_result:Callab
 			move = random.choice(node.untried_moves)
 			iteration_state = board_move(iteration_state, move, node.player)
 			node = node.add_child(move, iteration_state)
+			iteration_state = deepcopy(node.state)
 
 		# Playout
 		player = node.player
 		strategy = switching_mechanism.choose_strategy(i)
-		while True:          
+		while 1:          
 			all_possible_moves = get_all_posible_moves(iteration_state, player)
 			if  all_possible_moves != []:
 				move = strategy(all_possible_moves, iteration_state, board_move, get_all_posible_moves, player, change_player)

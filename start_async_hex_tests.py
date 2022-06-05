@@ -3,7 +3,7 @@ import time
 import tqdm
 import argparse
 from games.hex.hex import Hex
-from start_async_test import generate_instances, generate_specific_instances_hex, run_test, take_batch
+from start_async_test import generate_instances, generate_specific_instances_hex, remove_done_tests, run_test, take_batch
 
 parser = argparse.ArgumentParser(description='Script to run tests in batchs.')
 parser.add_argument("--batch_size", type=int, default=0)
@@ -12,7 +12,8 @@ parser.add_argument("--batch_number", type=int, default=0)
 def run_tests(batch_size, batch_number):
     iterable = generate_instances([Hex])
     iterable += generate_specific_instances_hex()
-
+    iterable = remove_done_tests(iterable)
+    
     print(f"batch size: {batch_size}, batch number: {batch_number}")
     iterable = take_batch(iterable, batch_size, batch_number)
     if iterable == None:

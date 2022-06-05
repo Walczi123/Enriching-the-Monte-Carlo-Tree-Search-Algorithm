@@ -1,3 +1,4 @@
+from copy import deepcopy
 import random
 from typing import Callable
 
@@ -29,7 +30,7 @@ def mcts_rave(initial_state, player, number_of_iteration, get_result:Callable, g
         while node.untried_moves == [] and node.child_nodes != []:
             node = select_rave_child(node.child_nodes)
             moves.append((node.move, node.player))
-        iteration_state = node.state
+        iteration_state = deepcopy(node.state)
 
         # Expansion
         if node.untried_moves != []:
@@ -37,14 +38,15 @@ def mcts_rave(initial_state, player, number_of_iteration, get_result:Callable, g
             iteration_state = board_move(iteration_state, move, node.player)
             node = node.add_child(move, iteration_state)
             moves.append((node.move, node.player))
+            iteration_state = deepcopy(node.state)
 
         # Playout
         player = node.player
-        while True:          
+        while 1:          
             all_possible_moves = get_all_posible_moves(iteration_state, player)
             if  all_possible_moves != []:
                 move = random.choice(all_possible_moves)
-                iteration_state = board_move(iteration_state, move, player)
+                board_move(iteration_state, move, player)
                 moves.append((move, player))
                 player = change_player(player)
                 continue
@@ -53,7 +55,7 @@ def mcts_rave(initial_state, player, number_of_iteration, get_result:Callable, g
             all_possible_moves = get_all_posible_moves(iteration_state, player)
             if  all_possible_moves != []:
                 move = random.choice(all_possible_moves)
-                iteration_state = board_move(iteration_state, move, player)
+                board_move(iteration_state, move, player)
                 moves.append((move, player))
                 player = change_player(player)
                 continue

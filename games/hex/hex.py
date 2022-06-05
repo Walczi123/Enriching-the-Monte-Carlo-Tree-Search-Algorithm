@@ -165,10 +165,7 @@ class Hex(Game):
         (x, y) = move
 
         assert self.logic.is_node_free((x, y), state), "node is busy"
-
-        copy_state = deepcopy(state)
-        copy_state[x][y] = player
-
-        return copy_state
+        state[x][y] = player
+        return state
 
         

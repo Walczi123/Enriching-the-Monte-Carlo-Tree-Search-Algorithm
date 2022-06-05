@@ -1,19 +1,15 @@
 from copy import deepcopy
 import time
+from ai.nodes import Node
 from games.othello.othello import Othello
 from games.player import MCTS_Player, Player
 
 import random
 from typing import Callable
-
-from numba import njit, jit
-from numba.experimental import jitclass
-from numba import int32, float32 
-
+from numba import njit
 from math import log, sqrt
 from typing import Callable
 
-@jit(nopython=True)
 def get_result(state, player):
     player1_score = 0
     player2_score = 0
@@ -35,7 +31,6 @@ def get_result(state, player):
     else :
         return 0
 
-@jit(nopython=True)
 def check_for_any_line(state, player, x, y, i, j):
     """ Check if move creates a line. 
         So if there is a line from (x,y) to another player's colored disk going through the neighbour (i,j), 
@@ -75,7 +70,6 @@ def check_for_any_line(state, player, x, y, i, j):
         tempY+=deltaY
     return False
 
-@jit(nopython=True)
 def check_move(state, move, player):
     """ Check if placing disk on (x,y) is a valid move
 
@@ -119,13 +113,12 @@ def get_all_posible_moves(state, player):
                 moveList.append((x,y))
     return moveList
 
-@jit(nopython=True)
 def change_player(player):
     if player == 2:
         return 1
     else:
         return 2
-@jit(nopython=True)
+
 def get_pieces_to_reverse(array,  player, x, y):
     #Must copy the passedArray so we don't alter the original
     # array = deepcopy(state)
@@ -179,7 +172,6 @@ def get_pieces_to_reverse(array,  player, x, y):
 
     return convert  
 
-@jit(nopython=True)
 def move(array,  player, x, y):
     """ Make move and reverse all influenced oponnent's disks 
 
@@ -194,7 +186,6 @@ def move(array,  player, x, y):
 
     # state = array
 
-@jit(nopython=True)
 def check_and_make_move(state, m, player):
     if  check_move(state, m, player):
         # state[move[0]][move[1]] = player
@@ -203,64 +194,10 @@ def check_and_make_move(state, m, player):
         return True
     return False
 
-@jit(nopython=True)
 def board_move(state, move, player):
-    s = deepcopy(state)
-    check_and_make_move(s, move, player)
-    return s
+    check_and_make_move(state, move, player)
+    return state
 
-spec = [
-    ('value', int32),               # a simple scalar field
-    ('array', float32[:]),          # an array field
-]
-
-class Node:
-    def __init__(self, parent, move, state, player, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, all_posible_moves = None):
-        self.get_result = get_result
-        self.get_all_posible_moves = get_all_posible_moves
-        self.change_player = change_player
-        
-        self.wins = 0
-        self.visits = 0
-        self.parent = parent
-        self.state = state
-        self.child_nodes = []
-        self.player = player
-        self.move = move
-
-        if all_posible_moves is None:
-            all_posible_moves = get_all_posible_moves(state, player)
-        self.untried_moves = all_posible_moves
-
-
-    def get_uct_score(self, c: float = sqrt(2)):
-        return self.wins / self.visits + c * \
-            sqrt(log(self.parent.visits) / self.visits)
-
-    def add_child(self, move, state):
-        player = self.change_player(self.player)
-        all_posible_moves = self.get_all_posible_moves(state, player)
-        if all_posible_moves == []:
-            p = self.change_player(player)
-            all_posible_moves = self.get_all_posible_moves(state, p)
-            if all_posible_moves != []:
-                child = Node(self, move, state, p, self.get_result, self.get_all_posible_moves, self.change_player, all_posible_moves)
-            else:
-                child = Node(self, move, state, player, self.get_result, self.get_all_posible_moves, self.change_player, all_posible_moves)
-        else:
-            child = Node(self, move, state, player, self.get_result, self.get_all_posible_moves, self.change_player, all_posible_moves)
-
-        self.child_nodes.append(child)
-        self.untried_moves.remove(move)
-        return child
-
-    def backpropagation(self, state):
-        self.visits +=1          
-        if self.parent is not None:
-            self.wins += self.get_result(state, self.parent.player)     
-            self.parent.backpropagation(state) 
-
-@jit(nopython=True)
 def select_uct_child(childNodes):
 	bestChildren = list()
 	bestScore = - float("inf")
@@ -275,47 +212,48 @@ def select_uct_child(childNodes):
 
 	return random.choice(bestChildren)
 
-@jit()
 def mcts_numba(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable, all_posible_moves:list):
-	rootnode = Node(None, None, initial_state, player, get_result, get_all_posible_moves, change_player, all_posible_moves)
-	for _ in range(number_of_iteration):
-		node = rootnode
+    rootnode = Node(None, None, initial_state, player, get_result, get_all_posible_moves, change_player, all_posible_moves)
+    for _ in range(number_of_iteration):
+        node = rootnode
 
-		# Selection
-		while node.untried_moves == [] and node.child_nodes != []:
-			node = select_uct_child(node.child_nodes)
-		iteration_state = node.state
+        # Selection
+        while node.untried_moves == [] and node.child_nodes != []:
+            node = select_uct_child(node.child_nodes)
+        iteration_state = deepcopy(node.state)
 
-		# Expansion
-		if node.untried_moves != []:
-			move = random.choice(node.untried_moves)
-			iteration_state = board_move(iteration_state, move, node.player)
-			node = node.add_child(move, iteration_state)
+        # Expansion
+        if node.untried_moves != []:
+            move = random.choice(node.untried_moves)
+            board_move(iteration_state, move, node.player)
+            node = node.add_child(move, iteration_state)
+            iteration_state = deepcopy(iteration_state)
+            
 
-		# Playout
-		player = node.player
-		while 1:      
-			all_possible_moves = get_all_posible_moves(iteration_state, player)
-			if  all_possible_moves != []:
-				move = random.choice(all_possible_moves)
-				iteration_state = board_move(iteration_state, move, player)
-				player = change_player(player)
-				continue
+        # Playout
+        player = node.player
+        while 1:      
+            all_possible_moves = get_all_posible_moves(iteration_state, player)
+            if  all_possible_moves != []:
+                move = random.choice(all_possible_moves)
+                board_move(iteration_state, move, player)
+                player = change_player(player)
+                continue
 
-			player = change_player(player)
-			all_possible_moves = get_all_posible_moves(iteration_state, player)
-			if  all_possible_moves != []:
-				move = random.choice(all_possible_moves)
-				iteration_state = board_move(iteration_state, move, player)
-				player = change_player(player)
-				continue
+            player = change_player(player)
+            all_possible_moves = get_all_posible_moves(iteration_state, player)
+            if  all_possible_moves != []:
+                move = random.choice(all_possible_moves)
+                board_move(iteration_state, move, player)
+                player = change_player(player)
+                continue
 
-			break
+            break
 
-		# Backpropagation
-		node.backpropagation(iteration_state)
+        # Backpropagation
+        node.backpropagation(iteration_state)
 
-	return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move
+    return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move
 
 
 class MCTS1_Player(Player):
@@ -332,8 +270,8 @@ class MCTS1_Player(Player):
 
 if __name__ == "__main__":
     start_time = time.time()
-    p1 = MCTS1_Player(10)
-    p2 = MCTS1_Player(10)
+    p1 = MCTS1_Player(50)
+    p2 = MCTS1_Player(50)
 
     game = Othello(use_ui=False, player1=p1, player2=p2)
     game.play()

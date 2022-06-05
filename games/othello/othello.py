@@ -1,4 +1,3 @@
-from copy import deepcopy
 import sys
 import os
 
@@ -85,9 +84,8 @@ class Othello(Game):
             return 2
 
     def board_move(self, state, move, player):
-        s = deepcopy(state)
-        self.check_and_make_move(s, move, player)
-        return s
+        self.check_and_make_move(state, move, player)
+        return state
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -431,6 +429,5 @@ def check_and_make_move(state, m, player):
     return False
 
 def board_move(state, move, player):
-    s = deepcopy(state)
-    check_and_make_move(s, move, player)
-    return s
+    check_and_make_move(state, move, player)
+    return state
