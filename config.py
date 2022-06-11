@@ -10,7 +10,11 @@ from strategies.strategies import mobility_strategy, mobility_strategy_vs, rando
 #TESTS
 SEED = 22025001
 REPETITIONS = 1
-RESULTS_FILE_PATH = './all_results_othello_pc.csv'
+RESULTS_FILE_NAME='no_such_file'
+
+
+RESULTS_FILE_PATH = f'./{RESULTS_FILE_NAME}.csv'
+FINISHED_RESULTS_FILE_PATH = f'./{RESULTS_FILE_NAME}_done.csv'
 
 #MCTS
 MCTS_ITERATIONS = 5

@@ -1,15 +1,5 @@
-import os
-from mcts import MCTS
 from player import MCTS_Player, Man_Player
-
-from player import Player
-
-# # Hide Pygame welcome message
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
-import pygame
-
 from hex import Hex
-from game import Game
 
 if __name__ == "__main__":
     BOARD_SIZE = 7

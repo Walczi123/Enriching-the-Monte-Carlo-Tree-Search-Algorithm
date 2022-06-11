@@ -1,9 +1,11 @@
 import argparse
 import multiprocessing
+import os
 import time
 import itertools
 import tqdm
-from config import COMMON_PLAYERS, HEX_PLAYERS, HIVE_PLAYERS, OTHELLO_PLAYERS, REPETITIONS, RESULTS_FILE_PATH, ROUND_LIMITS, SEED
+from config import COMMON_PLAYERS, FINISHED_RESULTS_FILE_PATH, HEX_PLAYERS, HIVE_PLAYERS, OTHELLO_PLAYERS, REPETITIONS, ROUND_LIMITS, SEED
+from games.game import Game
 from games.hex.hex import Hex
 from games.hive.hive import Hive
 from games.othello.othello import Othello
@@ -11,15 +13,37 @@ from test import Test
 
 GAME_TYPES = [Othello, Hex, Hive]
 
+def str2bool(v):
+    if isinstance(v, bool):
+        return v
+    if v.lower() in ('yes', 'true', 't', 'y', '1'):
+        return True
+    elif v.lower() in ('no', 'false', 'f', 'n', '0'):
+        return False
+    else:
+        raise argparse.ArgumentTypeError('Boolean value expected.')
+
+def str2game(v):
+    if isinstance(v, Game):
+        return v
+    if v.lower() in ('othello'):
+        return Othello
+    elif v.lower() in ('hex'):
+        return Hex
+    elif v.lower() in ('hive'):
+        return Hive
+    else:
+        raise argparse.ArgumentTypeError('Game name expected.')
+
 parser = argparse.ArgumentParser(description='Script to run tests in batchs.')
-parser.add_argument("--batch_size", type=int, default=0)
-parser.add_argument("--batch_number", type=int, default=0)
+parser.add_argument('-bs', "--batch_size", type=int, default=0)
+parser.add_argument('-bn', "--batch_number", type=int, default=0)
+parser.add_argument('-g',"--game_list", type=str2game, nargs="+", default=[Othello, Hex, Hive])
+parser.add_argument('-r',"--remove_done_tests", type=str2bool, nargs='?', const=True, default=True, help="Activate removing done tests.")
 
 def generate_instances(game_types): 
     result = []
 
-    # Othello, Hex, Hive
-    # game_types = [Othello, Hex, Hive]
     hive_game_counter = 0
     for r in itertools.product(game_types, COMMON_PLAYERS, COMMON_PLAYERS):
         for i in range(REPETITIONS):
@@ -89,8 +113,11 @@ def generate_specific_instances_othello():
     return result
 
 def remove_done_tests(iterable):
+    if not os.path.exists(FINISHED_RESULTS_FILE_PATH):
+        print('There is not file with finished tests.')
+        return iterable
     done_tests = []
-    with open(RESULTS_FILE_PATH) as file:
+    with open(FINISHED_RESULTS_FILE_PATH) as file:
         for line in file:
             splited_line = line.split(",")
             done_tests.append((splited_line[0], splited_line[1], splited_line[2], splited_line[4]))
@@ -103,7 +130,9 @@ def take_batch(iterable, batch_size, batch_number):
         if len(batches) < batch_number:
             print(f"Max batch_number:{len(batches)}")
             return None
+        print("Created specific batch.")
         return batches[batch_number]
+    print("Batch size of batch number is not proper.")
     return iterable
 
 def take_batches(iterable, batch_size):
@@ -116,37 +145,64 @@ def run_test(test):
     print(f'start of {test.name}')
     test.start()
 
-def run_tests():
-    iterable = generate_instances(GAME_TYPES)
-    iterable += generate_specific_instances_othello()
-    iterable += generate_specific_instances_hex()
-    iterable += generate_specific_instances_hive()
-    iterable = remove_done_tests(iterable)
-
-
-    print(f"batch size: {batch_size}, batch number: {batch_number}")
+def create_tests(batch_size, batch_number, game_list, remove_done):
+    print("----------------- CREATING TEST INSTANCES -----------------")
+    iterable = generate_instances(game_list)
+    print(f"Created {len(iterable)} test instances of common type.")
+    if Othello in game_list: 
+        iterable_othello = generate_specific_instances_othello()
+        print(f"Created {len(iterable_othello)} specific test instances of Othello.")
+        iterable += iterable_othello
+    if Hex in game_list: 
+        iterable_hex = generate_specific_instances_hex()
+        print(f"Created {len(iterable_hex)} specific test instances of Hex.")
+        iterable += iterable_hex
+    if Hive in game_list: 
+        iterable_hive = generate_specific_instances_hive()
+        print(f"Created {len(iterable_hive)} specific test instances of Hive.")
+        iterable += iterable_hive
+    print("----------------- REMOVING FINISHED TESTS  -----------------")
+    if remove_done: 
+        print(f"All generated test amount: {len(iterable)}")
+        iterable = remove_done_tests(iterable)
+        print(f"After applaying removig test amount: {len(iterable)}")
+    else:
+        print("Removing done tests is disabled.")
+    print("----------------- CREATING BATCHES OF TESTS  -----------------")
     iterable = take_batch(iterable, batch_size, batch_number)
+    return iterable
+
+def run_tests(batch_size, batch_number, game_list, remove_done):
+    iterable = create_tests(batch_size, batch_number, game_list, remove_done)
     if iterable == None:
-        print("nothing to test")
+        print("Nothing to test")
         return
 
-    start_time = time.time()
+    print("----------------- TESTING STARTS  -----------------")
+    print(f"Start batch of {len(iterable)} tests.")
+    print(f"Batch size: {batch_size}, batch number: {batch_number}.")
+    print(f"Test for games: {[x.__name__ for x in game_list]}")
 
-    # # run_test(iterable[0])
+    return
+
+    start_time = time.time()
 
     max_cpu = multiprocessing.cpu_count()
     p = multiprocessing.Pool(int(max_cpu))
     for _ in tqdm.tqdm(p.imap_unordered(run_test, iterable), total=len(iterable)):
         pass
-    # p.map_async(run_test, iterable)
+
     p.close()
     p.join()
 
     print("--- %s seconds ---" % (time.time() - start_time))
+    print("----------------- TESTING FINISHES  -----------------")
 
 if __name__ == '__main__':
     args = parser.parse_args()
-
     batch_size = args.batch_size
     batch_number = args.batch_number
-    run_tests(batch_size, batch_number)
+    game_list = args.game_list
+    remove_done = args.remove_done_tests
+
+    run_tests(batch_size, batch_number, game_list, remove_done)

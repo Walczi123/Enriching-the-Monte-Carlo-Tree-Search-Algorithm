@@ -2,19 +2,18 @@ import argparse
 from games.hex.hex import Hex
 from games.hive.hive import Hive
 from games.othello.othello import Othello
-from start_async_test import generate_instances, generate_specific_instances_hex, generate_specific_instances_hive, generate_specific_instances_othello, remove_done_tests, take_batches
+from start_async_test import create_tests, generate_instances, generate_specific_instances_hex, generate_specific_instances_hive, generate_specific_instances_othello, remove_done_tests, str2bool, str2game, take_batches
 
 GAME_TYPES = [Othello, Hex, Hive]
 
 parser = argparse.ArgumentParser(description='Script to run tests in batchs.')
-parser.add_argument("--batch_size", type=int, default=0)
+parser.add_argument('-bs', "--batch_size", type=int, default=0)
+parser.add_argument('-bn', "--batch_number", type=int, default=0)
+parser.add_argument('-g',"--game_list", type=str2game, nargs="+", default=["Othello", "Hex", "Hive"])
+parser.add_argument('-r',"--remove_done_tests", type=str2bool, nargs='?', const=True, default=True, help="Activate removing done tests.")
 
-def count_tests(batch_size):
-    iterable = generate_instances(GAME_TYPES)
-    iterable += generate_specific_instances_othello()
-    iterable += generate_specific_instances_hex()
-    iterable += generate_specific_instances_hive()
-    iterable = remove_done_tests(iterable)
+def count_tests(batch_size, batch_number, game_list, remove_done):
+    iterable = create_tests(batch_size, batch_number, game_list, remove_done)
 
     it_othello = [t for t in iterable if t.game_type == Othello]
     it_hex = [t for t in iterable if t.game_type == Hex]
@@ -51,3 +50,12 @@ if __name__ == '__main__':
 
     batch_size = args.batch_size
     count_tests(batch_size)
+
+if __name__ == '__main__':
+    args = parser.parse_args()
+    batch_size = args.batch_size
+    batch_number = args.batch_number
+    game_list = args.game_list
+    remove_done = args.remove_done_tests
+
+    count_tests(batch_size, batch_number, game_list, remove_done)
