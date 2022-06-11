@@ -183,8 +183,6 @@ def run_tests(batch_size, batch_number, game_list, remove_done):
     print(f"Batch size: {batch_size}, batch number: {batch_number}.")
     print(f"Test for games: {[x.__name__ for x in game_list]}")
 
-    return
-
     start_time = time.time()
 
     max_cpu = multiprocessing.cpu_count()
