@@ -12,50 +12,42 @@ parser.add_argument('-bn', "--batch_number", type=int, default=0)
 parser.add_argument('-g',"--game_list", type=str2game, nargs="+", default=["Othello", "Hex", "Hive"])
 parser.add_argument('-r',"--remove_done_tests", type=str2bool, nargs='?', const=True, default=True, help="Activate removing done tests.")
 
-def count_tests(batch_size, batch_number, game_list, remove_done):
-    iterable = create_tests(batch_size, batch_number, game_list, remove_done)
+def count_tests(batch_size, game_list, remove_done):
+    iterable = create_tests(0, 0 , game_list, remove_done)
 
     it_othello = [t for t in iterable if t.game_type == Othello]
     it_hex = [t for t in iterable if t.game_type == Hex]
     it_hive = [t for t in iterable if t.game_type == Hive]
 
-    print(" ------------------------ALL----------------------------------")
+    print(" ------------------------ALL--------------------------------")
     print(f"Counter of all rest tests: {len(iterable)}")
     bathces = take_batches(iterable, batch_size)
     print(f"Counter of test batches of size {batch_size}: {len(bathces)} ")
-    print(" -------------------------------------------------------------")
+    print(" -----------------------------------------------------------")
 
-    print(" ------------------------Othello------------------------------")
+    print(" ------------------------Othello----------------------------")
     print(f"Counter of all rest tests: {len(it_othello)}")
     bathces_othello = take_batches(it_othello, batch_size)
     print(f"Counter of test batches of size {batch_size}: {len(bathces_othello)} ")
-    print(" -------------------------------------------------------------")
+    print(" -----------------------------------------------------------")
 
-    print(" ------------------------Hex----------------------------------")
+    print(" ------------------------Hex--------------------------------")
     print(f"Counter of all rest tests: {len(it_hex)}")
     bathces_hex = take_batches(it_hex, batch_size)
     print(f"Counter of test batches of size {batch_size}: {len(bathces_hex)} ")
-    print(" -------------------------------------------------------------")
+    print(" -----------------------------------------------------------")
 
-    print(" ------------------------Hive---------------------------------")
+    print(" ------------------------Hive-------------------------------")
     print(f"Counter of all rest tests: {len(it_hive)}")
     bathces_hive = take_batches(it_hive, batch_size)
     print(f"Counter of test batches of size {batch_size}: {len(bathces_hive)} ")
-    print(" -------------------------------------------------------------")
-
+    print(" -----------------------------------------------------------")
 
 
 if __name__ == '__main__':
     args = parser.parse_args()
-
     batch_size = args.batch_size
-    count_tests(batch_size)
-
-if __name__ == '__main__':
-    args = parser.parse_args()
-    batch_size = args.batch_size
-    batch_number = args.batch_number
     game_list = args.game_list
     remove_done = args.remove_done_tests
 
-    count_tests(batch_size, batch_number, game_list, remove_done)
+    count_tests(batch_size, game_list, remove_done)

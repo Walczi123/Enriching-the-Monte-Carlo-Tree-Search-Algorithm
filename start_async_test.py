@@ -132,7 +132,7 @@ def take_batch(iterable, batch_size, batch_number):
             return None
         print("Created specific batch.")
         return batches[batch_number]
-    print("Batch size of batch number is not proper.")
+    print("Batch number is not proper.")
     return iterable
 
 def take_batches(iterable, batch_size):
@@ -167,9 +167,10 @@ def create_tests(batch_size, batch_number, game_list, remove_done):
         iterable = remove_done_tests(iterable)
         print(f"After applaying removig test amount: {len(iterable)}")
     else:
-        print("Removing done tests is disabled.")
-    print("----------------- CREATING BATCHES OF TESTS  -----------------")
-    iterable = take_batch(iterable, batch_size, batch_number)
+        print("Removing done tests is disabled.")   
+    if batch_size > 0:
+        print("----------------- CREATING BATCHES OF TESTS  -----------------")
+        iterable = take_batch(iterable, batch_size, batch_number)
     return iterable
 
 def run_tests(batch_size, batch_number, game_list, remove_done):
