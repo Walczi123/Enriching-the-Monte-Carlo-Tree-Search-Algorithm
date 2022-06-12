@@ -1,12 +1,11 @@
-from msilib.schema import Error
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
 
 #Scorre
 WIN_SCORE = 1
-DRAW_SCORE = 1
-DEFEAT_SCORE = 1
+DRAW_SCORE = 0.5
+DEFEAT_SCORE = 0
 
 def read_data(file_path, separator):
     return pd.read_csv(file_path, sep=separator)
@@ -68,11 +67,11 @@ def create_results_df(results_dict:dict):
     df['win%'] = df['wins'] / (df['wins'] + df['draws'] + df['defeats']) * 100
     df['draws%'] = df['draws'] / (df['wins'] + df['draws'] + df['defeats']) * 100
     df['defeats%'] = df['defeats'] / (df['wins'] + df['draws'] + df['defeats']) * 100
-    df.drop(columns=['wins', 'draws', 'defeats'], inplace=True)
+    # df.drop(columns=['wins', 'draws', 'defeats'], inplace=True)
     return df
 
 def check_data_and_create_result_df(df:pd.DataFrame, omit_errors:bool=False):
-    df.drop_duplicates(subset=df.columns.difference(['game_time']))
+    df.drop_duplicates(subset=df.columns.difference(['game_time']), inplace=True)
     if not set(df["player2"].unique()) == set(df["player1"].unique()) and not omit_errors:
         raise ValueError('Different players arrays') 
     check_number_players_games(df, omit_errors)
