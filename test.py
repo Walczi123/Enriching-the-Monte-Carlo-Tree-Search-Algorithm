@@ -35,19 +35,15 @@ class Test:
 
     def start(self):
         if self.game_type == Hive:
-            game = self.game_type(self.player1, self.player2, game_limit=self.game_limit)
+            game = self.game_type(self.player1, self.player2, round_limit=self.game_limit)
         else:
             game = self.game_type(self.player1, self.player2)
             
         if self.seed is not None:
             random.seed(self.seed)
-        try:
-            start_time = time.time()
-            r = game.play()
-            game_time = time.time() - start_time
-        except Exception as e:
-            print(f"ERRROOOORRRR {self.name}")
-            raise e
+        start_time = time.time()
+        r = game.play()
+        game_time = time.time() - start_time
         result = (r, self.seed, game_time)
         print(f"saving {self.name}")
         self.save_to_global_file(result)

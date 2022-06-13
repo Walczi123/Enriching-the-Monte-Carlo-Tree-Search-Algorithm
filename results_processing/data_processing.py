@@ -78,6 +78,53 @@ def check_data_and_create_result_df(df:pd.DataFrame, omit_errors:bool=False):
     result_dict = create_results_dict(df)
     return create_results_df(result_dict)
 
+def create_tournament_df(df:pd.DataFrame, players:list=None):
+    if players is None:
+        players = list(set(df["player1"].unique()))
+    arr = [[0 for _ in players] for _ in players]
+    nparr = np.zeros((len(players), len(players), 3))
+    for index1, value1 in enumerate(players):
+        for index2, value2 in enumerate(players):
+            (wins_p1, draws_p1, defeats_p1) = get_results_between_players(df, value1, value2)
+            arr[index1][index2] = f'{wins_p1}-{draws_p1}-{defeats_p1}'
+            nparr[index1][index2][0] = wins_p1
+            nparr[index1][index2][1] = draws_p1
+            nparr[index1][index2][2] = defeats_p1
+    df = pd.DataFrame(arr, columns=players, index=players)
+    return df
+
+def get_results_between_players(df:pd.DataFrame, player1, player2):
+    df_tmp = get_games_between_two_players(df, player1, player2)
+    wins_p1 = 0
+    draws_p1 = 0
+    defeats_p1 = 0
+    # wins
+    wins_p1 += len(df_tmp.loc[(df_tmp['player1'] == player1) & (df_tmp['winner'] == 1)])
+    # wins_p1 += len(df_tmp.loc[(df_tmp['player2'] == player1) & (df_tmp['winner'] == 2)])
+    # draws
+    draws_p1 += len(df_tmp.loc[(df_tmp['winner'] == 0)])
+    # defeat
+    defeats_p1 += len(df_tmp.loc[(df_tmp['player1'] == player1) & (df_tmp['winner'] == 2)])
+    # defeats_p1 += len(df_tmp.loc[(df_tmp['player2'] == player1) & (df_tmp['winner'] == 1)])
+    return (wins_p1, draws_p1, defeats_p1)
+
+
+def get_all_games_of_player(df:pd.DataFrame, player:str):
+    df1 = df.loc[(df['player1'] == player)]
+    df2 = df.loc[(df['player2'] == player) & (df['player1'] != player)]
+    return pd.concat([df1, df2])
+
+def get_games_between_two_players(df:pd.DataFrame, player1:str, player2:str):
+    df = df.loc[(df['player1'] == player1) & (df['player2'] == player2)]
+    return df
+
+def get_all_games_between_two_players(df:pd.DataFrame, player1:str, player2:str):
+    df1 = df.loc[(df['player1'] == player1) & (df['player2'] == player2)]
+    if player1 == player2:
+        return df1
+    df2 = df.loc[(df['player1'] == player2) & (df['player2'] == player1)]
+    return pd.concat([df1, df2])
+
 
 def show_results_bar_plot(results_dict:dict):
     # set width of bar

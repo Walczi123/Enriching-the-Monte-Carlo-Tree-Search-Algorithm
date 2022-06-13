@@ -142,8 +142,12 @@ def take_batches(iterable, batch_size):
     return iterable
 
 def run_test(test):
-    print(f'start of {test.name}')
-    test.start()
+    try:
+        test.start()
+    except Exception as e:
+        raise Exception(f"Error occured with test {test.name}") from e
+
+    
 
 def create_tests(batch_size, batch_number, game_list, remove_done):
     print("----------------- CREATING TEST INSTANCES -----------------")
