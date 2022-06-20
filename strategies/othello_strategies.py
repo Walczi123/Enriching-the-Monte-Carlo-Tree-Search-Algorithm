@@ -1,3 +1,4 @@
+from copy import deepcopy
 import random
 from games.othello.common import get_pieces_to_reverse
 from games.othello.evaluate import othello_evaluate
@@ -42,7 +43,8 @@ def greedyothello_strategy(moves, state, board_move, get_all_posible_moves, play
 def evaluateothello_strategy(moves, state, board_move, get_all_posible_moves, player, change_player):
     n_moves = []
     for i in range(len(moves)):
-        state_after_move = board_move(state, moves[i], player)
+        iteration_state = deepcopy(state)
+        state_after_move = board_move(iteration_state, moves[i], player)
         n_moves.append(othello_evaluate(state_after_move, player))
     index = n_moves.index(max(n_moves))
     return moves[index]

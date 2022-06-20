@@ -10,9 +10,9 @@ import time
 
 if __name__ == "__main__":
     random.seed(456)
-    p1 = Man_Player()
-    p2 = Strategy_Player(greedyhive_strategy)
-    game = Hive(use_ui=True, player1= p1, player2=p2, round_limit=50)
+    p1 = MCTS_Player(10)
+    p2 = MCTS_Player(10)
+    game = Hive(use_ui=True, player1= p1, player2=p2, round_limit=10)
     
     start_time = time.time()
 
