@@ -18,7 +18,7 @@ class Logic:
         # self.logger = np.zeros(shape=(self.board_size, self.board_size)) 
         self.logger = [[0 for x in range(self.board_size)] for y in range(self.board_size)] 
 
-    def get_possible_moves(self, board: np.ndarray):
+    def get_possible_moves(self, board: list):
         free_coordinates = []
         for x in range(self.board_size):
             for y in range(self.board_size):
@@ -143,7 +143,7 @@ class Logic:
             else:
                 self.ui.color[node] = COLOR_BLUE if player is BLUE_PLAYER else COLOR_RED
 
-    def is_game_over(self, player: int, board: np.ndarray, mcts_mode: bool = False):
+    def is_game_over(self, player: int, board: list, mcts_mode: bool = False):
         """
         Sets GAME_OVER to True if there are no more moves to play.
         Returns the winning player.
@@ -180,7 +180,7 @@ class Logic:
             if x == self.board_size - 1:
                 return True
 
-    def traverse(self, node: tuple, player: int, board: np.ndarray, visited: dict, mcts_mode: bool):
+    def traverse(self, node: tuple, player: int, board: list, visited: dict, mcts_mode: bool):
         x, y = node
         neighbours = self.get_neighbours((x, y))
 
@@ -215,18 +215,19 @@ class Logic:
 
         return neighbours
 
-    def is_node_free(self, coordinates: tuple, board: np.ndarray):
-        """
-        Returns True if node is free.
-        """
-        x, y = coordinates
+    # def is_node_free(self, coordinates: tuple, board:list):
+    #     """
+    #     Returns True if node is free.
+    #     """
+    #     x, y = coordinates
 
-        return True if not board[x][y] else False
+    #     return True if not board[x][y] else False
 
     def check_and_make_action(self, player: int, coordinates: tuple) -> int:
         (x, y) = coordinates
    
-        assert self.is_node_free((x, y), self.logger), "node is busy"
+        if self.logger[x][y] : raise("node is busy")
+        # assert self.is_node_free((x, y), self.logger), "node is busy"
         self.make_move((x, y), player)
         self.logger[x][y] = player
 

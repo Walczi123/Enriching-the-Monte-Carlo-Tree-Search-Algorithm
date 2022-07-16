@@ -164,7 +164,8 @@ class Hex(Game):
     def board_move(self, state, move, player):
         (x, y) = move
 
-        assert self.logic.is_node_free((x, y), state), "node is busy"
+        # assert self.logic.is_node_free((x, y), state), "node is busy"
+        if self.logic.logger[x][y] : raise("node is busy")
         state[x][y] = player
         return state
 
