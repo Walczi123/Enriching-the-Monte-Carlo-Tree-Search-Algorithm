@@ -1,12 +1,9 @@
+from copy import deepcopy
 from math import inf
 
 def alpha_beta_minmax(iteration_state, player, current_player, d: int, alpha: int, beta: int, get_all_posible_moves, board_move, get_result, change_player, evaluate):
-    if d <= 0:
+    if d <= 0 or (not get_all_posible_moves(iteration_state, player) and not get_all_posible_moves(iteration_state, change_player(player))):
         return None, evaluate(iteration_state, player), 1
-
-    if not get_all_posible_moves(iteration_state, player) and not get_all_posible_moves(iteration_state, change_player(player)):
-        winner = get_result(iteration_state, player)
-        return None, 1 if winner == player else -1, 1
 
     maximizing = current_player == player 
     f = max if maximizing else min
@@ -14,7 +11,8 @@ def alpha_beta_minmax(iteration_state, player, current_player, d: int, alpha: in
     nn = 0
     moves = get_all_posible_moves(iteration_state, current_player)
     for move in moves:
-        new_state = board_move(iteration_state, move, current_player)
+        new_state = deepcopy(iteration_state)
+        board_move(new_state, move, current_player)
         _, e, n = alpha_beta_minmax(new_state, player, change_player(current_player), d - 1, alpha, beta, get_all_posible_moves, board_move, get_result, change_player, evaluate)
         if maximizing:
             alpha = f(alpha, e)

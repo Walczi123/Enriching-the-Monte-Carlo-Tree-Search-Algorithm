@@ -72,6 +72,8 @@ def queen_is_on_board(state:State, move=None):
     return False
 
 def placement_is_allowed(state: State, move):
+    if move[1] in state.board.keys():
+        return False
     if not is_hive_adjacent(state, move[1]):
         return False
 
@@ -81,9 +83,8 @@ def placement_is_allowed(state: State, move):
         for p in pieces_around:
             if p.color[0]//128 != 2 - state.turn_state:
                 return False
-
-    if state.turn_state == 1 and state.amount_available_white_pieces[move[0][1][1]] > 0 and not move[1] in state.board.keys():
+    if state.turn_state == 1 and state.amount_available_white_pieces[move[0][1][1]] > 0:
         return True
-    elif state.turn_state == 2 and state.amount_available_black_pieces[move[0][1][1]] > 0 and not move[1] in state.board.keys():
+    elif state.turn_state == 2 and state.amount_available_black_pieces[move[0][1][1]] > 0:
         return True
     return False
