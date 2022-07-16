@@ -15,23 +15,15 @@ class Logic:
 
         self.GAME_OVER = False
         self.MCTS_GAME_OVER = False
-        self.logger = np.zeros(shape=(self.board_size, self.board_size))
-
-        self.distance_board_player1 = np.full((self.board_size, self.board_size), np.inf)     
-        self.distance_board_player2 = np.full((self.board_size, self.board_size), np.inf)   
-
-        # for i in range(self.board_size):
-        #     self.distance_board_player1 = self.update_distance(self.distance_board_player1, i, 0, 1)
-        #     self.distance_board_player1 = self.update_distance(self.distance_board_player1, i, self.board_size-1, 1)
-        # for i in range(self.board_size):
-        #     self.distance_board_player2 = self.update_distance(self.distance_board_player2, 0, i, 1)
-        #     self.distance_board_player2 = self.update_distance(self.distance_board_player2, self.board_size-1, i, 1)
-
-
+        # self.logger = np.zeros(shape=(self.board_size, self.board_size)) 
+        self.logger = [[0 for x in range(self.board_size)] for y in range(self.board_size)] 
 
     def get_possible_moves(self, board: np.ndarray):
-        x, y = np.where(board == 0)
-        free_coordinates = [(i, j) for i, j in zip(x, y)]
+        free_coordinates = []
+        for x in range(self.board_size):
+            for y in range(self.board_size):
+                if board[x][y] == 0 :
+                    free_coordinates.append((x,y))
 
         return free_coordinates
 
@@ -48,19 +40,6 @@ class Logic:
             board = self.update_distance(board, x+a, y+b, value+1)
         
         return board
-
-
-    def manhattan_distance(self, board, player):
-        if player == 1:
-            distance_board = deepcopy(self.distance_board_player1)
-        else:
-            distance_board = deepcopy(self.distance_board_player2)
-        distance_board[board == (player%2)+1] = None
-        result = np.where(self.logger == player)
-        for r in range(len(result[0])):
-            distance_board = self.update_distance(distance_board, result[0][r], result[1][r], 0)
-
-        return distance_board
         
     def get_dijkstra_score(self, board, color): 
         """gets the dijkstra score for a certain color, differs from dijkstra eval in that it only considers the passed color
@@ -71,7 +50,7 @@ class Logic:
         """
         LOSE = 1000 # Choose win value higher than possible score but lower than INF
 
-        board_size = len(board)
+        board_size = self.board_size
         scores = np.array([[LOSE for i in range(board_size)] for j in range(board_size)])
         updated = np.array([[True for i in range(board_size)] for j in range(board_size)]) #Start updating at one side of the board 
 
@@ -231,16 +210,10 @@ class Logic:
             for col in range(-1, 2):
                 if row != col:
                     node = (x + row, y + col)
-                    if self.is_valid(node):
+                    if 0 <= x + row < self.board_size and 0 <= y + col < self.board_size:
                         neighbours.append(node)
 
         return neighbours
-
-    def is_valid(self, coordinates: tuple):
-        """
-        Returns True if node exists.
-        """
-        return all(0 <= _ < self.board_size for _ in coordinates)
 
     def is_node_free(self, coordinates: tuple, board: np.ndarray):
         """

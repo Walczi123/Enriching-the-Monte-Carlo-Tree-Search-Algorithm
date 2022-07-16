@@ -1,5 +1,6 @@
 import os
 import random
+import time
 from games.hex.common import get_dijkstra_score
 from games.hex.evaluate import hex_evaluate
 from games.hex.hex_player import Man_Player
@@ -15,8 +16,12 @@ if __name__ == "__main__":
     random.seed(22025002)
     BOARD_SIZE = 11
     
-    p1 = Strategy_Player(mobility_strategy_vs)
-    p2 = Strategy_Player(mobility_strategy_vs)
+    p1 = MCTS_Player(1000)
+    p2 = MCTS_Player(1000)
 
     game = Hex(board_size=7, use_ui=False, player1=p1, player2=p2)
+    start_time = time.time()
+
     print(game.play())
+
+    print("--- %s seconds ---" % (time.time() - start_time))
