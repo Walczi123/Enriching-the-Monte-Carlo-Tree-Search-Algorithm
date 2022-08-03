@@ -18,8 +18,8 @@ def get_dijkstra_score(board, color):
     LOSE = 1000 # Choose win value higher than possible score but lower than INF
 
     board_size = len(board)
-    scores = np.array([[LOSE for i in range(board_size)] for j in range(board_size)])
-    updated = np.array([[True for i in range(board_size)] for j in range(board_size)]) #Start updating at one side of the board 
+    scores = [[LOSE for x in range(board_size)] for y in range(board_size)] 
+    updated = [[True for x in range(board_size)] for y in range(board_size)] #Start updating at one side of the board 
 
     #alignment of color (blue = left->right so (1,0))
     alignment = (0, 1) if color == 2 else (1, 0)
@@ -28,13 +28,13 @@ def get_dijkstra_score(board, color):
     for i in range(board_size):
         newcoord = tuple([i * j for j in alignment]) #iterate over last row or column based on alignment of current color
 
-        updated[newcoord] = False
-        if board[newcoord] == color: #if same color --> path starts at 0
-            scores[newcoord] = 0
-        elif board[newcoord] == 0: #if empty --> costs 1 move to use this path 
-            scores[newcoord] = 1
+        updated[newcoord[0]][newcoord[1]] = False
+        if board[newcoord[0]][newcoord[1]] == color: #if same color --> path starts at 0
+            scores[newcoord[0]][newcoord[1]] = 0
+        elif board[newcoord[0]][newcoord[1]] == 0: #if empty --> costs 1 move to use this path 
+            scores[newcoord[0]][newcoord[1]] = 1
         else: #If other color --> can't use this path
-            scores[newcoord] = LOSE
+            scores[newcoord[0]][newcoord[1]] = LOSE
 
     scores = dijkstra_update(board, color, scores, updated)
 
@@ -70,14 +70,14 @@ def dijkstra_update(board, color, scores, updated):
                     for neighborcoord in neighborcoords:
                         target_coord = tuple(neighborcoord)
                         path_cost = LOSE #1 for no color, 0 for same color, INF for other color 
-                        if board[target_coord] == 0:
+                        if board[neighborcoord[0]][neighborcoord[1]] == 0:
                             path_cost = 1
-                        elif board[target_coord] == color:
+                        elif board[neighborcoord[0]][neighborcoord[1]] == color:
                             path_cost = 0
                         
-                        if scores[target_coord] > scores[i][j] + path_cost: #if new best path to this neighbor
-                            scores[target_coord] = scores[i][j] + path_cost #update score
-                            updated[target_coord] = False #This neighbor should be updated
+                        if scores[neighborcoord[0]][neighborcoord[1]] > scores[i][j] + path_cost: #if new best path to this neighbor
+                            scores[neighborcoord[0]][neighborcoord[1]] = scores[i][j] + path_cost #update score
+                            updated[neighborcoord[0]][neighborcoord[1]] = False #This neighbor should be updated
                             updating = True #make sure next loop is started
                             
     return scores
