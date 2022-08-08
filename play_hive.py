@@ -12,9 +12,9 @@ if __name__ == "__main__":
     #test_hive50_random_strategy_alphabeta4_22025001
     random.seed(22025001)
     p1 = Strategy_Player(random_strategy)
-    p2 = AlphaBeta_Player(hive_evaluate, 4)
+    p2 = Strategy_Player(random_strategy)
     # p2 = Man_Player()
-    game = Hive(use_ui=True, player1= p1, player2=p2, round_limit=50)
+    game = Hive(use_ui=False, player1= p1, player2=p2, round_limit=150)
     
     start_time = time.time()
 

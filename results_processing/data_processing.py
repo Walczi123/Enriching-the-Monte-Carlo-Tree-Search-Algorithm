@@ -46,7 +46,7 @@ def create_results_dict(df:pd.DataFrame):
     results_dict = dict()
     players = np.unique(np.concatenate((df["player1"].unique(), df["player2"].unique())))
     for player_name in players:
-        results_dict[player_name] = [0,0,0]
+        results_dict[player_name] = [0,0,0,0]
 
     for key in results_dict.keys():
         # wins
@@ -58,17 +58,22 @@ def create_results_dict(df:pd.DataFrame):
         # defeat
         results_dict[key][2] += len(df.loc[(df['player1'] == key) & (df['winner'] == 2)])
         results_dict[key][2] += len(df.loc[(df['player2'] == key) & (df['winner'] == 1)])
+        # avg game time
+        results_dict[key][3] = round(np.mean(df.loc[(df['player1'] == key) | (df['player2'] == key)]["game_time"]), 2)
+
     return results_dict
 
 def create_results_df(results_dict:dict):
-    df = pd.DataFrame.from_dict(results_dict, orient='index', columns=['wins', 'draws', 'defeats'])
+    df = pd.DataFrame.from_dict(results_dict, orient='index', columns=['wins', 'draws', 'defeats', 'avg game time'])
     df['score'] = df['wins']*WIN_SCORE+df['draws']*DRAW_SCORE+df['defeats']*DEFEAT_SCORE
     df.sort_values(by=['score', 'wins', 'draws'], inplace=True, ascending=False)
     df['win%'] = df['wins'] / (df['wins'] + df['draws'] + df['defeats']) * 100
     df['draws%'] = df['draws'] / (df['wins'] + df['draws'] + df['defeats']) * 100
     df['defeats%'] = df['defeats'] / (df['wins'] + df['draws'] + df['defeats']) * 100
+    df['no games'] = df['wins']+df['draws']+df['defeats']
     # df.drop(columns=['wins', 'draws', 'defeats'], inplace=True)
     return df
+
 
 def check_data_and_create_result_df(df:pd.DataFrame, omit_errors:bool=False):
     df.drop_duplicates(subset=df.columns.difference(['game_time']), inplace=True)
@@ -82,14 +87,14 @@ def create_tournament_df(df:pd.DataFrame, players:list=None):
     if players is None:
         players = list(set(df["player1"].unique()))
     arr = [[0 for _ in players] for _ in players]
-    nparr = np.zeros((len(players), len(players), 3))
+    # nparr = np.zeros((len(players), len(players), 3))
     for index1, value1 in enumerate(players):
         for index2, value2 in enumerate(players):
             (wins_p1, draws_p1, defeats_p1) = get_results_between_players(df, value1, value2)
             arr[index1][index2] = f'{wins_p1}-{draws_p1}-{defeats_p1}'
-            nparr[index1][index2][0] = wins_p1
-            nparr[index1][index2][1] = draws_p1
-            nparr[index1][index2][2] = defeats_p1
+            # nparr[index1][index2][0] = wins_p1
+            # nparr[index1][index2][1] = draws_p1
+            # nparr[index1][index2][2] = defeats_p1
     df = pd.DataFrame(arr, columns=players, index=players)
     return df
 
