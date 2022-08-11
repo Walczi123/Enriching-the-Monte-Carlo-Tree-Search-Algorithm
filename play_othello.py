@@ -8,9 +8,9 @@ from strategies.strategies import mobility_strategy, mobility_strategy_vs, rando
 
 if __name__ == "__main__":
     start_time = time.time()
-    p1 = Man_Player()
+    p1 = MCTS_Player(100)
     # p2 = Strategy_Player(mapbaseothello_strategy)
-    p2 = Man_Player()
+    p2 = MCTS_Player(100)
 
     game = Othello(use_ui=True, player1=p1, player2=p2)
     game.play()
