@@ -129,8 +129,11 @@ class Hex(Game):
         self.ui.draw_board()
         pygame.display.update()
         self.get_winner()
-        print("Player {} wins!".format(self.winner))
+        print(f"Player {self.winner} wins!")
         self.wait_for_click()
+
+       
+
         return self.winner
     
     def play_without_ui(self):
@@ -146,14 +149,18 @@ class Hex(Game):
         return self.winner
 
     def get_result(self, state, player) -> int:
-        result = self.logic.is_game_over(player, state, True)
+        result = self.logic.is_game_over(player, state, False)
         if result is None:
             result = 0.5
         return result
 
     def get_all_posible_moves(self, iteration_state, player = None) -> list:
-        moves = self.logic.get_possible_moves(iteration_state)
-        return moves
+        v = self.logic.is_game_over(None, iteration_state, False, False)
+        if self.logic.is_game_over(None, iteration_state, False, False):
+            return []
+        else:
+            moves = self.logic.get_possible_moves(iteration_state)
+            return moves
 
     def change_player(self, player) -> int:
         if player == 2:

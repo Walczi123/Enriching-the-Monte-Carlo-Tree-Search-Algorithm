@@ -83,13 +83,13 @@ class RAVENode:
         self.untried_moves.remove(move)
         return child
 
-    def get_rave_score(self, k: int = 1000):
+    def get_rave_score(self, c: float = sqrt(2), k: int = 1000):
         b = sqrt(k/((3*self.visits)+k))
         stat1 = 0
         if self.rave_visits != 0 :
             stat1 = (b * (self.rave_wins/self.rave_visits)) 
         stat2 = ((1-b) * (self.wins/self.visits))
-        return stat1 + stat2
+        return stat1 + stat2 + (c * sqrt(log(self.parent.visits) / self.visits))
 
     def backpropagation(self, state, moves):
         update_children = [child for child in self.child_nodes if (child.move, child.player) in moves]

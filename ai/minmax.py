@@ -24,9 +24,10 @@ def alpha_beta_minmax(iteration_state, player, current_player, d: int, alpha: in
             break
 
     if not evaluations:
-        if maximizing:
-            return None, -inf, 1 
-        else:
-            return None, inf, 1 
+        new_state = deepcopy(iteration_state)
+        _, e, n = alpha_beta_minmax(new_state, player, change_player(current_player), d, alpha, beta, get_all_posible_moves, board_move, get_result, change_player, evaluate)
+        nn += n
+        return 'null_move', e, nn
+
     best = f(evaluations, key=evaluations.get)
     return best, evaluations[best], nn

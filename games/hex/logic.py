@@ -143,33 +143,47 @@ class Logic:
             else:
                 self.ui.color[node] = COLOR_BLUE if player is BLUE_PLAYER else COLOR_RED
 
-    def is_game_over(self, player: int, board: list, mcts_mode: bool = False):
-        """
-        Sets GAME_OVER to True if there are no more moves to play.
-        Returns the winning player.
-        """
-        if not self.get_possible_moves(board):
-            if not mcts_mode:
-                self.GAME_OVER = True
+    def is_game_over(self, player: int, board: list, show_path: bool = True, return_winner:bool = True):
+        if not return_winner and not self.get_possible_moves(board):
+            return True
 
-        for _ in range(self.board_size):
-            if player is BLUE_PLAYER:
-                border = (_, 0)
-            if player is RED_PLAYER:
-                border = (0, _)
+        if player is None:
+            for _ in range(self.board_size):
+                path = self.traverse((_, 0), BLUE_PLAYER, board, list())
+                if path:
+                    if show_path and self.ui:
+                        for step in path:
+                            x, y = step
+                            node = x * self.board_size + y
+                            self.ui.color[node] = self.ui.green
 
-            path = self.traverse(border, player, board, {}, mcts_mode)
-            if path:
-                if self.ui:
-                    # Highlights the winning path in green
-                    for step in path.keys():
-                        x, y = step
-                        node = x * self.board_size + y
-                        self.ui.color[node] = self.ui.green
+                    return BLUE_PLAYER
 
-                return player
-        
+                path = self.traverse((0, _), RED_PLAYER, board, list())
+                if path:
+                    if show_path and self.ui:
+                        for step in path:
+                            x, y = step
+                            node = x * self.board_size + y
+                            self.ui.color[node] = self.ui.green
 
+                    return RED_PLAYER           
+        else:
+            for _ in range(self.board_size):
+                if player is BLUE_PLAYER:
+                    border = (_, 0)
+                if player is RED_PLAYER:
+                    border = (0, _)
+
+                path = self.traverse(border, player, board, list())
+                if path:
+                    if show_path and self.ui:
+                        for step in path:
+                            x, y = step
+                            node = x * self.board_size + y
+                            self.ui.color[node] = self.ui.green
+
+                    return player
 
     def is_border(self, node: tuple, player: int):
         x, y = node
@@ -180,27 +194,21 @@ class Logic:
             if x == self.board_size - 1:
                 return True
 
-    def traverse(self, node: tuple, player: int, board: list, visited: dict, mcts_mode: bool):
-        x, y = node
-        neighbours = self.get_neighbours((x, y))
+    def traverse(self, node: tuple, player: int, board: list, visited: list):
+        x, y = node 
+        achiachieved_border = False    
+        if not ((x, y) in visited) and board[x][y] == player:
+            visited.append((x, y))
 
-        try:
-            if visited[(x, y)]:
-                pass
-        except KeyError:
-            if board[x][y] == player:
-                visited[(x, y)] = 1
+            if self.is_border(node, player):
+                achiachieved_border =  True
 
-                if self.is_border(node, player):
-                    if not mcts_mode:
-                        self.GAME_OVER = True
-                    # else:
-                    #     self.MCTS_GAME_OVER = True
+            neighbours = self.get_neighbours((x, y))
+            for neighbour in neighbours:
+                if self.traverse(neighbour, player, board, visited):
+                    achiachieved_border =  True
 
-                for neighbour in neighbours:
-                    self.traverse(neighbour, player, board, visited, mcts_mode)
-
-        if self.GAME_OVER or self.MCTS_GAME_OVER:
+        if achiachieved_border:
             return visited
 
     def get_neighbours(self, coordinates: tuple):
@@ -215,19 +223,10 @@ class Logic:
 
         return neighbours
 
-    # def is_node_free(self, coordinates: tuple, board:list):
-    #     """
-    #     Returns True if node is free.
-    #     """
-    #     x, y = coordinates
-
-    #     return True if not board[x][y] else False
-
     def check_and_make_action(self, player: int, coordinates: tuple) -> int:
         (x, y) = coordinates
    
         if self.logger[x][y] : raise("node is busy")
-        # assert self.is_node_free((x, y), self.logger), "node is busy"
         self.make_move((x, y), player)
         self.logger[x][y] = player
 

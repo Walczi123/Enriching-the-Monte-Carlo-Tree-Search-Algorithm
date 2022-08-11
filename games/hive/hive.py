@@ -2,6 +2,8 @@ from collections import defaultdict
 from copy import deepcopy
 import sys
 import os
+
+from sympy import Q
 from config import ROUND_LIMIT
 
 from games.hive.const import ANT_AMOUNT, ANT_ID, BEETLE_AMOUNT, BEETLE_ID, GRASSHOPPER_AMOUNT, GRASSHOPPER_ID, QUEEN_AMOUNT, QUEEN_ID, SPIDER_AMOUNT, SPIDER_ID
@@ -108,8 +110,15 @@ class Hive():
 
         return result
 
+    def is_end(self,board):
+        if self.is_looser(board, 1):
+            return False
+        if self.is_looser(board, 2):
+            return False
+        return True
+
     def get_all_posible_moves(self, state:State, player=None):
-        if self.set_limit and state.round_counter > self.round_limit:
+        if (self.set_limit and state.round_counter > self.round_limit) or not self.is_end(state.board):
             return []
         if not state.board:
             # Empty board
