@@ -155,7 +155,6 @@ class Hex(Game):
         return result
 
     def get_all_posible_moves(self, iteration_state, player = None) -> list:
-        v = self.logic.is_game_over(None, iteration_state, False, False)
         if self.logic.is_game_over(None, iteration_state, False, False):
             return []
         else:
