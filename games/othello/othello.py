@@ -50,41 +50,12 @@ class Othello(Game):
 
     def get_result(self, iteration_state, player):
         return get_result(iteration_state, player)
-        # player1_score = 0
-        # player2_score = 0
-        # for x in range(8):
-        #     for y in range(8):  
-        #         if iteration_state[x][y] == 1:
-        #             player1_score += 1
-        #         elif iteration_state[x][y] == 2:
-        #                 player2_score += 1
-        # if player1_score == player2_score:
-        #     return 0.5
-        # if player == 1:
-        #     if player1_score > player2_score :
-        #         return 1
-        #     else :
-        #         return 0
-        # if player1_score < player2_score :
-        #     return 1
-        # else :
-        #     return 0
 
     def get_all_posible_moves(self, state, player):
         return get_all_posible_moves(state, player)
-        # moveList = []
-        # for x in range(8):
-        #     for y in range(8):
-        #         if self.check_move(state, (x,y), player):
-        #             moveList.append((x,y))
-        # return moveList
 
     def change_player(self, player) -> int:
         return change_player(player)
-        # if player == 2:
-        #     return 1
-        # else:
-        #     return 2
 
     def board_move(self, state, move, player):
         return board_move(state, move, player)
@@ -117,41 +88,9 @@ class Othello(Game):
 
     def check_for_any_line(self, state, player, x, y, i, j):
         return check_for_any_line(state, player, x, y, i, j)
-        # neighX = i
-        # neighY = j
-        
-        # #If the neighbour colour is equal to your colour, it doesn't form a line
-        # #Go onto the next neighbour
-        # if state[neighX][neighY]==player:
-        #     return False
-
-        # #Determine the direction of the line
-        # deltaX = neighX-x
-        # deltaY = neighY-y
-        # tempX = neighX
-        # tempY = neighY
-        
-        # while 0<=tempX<=7 and 0<=tempY<=7:
-        #     #If an empty space, no line is formed
-        #     if state[tempX][tempY]==None:
-        #         return False
-        #     #If it reaches a piece of the player's colour, it forms a line
-        #     if state[tempX][tempY] == player:
-        #         return True
-        #     #Move the index according to the direction of the line
-        #     tempX+=deltaX
-        #     tempY+=deltaY
-        # return False
 
     def check_and_make_move(self, state, move, player):
         return check_and_make_move(state, move, player)
-        # if  self.check_move(state, move, player):
-        #     # state[move[0]][move[1]] = player
-
-        #     self.move(state, player, move[0], move[1])
-            
-        #     return True
-        # return False
         
     def move(self, array,  player, x, y):
         """ Make move and reverse all influenced oponnent's disks 
@@ -160,49 +99,9 @@ class Othello(Game):
             [type]: array - board after move
         """
         return move(array,  player, x, y)
-        # convert = get_pieces_to_reverse(array,  player, x, y)
-                    
-        # #Convert all the appropriate tiles
-        # for i,j in convert:
-        #     array[i][j]=player
-
-        # # state = array
-
 
     def check_move(self, state, move, player):
         return check_move(state, move, player)
-        # """ Check if placing disk on (x,y) is a valid move
-
-        # Args:
-        #     player ([type]): [description]
-        #     x ([type]): [description]
-        #     y ([type]): [description]
-
-        # Returns:
-        #     [type]: [description]
-        # """
-        # x, y = move
-        # #Sets player colour
-        # colour = player
-        # #If there's already a piece there, it's an invalid move
-        # if state[x][y] != None:
-        #     return False
-        # else:
-        #     #Generating the list of neighbours
-        #     neighbour = False
-        #     neighbours = []
-        #     valid = False
-        #     for i in range(max(0,x-1),min(x+2,8)):
-        #         for j in range(max(0,y-1),min(y+2,8)):
-        #             if state[i][j]!=None:
-        #                 neighbour=True
-        #                 neighbours.append([i,j])
-        #                 valid = valid or self.check_for_any_line(state, colour, x, y, i, j)
-        #     #If there's no neighbours, it's an invalid move
-        #     if not neighbour:
-        #         return False
-        #     else:
-        #         return valid
 
     def player_make_move(self, player, clicked = None, all_posible_moves:list = None):
         if player.is_man:
@@ -223,7 +122,7 @@ class Othello(Game):
             for y in range(8):
                 if self.board[x][y] == 1:
                     s1 += 1
-                if self.board[x][y] == 2:
+                elif self.board[x][y] == 2:
                     s2 += 1
         return s1, s2
 
@@ -231,12 +130,12 @@ class Othello(Game):
         for x in range(8):
             print(self.board[x])
 
-
     def end_condition(self):
         first_pos_moves = self.get_all_posible_moves(self.board, 1)
         second_pos_moves = self.get_all_posible_moves(self.board, 2)
-        if len(first_pos_moves) != 0 or len(second_pos_moves) != 0 :
+        if len(first_pos_moves) == 0 and len(second_pos_moves) == 0 :
             s1, s2 = self.get_scores()
+            self.score_result = (s1, s2)
             if s1 > s2:     
                 self.winner = 1
             elif s2 > s1:
@@ -246,17 +145,31 @@ class Othello(Game):
             return True
         return False
 
+    def avg(self, l):
+        return sum(l)/len(l)
+
     def play_with_ui(self):
         pygame.init()
         pygame.display.set_caption("Othello")
         self.ui = UI()
 
+        no_moves_p1 = 0
+        no_moves_p2 = 0
+        no_blocked_moves_p1 = 0
+        no_blocked_moves_p2 = 0
+        move_income_p1 = []
+        move_income_p2 = []
         current_player = self.player1
-        while self.end_condition():
+        board_scores = []
+        while not self.end_condition():
             # print("start player"+str(self.turn_state))
             pos_moves = self.get_all_posible_moves(self.board, self.turn_state)
             self.ui.draw_board(self.board, pos_moves)
             if pos_moves == []:
+                if self.turn_state == 1:
+                    no_blocked_moves_p1 += 1
+                else: 
+                    no_blocked_moves_p2 += 1
                 current_player = self.swich_player()
                 continue
 
@@ -267,8 +180,17 @@ class Othello(Game):
 
             if (current_player.is_man and clicked is not None) or not current_player.is_man:
                 move = self.player_make_move(current_player, clicked, pos_moves)
-                if self.check_and_make_move(self.board, move, self.turn_state):  
-                    current_player = self.swich_player()  
+                checked_move = self.check_and_make_move(self.board, move, self.turn_state)
+                if checked_move[0]: 
+                    s1, s2 = self.get_scores()
+                    board_scores.append(s1-s2)
+                    if self.turn_state == 1:
+                        move_income_p1.append(checked_move[1])
+                        no_moves_p1 += 1
+                    else: 
+                        move_income_p2.append(checked_move[1])
+                        no_moves_p2 += 1
+                    current_player = self.swich_player()   
 
         self.ui.draw_board(self.board)
         pygame.display.update()
@@ -276,23 +198,41 @@ class Othello(Game):
         print("winner ", self.winner)
         self.wait_for_click()
         pygame.quit()
-        return self.winner
+        return self.winner, (self.score_result, (no_moves_p1, no_moves_p2), (no_blocked_moves_p1, no_blocked_moves_p2), (self.avg(move_income_p1), self.avg(move_income_p2)), self.avg(board_scores))
                          
-
     def play_without_ui(self):
         current_player = self.player1
-        while self.end_condition():
+        no_moves_p1 = 0
+        no_moves_p2 = 0
+        no_blocked_moves_p1 = 0
+        no_blocked_moves_p2 = 0
+        move_income_p1 = []
+        move_income_p2 = []
+        board_scores = []
+        while not self.end_condition():
             pos_moves = self.get_all_posible_moves(self.board, self.turn_state)
             if pos_moves == []:
+                if self.turn_state == 1:
+                    no_blocked_moves_p1 += 1
+                else: 
+                    no_blocked_moves_p2 += 1
                 current_player = self.swich_player() 
                 continue
 
             move = self.player_make_move(current_player, pos_moves)
-            if self.check_and_make_move(self.board, move, self.turn_state):  
+            checked_move = self.check_and_make_move(self.board, move, self.turn_state)
+            if checked_move[0]:
+                s1, s2 = self.get_scores()
+                board_scores.append(s1-s2)
+                if self.turn_state == 1:
+                    move_income_p1.append(checked_move[1])
+                    no_moves_p1 += 1
+                else: 
+                    move_income_p2.append(checked_move[1])
+                    no_moves_p2 += 1
                 current_player = self.swich_player()  
 
-        # print("winner ", self.winner)
-        return self.winner
+        return self.winner, (self.score_result, (no_moves_p1, no_moves_p2), (no_blocked_moves_p1, no_blocked_moves_p2), (self.avg(move_income_p1), self.avg(move_income_p2)), self.avg(board_scores))
 
 def get_result(state, player):
     player1_score = 0
@@ -331,8 +271,6 @@ def check_for_any_line(state, player, x, y, i, j):
     neighX = i
     neighY = j
     
-    #If the neighbour colour is equal to your colour, it doesn't form a line
-    #Go onto the next neighbour
     if state[neighX][neighY]==player:
         return False
 
@@ -414,15 +352,15 @@ def move(array,  player, x, y):
     for i,j in convert:
         array[i][j]=player
 
-    # state = array
+    return len(convert)
 
 def check_and_make_move(state, m, player):
     if  check_move(state, m, player):
         # state[move[0]][move[1]] = player
-        move(state, player, m[0], m[1])
+        l = move(state, player, m[0], m[1])
         
-        return True
-    return False
+        return True, l
+    return False, 0
 
 def board_move(state, move, player):
     check_and_make_move(state, move, player)
