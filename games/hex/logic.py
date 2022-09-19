@@ -134,10 +134,9 @@ class Logic:
         return neighbors
 
     def make_move(self, coordinates: tuple, player: Union[int, None]):
-        x, y = coordinates
-        node = x * self.board_size + y
-
         if self.ui is not None:
+            x, y = coordinates
+            node = x * self.board_size + y
             if player is None and self.ui.color[node] == 0:
                 self.ui.color[node] = self.ui.green
             else:

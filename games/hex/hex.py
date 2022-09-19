@@ -3,6 +3,7 @@ import sys
 import os
 
 from config import BOARD_SIZE
+from games.hex.common import get_dijkstra_score
 
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
@@ -108,6 +109,12 @@ class Hex(Game):
     def play_with_ui(self):
         # print(f'{self.name} starts')
         node = None
+
+        no_moves_p1 = 0
+        no_moves_p2 = 0
+        dikstra_scores_p1 = []
+        dikstra_scores_p2 = []
+
         current_player = self.player1
         while not self.end_condition():
             # dist_board = self.logic.manhattan_distance(self.logic.logger, self.turn_state)
@@ -125,6 +132,12 @@ class Hex(Game):
             if (current_player.is_man and cliced) or not current_player.is_man:
                 move = self.player_make_move(current_player, node)
                 if self.check_move(move, self.turn_state):  
+                    if self.turn_state == 1:
+                        no_moves_p1 += 1
+                        dikstra_scores_p1.append(get_dijkstra_score(self.logic.logger, self.turn_state))
+                    else: 
+                        no_moves_p2 += 1
+                        dikstra_scores_p2.append(get_dijkstra_score(self.logic.logger, self.turn_state))
                     current_player = self.swich_player()  
         self.ui.draw_board()
         pygame.display.update()
@@ -132,21 +145,31 @@ class Hex(Game):
         print(f"Player {self.winner} wins!")
         self.wait_for_click()
 
-       
-
-        return self.winner
+        return self.winner, ((no_moves_p1, no_moves_p2), (dikstra_scores_p1, dikstra_scores_p2))
     
     def play_without_ui(self):
-        # print(f'{self.name} starts')
+        no_moves_p1 = 0
+        no_moves_p2 = 0
+        dikstra_scores_p1 = []
+        dikstra_scores_p2 = []
+
         current_player = self.player1
         while not self.end_condition():
             # move = current_player.make_move()
             move = self.player_make_move(current_player)
             self.check_move(move, self.turn_state)
-            current_player = self.swich_player()
 
+            if self.turn_state == 1:
+                no_moves_p1 += 1
+                dikstra_scores_p1.append(get_dijkstra_score(self.logic.logger, self.turn_state))
+            else: 
+                no_moves_p2 += 1
+                dikstra_scores_p2.append(get_dijkstra_score(self.logic.logger, self.turn_state))
+
+            current_player = self.swich_player()
+            
         self.get_winner()
-        return self.winner
+        return self.winner, ((no_moves_p1, no_moves_p2), (dikstra_scores_p1, dikstra_scores_p2))
 
     def get_result(self, state, player) -> int:
         result = self.logic.is_game_over(player, state, False)
