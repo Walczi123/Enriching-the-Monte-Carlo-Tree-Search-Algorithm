@@ -316,7 +316,7 @@ class Hive():
         pygame.quit()
 
         print(f"Player {self.winner} wins!")
-        return self.winner
+        return self.winner, None
                          
     def play_without_ui(self):
         current_player = self.player1
@@ -334,7 +334,7 @@ class Hive():
             if self.check_and_make_move(self.state, move):
                 current_player = self.swich_player()
 
-        return self.winner
+        return self.winner, None
 
     def play(self):
         if self.use_ui:

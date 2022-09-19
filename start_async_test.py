@@ -190,13 +190,15 @@ def run_tests(batch_size, batch_number, game_list, remove_done):
 
     start_time = time.time()
 
-    max_cpu = multiprocessing.cpu_count()
-    p = multiprocessing.Pool(int(max_cpu))
-    for _ in tqdm.tqdm(p.imap_unordered(run_test, iterable), total=len(iterable)):
-        pass
+    # max_cpu = multiprocessing.cpu_count()
+    # p = multiprocessing.Pool(int(max_cpu))
+    # for _ in tqdm.tqdm(p.imap_unordered(run_test, iterable), total=len(iterable)):
+    #     pass
 
-    p.close()
-    p.join()
+    # p.close()
+    # p.join()
+
+    run_test(iterable[0])
 
     print("--- %s seconds ---" % (time.time() - start_time))
     print("----------------- TESTING FINISHES  -----------------")

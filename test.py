@@ -42,29 +42,28 @@ class Test:
         if self.seed is not None:
             random.seed(self.seed)
         start_time = time.time()
-        r = game.play()
+        r, additional_params = game.play()
         game_time = time.time() - start_time
-        result = (r, self.seed, game_time)
+        result = (r, additional_params, self.seed, game_time)
         print(f"saving {self.name}")
         self.save_to_global_file(result)
 
+    # def save_to_file(self, results):
+    #     file_path = f'./tests/results/{str(self.game_type.__name__).lower()}/{self.name}'
+    #     f = open(file_path, "w")
+    #     print("saving", self.name)
+    #     f.write(f"Game NO{SEPARATHOR}Winner\n")
+    #     results = [f'{str(results[i][0])}{SEPARATHOR}{str(results[i][1])}\n' for i in range(
+    #         len(results))]
+    #     f.writelines(results)
+    #     f.close
 
-    def save_to_file(self, results):
-        file_path = f'./tests/results/{str(self.game_type.__name__).lower()}/{self.name}'
-        f = open(file_path, "w")
-        print("saving", self.name)
-        f.write(f"Game NO{SEPARATHOR}Winner\n")
-        results = [f'{str(results[i][0])}{SEPARATHOR}{str(results[i][1])}\n' for i in range(
-            len(results))]
-        f.writelines(results)
-        f.close
-
-    def get_result_csv(self,result):
-        # game_type, player1, player2, winner, seed, game_time
+    def get_result_csv(self, result):
+        # game_type, player1, player2, winner, seed, game_time, additional params
         p1 = self.player1.name
         p2 = self.player2.name
         return (str(self.game_type.__name__).lower(),
-                      p1, p2, result[0], result[1], result[2])
+                      p1, p2, result[0], result[2], result[3], result[1])
 
     def save_to_global_file(self, result):
         file_path = RESULTS_FILE_PATH
