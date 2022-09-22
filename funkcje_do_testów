@@ -1,0 +1,12 @@
+
+othello: 
++ srednia ocena mapy
++ średnia ocena ruchu 
++ liczba zdobyty pionów
+
+hex:
++ prędokość dążenia do stworzenia ścieżki
+? redukcje - http://hex.kosmanor.com/theory/y-hex.pdf
+
+Hive: 
+- funkcje oceny - google
