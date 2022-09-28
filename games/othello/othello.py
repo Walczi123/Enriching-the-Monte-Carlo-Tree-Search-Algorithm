@@ -183,7 +183,7 @@ class Othello(Game):
                 checked_move = self.check_and_make_move(self.board, move, self.turn_state)
                 if checked_move[0]: 
                     s1, s2 = self.get_scores()
-                    board_scores.append(s1-s2)
+                    board_scores.append((s1,s2))
                     if self.turn_state == 1:
                         move_income_p1.append(checked_move[1])
                         no_moves_p1 += 1
@@ -198,7 +198,7 @@ class Othello(Game):
         print("winner ", self.winner)
         self.wait_for_click()
         pygame.quit()
-        return self.winner, (self.score_result, (no_moves_p1, no_moves_p2), (no_blocked_moves_p1, no_blocked_moves_p2), (self.avg(move_income_p1), self.avg(move_income_p2)), self.avg(board_scores))
+        return self.winner, (self.score_result, (no_moves_p1, no_moves_p2), (no_blocked_moves_p1, no_blocked_moves_p2), (move_income_p1, move_income_p2), board_scores)
                          
     def play_without_ui(self):
         current_player = self.player1

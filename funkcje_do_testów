@@ -3,6 +3,7 @@ othello:
 + srednia ocena mapy
 + średnia ocena ruchu 
 + liczba zdobyty pionów
+- listy lepsze
 
 hex:
 + prędokość dążenia do stworzenia ścieżki
@@ -10,3 +11,5 @@ hex:
 
 Hive: 
 - funkcje oceny - google
+
+10 razy - kazdy z kazdym -5 białe 5 czarne
