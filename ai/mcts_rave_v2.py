@@ -2,7 +2,7 @@ from copy import deepcopy
 import random
 from typing import Callable
 
-from ai.nodes import RAVENode
+from ai.nodes import RAVENode, RAVENodev2
 
 
 
@@ -20,8 +20,8 @@ def select_rave_child(childNodes):
 
     return random.choice(bestChildren)
     
-def mcts_rave(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable, all_posible_moves:list):
-    rootnode = RAVENode(None, None, initial_state, player, get_result, get_all_posible_moves, change_player, all_posible_moves)
+def mcts_rave_v2(initial_state, player, number_of_iteration, get_result:Callable, get_all_posible_moves:Callable, change_player:Callable, board_move:Callable, all_posible_moves:list):
+    rootnode = RAVENodev2(None, None, initial_state, player, get_result, get_all_posible_moves, change_player, all_posible_moves)
     for _ in range(number_of_iteration):
         node = rootnode
         moves = []

@@ -232,7 +232,7 @@ class Othello(Game):
                     no_moves_p2 += 1
                 current_player = self.swich_player()  
 
-        return self.winner, (self.score_result, (no_moves_p1, no_moves_p2), (no_blocked_moves_p1, no_blocked_moves_p2), (self.avg(move_income_p1), self.avg(move_income_p2)), self.avg(board_scores))
+        return self.winner, (self.score_result, (no_moves_p1, no_moves_p2), (no_blocked_moves_p1, no_blocked_moves_p2), (move_income_p1, move_income_p2), board_scores)
 
 def get_result(state, player):
     player1_score = 0

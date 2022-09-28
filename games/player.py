@@ -4,6 +4,7 @@ import time
 from typing import Callable
 from ai.mcts import mcts
 from ai.mcts_rave import mcts_rave
+from ai.mcts_rave_v2 import mcts_rave_v2
 from ai.mcts_strategy import mcts_strategy
 from ai.mcts_switching import mcts_switching
 from ai.minmax import alpha_beta_minmax
@@ -52,6 +53,17 @@ class MCTSRAVE_Player(Player):
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves) = args
         move = mcts_rave(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves)
+        return move
+
+class MCTSRAVEv2_Player(Player):
+    def __init__(self, number_of_iteration: int = 100):
+        super().__init__(False)
+        self.number_of_iteration = number_of_iteration
+        self.name = f"mctsrave_v2{str(number_of_iteration)}"
+
+    def make_move(self, args):
+        (initial_state, player, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves) = args
+        move = mcts_rave_v2(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves)
         return move
 
 
