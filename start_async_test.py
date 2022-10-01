@@ -179,7 +179,7 @@ def create_tests(batch_size, batch_number, game_list, remove_done):
 
 def run_tests(batch_size, batch_number, game_list, remove_done):
     iterable = create_tests(batch_size, batch_number, game_list, remove_done)
-    if iterable == None:
+    if iterable == None or len(iterable) == 0:
         print("Nothing to test")
         return
 
@@ -190,13 +190,16 @@ def run_tests(batch_size, batch_number, game_list, remove_done):
 
     start_time = time.time()
 
-    max_cpu = multiprocessing.cpu_count()
-    p = multiprocessing.Pool(int(max_cpu))
-    for _ in tqdm.tqdm(p.imap_unordered(run_test, iterable), total=len(iterable)):
-        pass
+    if len(iterable) == 1:
+        run_test(iterable[0])
+    else:
+        max_cpu = multiprocessing.cpu_count()
+        p = multiprocessing.Pool(int(max_cpu))
+        for _ in tqdm.tqdm(p.imap_unordered(run_test, iterable), total=len(iterable)):
+            pass
 
-    p.close()
-    p.join()
+        p.close()
+        p.join()
 
     print("--- %s seconds ---" % (time.time() - start_time))
     print("----------------- TESTING FINISHES  -----------------")

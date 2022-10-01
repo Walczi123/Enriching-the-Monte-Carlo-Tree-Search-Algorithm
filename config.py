@@ -9,8 +9,8 @@ from strategies.othello_strategies import evaluateothello_strategy, greedyothell
 from strategies.strategies import mobility_strategy, mobility_strategy_vs, random_strategy
 
 #TESTS
-SEED = 22029082
-REPETITIONS = 1
+SEED = 22020110
+REPETITIONS = 10
 RESULTS_FILE_NAME='no_such_file'
 
 
