@@ -21,9 +21,6 @@ class SwitchingMechanism():
         for i in range(len(self.strategies)):
             result.append((self.q_table[i]/self.__t_table__(i)) + self.b * sqrt(log(n)/self.__t_table__(i)))
         index = result.index(max(result))
-        print("result", result)
-        print("max(result)", max(result))
-        print("result.index(max(result))", result.index(max(result)))
         return self.strategies[index]
 
     def update_strategy_result(self, strategy, result):
