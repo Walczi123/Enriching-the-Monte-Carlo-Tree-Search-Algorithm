@@ -14,12 +14,12 @@ from games.hex.hex import Hex
 
 if __name__ == "__main__":
     # random.seed(22025002)
-    BOARD_SIZE = 7
+    BOARD_SIZE = 11
     
-    p1 = MCTS_Player(3)
-    p2 = MCTS_Player(3)
+    p1 = MCTS_Player(10)
+    p2 = MCTS_Player(10)
 
-    game = Hex(board_size=BOARD_SIZE, use_ui=False, player1=p1, player2=p2)
+    game = Hex(board_size=BOARD_SIZE, use_ui=True, player1=p1, player2=p2)
     start_time = time.time()
 
     print(game.play())

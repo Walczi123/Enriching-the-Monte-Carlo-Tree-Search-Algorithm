@@ -62,14 +62,14 @@ HIVE_PLAYERS = [
 HEX_PLAYERS = [
     MCTS_Player(10000),
     MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehex_strategy], 10000),
-    AlphaBeta_Player(10),
+    AlphaBeta_Player(hex_evaluate, 10),
     MCTSStrategy_Player(mobility_strategy, 10000),
     MCTSStrategy_Player(mobility_strategy_vs, 10000),
     Strategy_Player(evaluatehex_strategy),
     Strategy_Player(random_strategy),
     MCTSRAVE_Player(10000),
     MCTSRAVEv2_Player(10000),
-    AlphaBeta_Player(12)
+    AlphaBeta_Player(hex_evaluate, 12)
     ]
 
 OTHELLO_PLAYERS = [
@@ -79,10 +79,10 @@ OTHELLO_PLAYERS = [
     MCTS_Player(10000),
     MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy,greedyothello_strategy,evaluateothello_strategy], 10000),
     MCTSRAVE_Player(10000),
-    AlphaBeta_Player(10),
+    AlphaBeta_Player(othello_evaluate, 10),
     Strategy_Player(random_strategy),
     Strategy_Player(greedyothello_strategy),
     MCTSSwitchingStrategy_Player([mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy], 10000),
     MCTSRAVEv2_Player(10000),
-    AlphaBeta_Player(12)
+    AlphaBeta_Player(othello_evaluate, 12)
     ]

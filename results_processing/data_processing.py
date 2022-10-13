@@ -12,7 +12,7 @@ def read_data(file_path, separator):
 
 def read_data_of_game(file_path, separator, game_name):
     df = pd.read_csv(file_path, sep=separator, header=None)
-    df.columns = ['game_type','player1','player2','winner','seed','game_time']
+    df.columns = ['game_type','player1','player2','winner','seed','game_time','other']
     return df[df['game_type']==game_name]
 
 def check_number_players_games(df:pd.DataFrame, omit_errors:bool=False):
