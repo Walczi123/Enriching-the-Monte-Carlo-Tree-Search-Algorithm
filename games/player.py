@@ -88,10 +88,12 @@ class MCTSSwitchingStrategy_Player(Player):
         strategies_names = ':'.join(x.__name__ for x in self.strategies)
         self.name = f"mctsstrategies{str(number_of_iteration)}"
         self.name += f"({strategies_names})"
+        self.stats = []
 
     def make_move(self, args):
         (initial_state, player, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves) = args
-        move = mcts_switching(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategies, all_posible_moves)
+        move, stat = mcts_switching(initial_state, player, self.number_of_iteration, get_result, get_all_posible_moves, change_player, board_move, self.strategies, all_posible_moves)
+        self.stats.append(stat)
         return move
 
 

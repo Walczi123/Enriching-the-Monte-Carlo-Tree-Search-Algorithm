@@ -17,11 +17,15 @@ HEX
 
 mcts10000
 mctsstrategies10000(random_strategy:mobility_strategy_vs:mobility_strategy:evaluatehex_strategy)
+mctsstrategies10000(mobility_strategy_vs:mobility_strategy:evaluatehex_strategy) # dodać
 alphabeta10
 mctsstrategy10000(mobility_strategy)
 mctsstrategy10000(mobility_strategy_vs)
+mctsstrategy10000(evaluatehex_strategy) #dodać
 evaluatehex_strategy
 random_strategy
 mctsrave10000
 mctsrave10000_v2
 alphabeta12
+
+dodać logowanie liczby strategii 

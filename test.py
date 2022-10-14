@@ -7,7 +7,7 @@ import time
 
 from games.game import Game
 from games.hive.hive import Hive
-from games.player import Player
+from games.player import MCTSSwitchingStrategy_Player, Player
 
 SEPARATHOR = '\t'
 
@@ -44,7 +44,14 @@ class Test:
         start_time = time.time()
         r, additional_params = game.play()
         game_time = time.time() - start_time
-        result = (r, additional_params, self.seed, game_time)
+        p1 = None 
+        p2 = None
+        if type(self.player1) == MCTSSwitchingStrategy_Player:
+            print(self.player1.stats)
+            p1 = self.player1.stats
+        if type(self.player2) == MCTSSwitchingStrategy_Player:
+            p2 = self.player2.stats
+        result = (r, additional_params + (p1,p2), self.seed, game_time)
         print(f"saving {self.name}")
         self.save_to_global_file(result)
 

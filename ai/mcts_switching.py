@@ -63,4 +63,4 @@ def mcts_switching(initial_state, player, number_of_iteration, get_result:Callab
 		node.backpropagation(iteration_state)
 		switching_mechanism.update_strategy_result(strategy, get_result(iteration_state, player))
 
-	return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move
+	return sorted(rootnode.child_nodes, key=lambda c: c.visits)[-1].move, switching_mechanism.get_stats()

@@ -62,9 +62,11 @@ HIVE_PLAYERS = [
 HEX_PLAYERS = [
     MCTS_Player(10000),
     MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehex_strategy], 10000),
+    MCTSSwitchingStrategy_Player([mobility_strategy_vs,mobility_strategy,evaluatehex_strategy], 10000),
     AlphaBeta_Player(hex_evaluate, 10),
     MCTSStrategy_Player(mobility_strategy, 10000),
     MCTSStrategy_Player(mobility_strategy_vs, 10000),
+    MCTSStrategy_Player(evaluatehex_strategy, 10000),
     Strategy_Player(evaluatehex_strategy),
     Strategy_Player(random_strategy),
     MCTSRAVE_Player(10000),
