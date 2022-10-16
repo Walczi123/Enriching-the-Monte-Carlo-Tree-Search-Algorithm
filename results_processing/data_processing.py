@@ -13,7 +13,13 @@ def read_data(file_path, separator):
 def read_data_of_game(file_path, separator, game_name):
     df = pd.read_csv(file_path, sep=separator, header=None)
     df.columns = ['game_type','player1','player2','winner','seed','game_time','other']
-    return df[df['game_type']==game_name]
+    df = df[df['game_type']==game_name]
+    if game_name in 'othello':
+        return transform_other_othello(df)
+    elif game_name in 'hex':
+        return df
+    elif game_name in 'hive':
+        return df
 
 def check_number_players_games(df:pd.DataFrame, omit_errors:bool=False):
     n_games1 = len(df.loc[(df['player1'] == df["player1"].unique()[0])])
@@ -35,6 +41,11 @@ def check_number_players_games(df:pd.DataFrame, omit_errors:bool=False):
             raise ValueError('Different games player by players')
         return False
     return True
+
+def check_additiona_info(df:pd.DataFrame, omit_errors:bool=False):
+    check_additiona_info_othello(df.loc[(df['game_type'] == 'othello')], omit_errors)
+    check_additiona_info_hex(df.loc[(df['game_type'] == 'othello')], omit_errors)
+    check_additiona_info_hive(df.loc[(df['game_type'] == 'othello')], omit_errors)
 
 def is_duplicated_records(df:pd.DataFrame):
     return len(df[df.duplicated()]) == 0
@@ -79,7 +90,10 @@ def check_data_and_create_result_df(df:pd.DataFrame, omit_errors:bool=False):
     df.drop_duplicates(subset=df.columns.difference(['game_time']), inplace=True)
     if not set(df["player2"].unique()) == set(df["player1"].unique()) and not omit_errors:
         raise ValueError('Different players arrays') 
+    print(f"Amount data before check: {len(df)}")
     check_number_players_games(df, omit_errors)
+    check_additiona_info(df, omit_errors)
+    print(f"Amount data after check: {len(df)}")
     result_dict = create_results_dict(df)
     return create_results_df(result_dict)
 
@@ -189,3 +203,81 @@ def draw_graphs(df):
             fig = plt.figure()
             plt.title(f"{player1} vs {player2}")
             plt.pie(v_counts, labels=v_counts.index, autopct=lambda x : '{:.2f}%\n({:.0f})'.format(x, total*x/100), shadow=True)
+
+def transform_other_othello(df:pd.DataFrame):
+    d_tmp = dict()
+    columns = ['score_result','no_moves_p1','no_moves_p2','no_blocked_moves_p1','no_blocked_moves_p2','move_income_p1','move_income_p2','board_scores','switching_stats_p1','switching_stats_p2']
+
+    for c in columns:
+        d_tmp[c] = list()
+
+    for r in df['other']:
+        d = r[1:-1].replace('(', '').split("),")
+
+        d1 = d[1].strip().split(",")
+        d2 = d[2].strip().split(",")
+        d3 = d[3].strip()[1:-1].split("], [")
+        d4 = d[4].split("],",1)
+        d4_1 = d4[1].strip().replace("None", '[[]]').strip().split(']], [[')
+
+        d_tmp['score_result'].append(d[0].replace(',', ':'))
+        d_tmp['no_moves_p1'].append(d1[0])
+        d_tmp['no_moves_p2'].append(d1[1])
+        d_tmp['no_blocked_moves_p1'].append(d2[0])
+        d_tmp['no_blocked_moves_p2'].append(d2[1])
+        d_tmp['move_income_p1'].append(d3[0])
+        d_tmp['move_income_p2'].append(d3[1])
+        d_tmp['board_scores'].append(d4[0].strip()[1:])
+        d_tmp['switching_stats_p1'].append(d4_1[0][1:]+']' if d4_1[0] != '[[' else None)
+        d_tmp['switching_stats_p2'].append('['+d4_1[1][:-1] if d4_1[1] != ']]' else None)
+
+    # df1 = df.drop('other', axis=1).reset_index()
+    df1 = df.reset_index()
+    return pd.concat([df1, pd.DataFrame(d_tmp)], axis=1)
+
+def check_additiona_info_othello(df:pd.DataFrame, omit_errors:bool=False):
+    df_temp=pd.concat([df['score_result'].str.split(':',1,expand=True).astype(int),df['winner']],axis=1)
+    for r in pd.concat([df_temp.iloc[:,0:2].idxmax(axis=1)+1 == df["winner"],df_temp[0]==df_temp[1], df_temp['winner']==0],axis=1).values:
+        if not (r[0] or (r[1]and r[2])):
+            if not omit_errors: raise ValueError('Additional info Othello - invalid score_result or winner')
+
+    df_tmp = df["no_moves_p1"].apply(lambda x : int(x)>0)
+    invalid_indexies = df_tmp[df_tmp==False].index
+    if len(invalid_indexies)>0:
+        if not omit_errors: raise ValueError(f'Additional info Othello - no player 1 moves ({invalid_indexies[0]})')
+    df_tmp = df["no_moves_p2"].apply(lambda x : int(x)>0)
+    invalid_indexies = df_tmp[df_tmp==False].index
+    if len(invalid_indexies)>0:
+        if not omit_errors: raise ValueError(f'Additional info Othello - no player 2 moves ({invalid_indexies[0]})')
+    
+    df_tmp = df[df["board_scores"]==""]
+    if not all((df['no_moves_p1'].astype(int)+df['no_blocked_moves_p1'].astype(int))-(df['no_moves_p2'].astype(int)+df['no_blocked_moves_p2'].astype(int))<2):
+        if not omit_errors: raise ValueError('Additional info Othello - Sum of players moves diff is bigger then 1')
+
+    df_tmp = df[df["board_scores"]==""]
+    if len(df_tmp)>0:
+        if not omit_errors: raise ValueError(f'Additional info Othello - invalid board scores ({df_tmp.index[0]})')
+        df = df.drop(df_tmp.index)
+
+    df_tmp = df[df["board_scores"]==""]
+    df_monotonic = df["board_scores"].apply(lambda x: [int(el) for el in x.split(",")]).apply(lambda x : [1 if x[i] < x[i+1] else -1 for i in range(len(x)-1)])
+    if not all(df_monotonic.apply(lambda x: abs(sum([el for el in x if el>0 ])) + 1).astype(int) == df["no_moves_p1"].astype(int)):
+        if not omit_errors: raise ValueError(f'Additional info Othello - invalid board scores or no player 1 moves ({df[df_monotonic.apply(lambda x: abs(sum([el for el in x if el>0 ])) + 1).astype(int) == df["no_moves_p1"].astype(int)].index[0]})')   
+    if not all(df_monotonic.apply(lambda x: abs(sum([el for el in x if el<0]))).astype(int)== df["no_moves_p2"].astype(int)):
+        if not omit_errors: raise ValueError(f'Additional info Othello - invalid board scores or no player 2 moves ({df[df_monotonic.apply(lambda x: abs(sum([el for el in x if el<0]))).astype(int)!= df["no_moves_p2"].astype(int)].index[0]})')
+
+    if not all(df_monotonic.apply(lambda x : sum([1 if x[i] == -1 and x[i+1] == -1 else 0 for i in range(len(x)-1)])).astype(int)==df['no_blocked_moves_p1'].astype(int)):
+        index = df[df_monotonic.apply(lambda x : sum([1 if x[i] == -1 and x[i+1] == -1 else 0 for i in range(len(x)-1)])).astype(int)!=df['no_blocked_moves_p1'].astype(int)].index[0]
+        if not omit_errors: raise ValueError(f'Additional info Othello - invalid board scores or no player 1 blocked moves ({index})')
+        
+    if not all(df_monotonic.apply(lambda x : sum([1 if x[i] == 1 and x[i+1] == 1 else 0 for i in range(len(x)-1)])).astype(int)==df['no_blocked_moves_p2'].astype(int)):
+        index = df[df_monotonic.apply(lambda x : sum([1 if x[i] == 1 and x[i+1] == 1 else 0 for i in range(len(x)-1)])).astype(int)!=df['no_blocked_moves_p2'].astype(int)].index[0]
+        if not omit_errors: raise ValueError(f'Additional info Othello - invalid board scores or no player 2 blocked moves ({index})')
+    
+       
+
+def check_additiona_info_hex(df:pd.DataFrame, omit_errors:bool=False):
+    pass
+
+def check_additiona_info_hive(df:pd.DataFrame, omit_errors:bool=False):
+    pass

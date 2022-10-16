@@ -34,7 +34,7 @@ def greedyothello_strategy(moves, state, board_move, get_all_posible_moves, play
     get_points = 0
     for m in moves:
         x, y = m
-        p = len(get_pieces_to_reverse(state, player, x, y))
+        p = len(get_pieces_to_reverse(deepcopy(state), player, x, y))
         if p > get_points:
             move = m
             get_points = p

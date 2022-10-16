@@ -10,15 +10,14 @@ from strategies.othello_strategies import evaluateothello_strategy, greedyothell
 from strategies.strategies import mobility_strategy, mobility_strategy_vs, random_strategy
 
 if __name__ == "__main__":
-    random.seed(22025005)
+    random.seed(22020137)
     start_time = time.time()
-    p1 = MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy,greedyothello_strategy,evaluateothello_strategy], 10)
-    # p2 = Strategy_Player(mapbaseothello_strategy)
-    p2 = Man_Player()
+    # p1 = MCTSSwitchingStrategy_Player([mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy], 10000)
+    p2 = Strategy_Player(greedyothello_strategy)
+    p1 = Man_Player()
+    # p2 = Man_Player()
 
-    game = Othello(use_ui=True, player1=p1, player2=p2)
+    game = Othello(use_ui=False, player1=p1, player2=p2)
     print(game.play())
     print("--- %s seconds ---" % (time.time() - start_time))
 
-#    sm = SwitchingMechanism([random_strategy, mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy,greedyothello_strategy,evaluateothello_strategy])
-#    sm.choose_strategy(0)

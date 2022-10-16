@@ -47,7 +47,6 @@ class Test:
         p1 = None 
         p2 = None
         if type(self.player1) == MCTSSwitchingStrategy_Player:
-            print(self.player1.stats)
             p1 = self.player1.stats
         if type(self.player2) == MCTSSwitchingStrategy_Player:
             p2 = self.player2.stats

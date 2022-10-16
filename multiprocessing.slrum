@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name hex_params_tests
-#SBATCH --time=24:00:00
+#SBATCH --job-name final_tests
+#SBATCH --time=72:00:00
 #SBATCH --array=0-1%2
 #SBATCH --mail-type=END,FAIL
 #SBATCH --mail-user=walczakp2@student.mini.pw.edu.pl
 #SBATCH --error=slurmlogs/error/test_error_%j.log
 #SBATCH --output=slurmlogs/output/test_output_%j.log
 
-pypy mgr-eden-wop/start_async_test.py --batch_size 64 --batch_number $SLURM_ARRAY_TASK_ID --game_list hex
+pypy mgr-eden-wop/start_async_test.py --batch_size 1 --batch_number $SLURM_ARRAY_TASK_ID --game_list hex othello
