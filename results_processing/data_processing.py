@@ -14,11 +14,11 @@ def read_data_of_game(file_path, separator, game_name):
     df = pd.read_csv(file_path, sep=separator, header=None)
     df.columns = ['game_type','player1','player2','winner','seed','game_time','other']
     df = df[df['game_type']==game_name]
-    if game_name in 'othello':
+    if game_name == 'othello':
         return transform_other_othello(df)
-    elif game_name in 'hex':
-        return df
-    elif game_name in 'hive':
+    elif game_name == 'hex':
+        return transform_other_hex(df)
+    elif game_name == 'hive':
         return df
 
 def check_number_players_games(df:pd.DataFrame, omit_errors:bool=False):
@@ -43,9 +43,12 @@ def check_number_players_games(df:pd.DataFrame, omit_errors:bool=False):
     return True
 
 def check_additiona_info(df:pd.DataFrame, omit_errors:bool=False):
-    check_additiona_info_othello(df.loc[(df['game_type'] == 'othello')], omit_errors)
-    check_additiona_info_hex(df.loc[(df['game_type'] == 'othello')], omit_errors)
-    check_additiona_info_hive(df.loc[(df['game_type'] == 'othello')], omit_errors)
+    if len(df.loc[(df['game_type'] == 'othello')])>0:
+        check_additiona_info_othello(df.loc[(df['game_type'] == 'othello')], omit_errors)
+    if len(df.loc[(df['game_type'] == 'hex')])>0:
+        check_additiona_info_hex(df.loc[(df['game_type'] == 'hex')], omit_errors)
+    if len(df.loc[(df['game_type'] == 'hive')])>0:
+        check_additiona_info_hive(df.loc[(df['game_type'] == 'hive')], omit_errors)
 
 def is_duplicated_records(df:pd.DataFrame):
     return len(df[df.duplicated()]) == 0
@@ -235,6 +238,31 @@ def transform_other_othello(df:pd.DataFrame):
     df1 = df.reset_index()
     return pd.concat([df1, pd.DataFrame(d_tmp)], axis=1)
 
+def transform_other_hex(df:pd.DataFrame):
+    d_tmp = dict()
+    columns = ['no_moves_p1','no_moves_p2', 'dikstra_scores_p1', 'dikstra_scores_p2', 'switching_stats_p1','switching_stats_p2']
+
+    for c in columns:
+        d_tmp[c] = list()
+
+    for r in df['other']:
+        d = r[1:-1].replace('(', '').split("),")
+
+        d0=d[0].strip().split(",")
+        d1=d[1].strip().split("], [")
+        d2=d[2].strip().replace("None", '[[]]').strip().split(']], [[')
+
+        d_tmp['no_moves_p1'].append(d0[0])
+        d_tmp['no_moves_p2'].append(d0[1])
+        d_tmp['dikstra_scores_p1'].append(d1[0][1:])
+        d_tmp['dikstra_scores_p2'].append(d1[1][:-1])
+        d_tmp['switching_stats_p1'].append(d2[0][1:]+']' if d2[0] != '[[' else None)
+        d_tmp['switching_stats_p2'].append('['+d2[1][:-1] if d2[1] != ']]' else None)
+
+    # df1 = df.drop('other', axis=1).reset_index()
+    df1 = df.reset_index()
+    return pd.concat([df1, pd.DataFrame(d_tmp)], axis=1)
+
 def check_additiona_info_othello(df:pd.DataFrame, omit_errors:bool=False):
     df_temp=pd.concat([df['score_result'].str.split(':',1,expand=True).astype(int),df['winner']],axis=1)
     for r in pd.concat([df_temp.iloc[:,0:2].idxmax(axis=1)+1 == df["winner"],df_temp[0]==df_temp[1], df_temp['winner']==0],axis=1).values:
@@ -273,11 +301,38 @@ def check_additiona_info_othello(df:pd.DataFrame, omit_errors:bool=False):
     if not all(df_monotonic.apply(lambda x : sum([1 if x[i] == 1 and x[i+1] == 1 else 0 for i in range(len(x)-1)])).astype(int)==df['no_blocked_moves_p2'].astype(int)):
         index = df[df_monotonic.apply(lambda x : sum([1 if x[i] == 1 and x[i+1] == 1 else 0 for i in range(len(x)-1)])).astype(int)!=df['no_blocked_moves_p2'].astype(int)].index[0]
         if not omit_errors: raise ValueError(f'Additional info Othello - invalid board scores or no player 2 blocked moves ({index})')
-    
-       
 
+    df_tmp = df[df['player1'].str.contains('mctsstrategies')].reset_index()
+    if not all(df_tmp['switching_stats_p1'].apply(lambda x: len([el for el in x.split('], [')])).astype(int) == df_tmp['no_moves_p1'].astype(int)):
+        if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 1')
+    if not all(df_tmp['switching_stats_p1'].apply(lambda x: all([all(sum([int(el) for el in y.split(',')]) == df_tmp['player1'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)) for y in x[1:-1].split('], [')]))):
+        if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 1 (switching stats sum is incorrect')
+
+    df_tmp = df[df['player2'].str.contains('mctsstrategies')].reset_index()
+    if not all(df_tmp['switching_stats_p2'].apply(lambda x: len([el for el in x.split('], [')])).astype(int) == df_tmp['no_moves_p2'].astype(int)):
+        if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 2')
+    if not all(df_tmp['switching_stats_p2'].apply(lambda x: all([all(sum([int(el) for el in y.split(',')]) == df_tmp['player2'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)) for y in x[1:-1].split('], [')]))):
+        if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 2 (switching stats sum is incorrect')
+
+
+    
 def check_additiona_info_hex(df:pd.DataFrame, omit_errors:bool=False):
-    pass
+    if not all(df['dikstra_scores_p1'].apply(lambda x : len([el for el in x.split(',')])).astype(int)==df['no_moves_p1'].astype(int)):
+        if not omit_errors: raise ValueError('Additional info Hex - invalid dikstra scores or no player 1 moves')
+    if not all(df['dikstra_scores_p2'].apply(lambda x : len([el for el in x.split(',')])).astype(int)==df['no_moves_p2'].astype(int)):
+        if not omit_errors: raise ValueError('Additional info Hex - invalid dikstra scores or no player 2 moves')
+
+    df_tmp = df[df['player1'].str.contains('mctsstrategies')].reset_index()
+    if not all(df_tmp['switching_stats_p1'].apply(lambda x: len([el for el in x.split('], [')])).astype(int) == df_tmp['no_moves_p1'].astype(int)):
+        if not omit_errors: raise ValueError('Additional info Hex - invalid switching stats for player 1')
+    if not all(df_tmp['switching_stats_p1'].apply(lambda x: all([all(sum([int(el) for el in y.split(',')]) == df_tmp['player1'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)) for y in x[1:-1].split('], [')]))):
+        if not omit_errors: raise ValueError('Additional info Hex - invalid switching stats for player 1 (switching stats sum is incorrect')
+    df_tmp = df[df['player2'].str.contains('mctsstrategies')].reset_index()
+    if not all(df_tmp['switching_stats_p2'].apply(lambda x: len([el for el in x.split('], [')])).astype(int) == df_tmp['no_moves_p2'].astype(int)):
+        if not omit_errors: raise ValueError('Additional info Hex - invalid switching stats for player 2')
+    if not all(df_tmp['switching_stats_p2'].apply(lambda x: all([all(sum([int(el) for el in y.split(',')]) == df_tmp['player2'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)) for y in x[1:-1].split('], [')]))):
+        if not omit_errors: raise ValueError('Additional info Hex - invalid switching stats for player 2 (switching stats sum is incorrect')
+
 
 def check_additiona_info_hive(df:pd.DataFrame, omit_errors:bool=False):
     pass

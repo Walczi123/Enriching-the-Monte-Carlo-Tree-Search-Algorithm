@@ -12,12 +12,18 @@ from strategies.strategies import mobility_strategy, mobility_strategy_vs, rando
 if __name__ == "__main__":
     random.seed(22020137)
     start_time = time.time()
-    # p1 = MCTSSwitchingStrategy_Player([mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy], 10000)
-    p2 = Strategy_Player(greedyothello_strategy)
-    p1 = Man_Player()
+    p1 = MCTSSwitchingStrategy_Player([mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy], 10)
+    p2 = MCTSSwitchingStrategy_Player([mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy], 10)
+    # p2 = Strategy_Player(greedyothello_strategy)
+    # p1 = Man_Player()
     # p2 = Man_Player()
 
     game = Othello(use_ui=False, player1=p1, player2=p2)
     print(game.play())
     print("--- %s seconds ---" % (time.time() - start_time))
+    print(p1.stats1)
+    print(len(p1.stats1))
+    print('-----------------')
+    print(p2.stats2)
+    print(len(p2.stats2))
 

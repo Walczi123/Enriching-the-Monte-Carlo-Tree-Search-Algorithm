@@ -47,9 +47,9 @@ class Test:
         p1 = None 
         p2 = None
         if type(self.player1) == MCTSSwitchingStrategy_Player:
-            p1 = self.player1.stats
+            p1 = self.player1.stats1
         if type(self.player2) == MCTSSwitchingStrategy_Player:
-            p2 = self.player2.stats
+            p2 = self.player2.stats2
         result = (r, additional_params + (p1,p2), self.seed, game_time)
         print(f"saving {self.name}")
         self.save_to_global_file(result)
