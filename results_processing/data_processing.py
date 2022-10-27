@@ -7,6 +7,12 @@ WIN_SCORE = 1
 DRAW_SCORE = 0.5
 DEFEAT_SCORE = 0
 
+def process_data(file_path, separator, game_name, omit_errors:bool=False):
+    df = read_data_of_game(file_path, separator, game_name)
+    result_df = check_data_and_create_result_df(df, omit_errors) #FALSE
+    df_tournament = create_tournament_df(df, list(result_df.index))
+    return  df, result_df, df_tournament
+
 def read_data(file_path, separator):
     return pd.read_csv(file_path, sep=separator)
 
@@ -90,12 +96,12 @@ def create_results_df(results_dict:dict):
 
 
 def check_data_and_create_result_df(df:pd.DataFrame, omit_errors:bool=False):
-    df.drop_duplicates(subset=df.columns.difference(['game_time']), inplace=True)
+    df.drop_duplicates(subset=df.columns.difference(['index','game_time']), inplace=True)
     if not set(df["player2"].unique()) == set(df["player1"].unique()) and not omit_errors:
         raise ValueError('Different players arrays') 
     print(f"Amount data before check: {len(df)}")
     check_number_players_games(df, omit_errors)
-    check_additiona_info(df, omit_errors)
+    check_additiona_info(df, False)
     print(f"Amount data after check: {len(df)}")
     result_dict = create_results_dict(df)
     return create_results_df(result_dict)
