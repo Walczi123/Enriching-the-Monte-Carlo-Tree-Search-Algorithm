@@ -13,6 +13,10 @@ def read_data(file_path, separator):
 def read_data_of_game(file_path, separator, game_name):
     df = pd.read_csv(file_path, sep=separator, header=None)
     df.columns = ['game_type','player1','player2','winner','seed','game_time','other']
+    
+    # do usuniecia
+    df.drop(df[df['player1'].str.contains('greedyothello_strategy')|df['player2'].str.contains('greedyothello_strategy')].index, inplace=True)
+    
     df = df[df['game_type']==game_name]
     if game_name == 'othello':
         return transform_other_othello(df)
@@ -95,7 +99,7 @@ def check_data_and_create_result_df(df:pd.DataFrame, omit_errors:bool=False):
         raise ValueError('Different players arrays') 
     print(f"Amount data before check: {len(df)}")
     check_number_players_games(df, omit_errors)
-    check_additiona_info(df, omit_errors)
+    # check_additiona_info(df, omit_errors)
     print(f"Amount data after check: {len(df)}")
     result_dict = create_results_dict(df)
     return create_results_df(result_dict)
@@ -209,7 +213,7 @@ def draw_graphs(df):
 
 def transform_other_othello(df:pd.DataFrame):
     d_tmp = dict()
-    columns = ['score_result','no_moves_p1','no_moves_p2','no_blocked_moves_p1','no_blocked_moves_p2','move_income_p1','move_income_p2','board_scores','switching_stats_p1','switching_stats_p2']
+    columns = ['score_result','score_result_diff', 'no_moves_p1','no_moves_p2','no_blocked_moves_p1','no_blocked_moves_p2','move_income_p1','move_income_p2','board_scores','switching_stats_p1','switching_stats_p2']
 
     for c in columns:
         d_tmp[c] = list()
@@ -224,15 +228,33 @@ def transform_other_othello(df:pd.DataFrame):
         d4_1 = d4[1].strip().replace("None", '[[]]').strip().split(']], [[')
 
         d_tmp['score_result'].append(d[0].replace(',', ':'))
-        d_tmp['no_moves_p1'].append(d1[0])
-        d_tmp['no_moves_p2'].append(d1[1])
-        d_tmp['no_blocked_moves_p1'].append(d2[0])
-        d_tmp['no_blocked_moves_p2'].append(d2[1])
-        d_tmp['move_income_p1'].append(d3[0])
-        d_tmp['move_income_p2'].append(d3[1])
-        d_tmp['board_scores'].append(d4[0].strip()[1:])
-        d_tmp['switching_stats_p1'].append(d4_1[0][1:]+']' if d4_1[0] != '[[' else None)
-        d_tmp['switching_stats_p2'].append('['+d4_1[1][:-1] if d4_1[1] != ']]' else None)
+        a,b = d[0].split(',')
+        d_tmp['score_result_diff'].append(int(a) - int(b))
+        d_tmp['no_moves_p1'].append(int(d1[0]))
+        d_tmp['no_moves_p2'].append(int(d1[1]))
+        d_tmp['no_blocked_moves_p1'].append(int(d2[0]))
+        d_tmp['no_blocked_moves_p2'].append(int(d2[1]))
+        d_tmp['move_income_p1'].append(tuple((int(elem) for elem in d3[0].split(','))))
+        d_tmp['move_income_p2'].append(tuple((int(elem) for elem in d3[1].split(','))))
+        d_tmp['board_scores'].append(tuple((int(elem) for elem in d4[0].strip()[1:].split(','))))
+        # d_tmp['move_income_p1'].append(d3[0])
+        # d_tmp['move_income_p2'].append(d3[1])
+        # d_tmp['board_scores'].append(d4[0].strip()[1:])
+        # d_tmp['switching_stats_p1'].append(d4_1[0][1:]+']' if d4_1[0] != '[[' else None)
+        # d_tmp['switching_stats_p2'].append('['+d4_1[1][:-1] if d4_1[1] != ']]' else None)
+
+        if d4_1[0] != '[[':
+            switching_stats = tuple((tuple(([int(elem2) for elem2 in elem.split(',') ])) for elem in d4_1[0][2:].replace(' ','').split('],[')))
+            d_tmp['switching_stats_p1'].append(switching_stats)
+        else:           
+            d_tmp['switching_stats_p1'].append(None)
+
+        if d4_1[1] != ']]':
+            switching_stats = tuple((tuple(([int(elem2) for elem2 in elem.split(',') ])) for elem in d4_1[1][:-2].replace(' ','').split('],[')))
+            d_tmp['switching_stats_p2'].append(switching_stats)
+        else:
+            d_tmp['switching_stats_p2'].append(None)
+
 
     # df1 = df.drop('other', axis=1).reset_index()
     df1 = df.reset_index()
@@ -252,8 +274,8 @@ def transform_other_hex(df:pd.DataFrame):
         d1=d[1].strip().split("], [")
         d2=d[2].strip().replace("None", '[[]]').strip().split(']], [[')
 
-        d_tmp['no_moves_p1'].append(d0[0])
-        d_tmp['no_moves_p2'].append(d0[1])
+        d_tmp['no_moves_p1'].append(int(d0[0]))
+        d_tmp['no_moves_p2'].append(int(d0[1]))
         d_tmp['dikstra_scores_p1'].append(d1[0][1:])
         d_tmp['dikstra_scores_p2'].append(d1[1][:-1])
         d_tmp['switching_stats_p1'].append(d2[0][1:]+']' if d2[0] != '[[' else None)
@@ -313,8 +335,6 @@ def check_additiona_info_othello(df:pd.DataFrame, omit_errors:bool=False):
         if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 2')
     if not all(df_tmp['switching_stats_p2'].apply(lambda x: all([all(sum([int(el) for el in y.split(',')]) == df_tmp['player2'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)) for y in x[1:-1].split('], [')]))):
         if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 2 (switching stats sum is incorrect')
-
-
     
 def check_additiona_info_hex(df:pd.DataFrame, omit_errors:bool=False):
     if not all(df['dikstra_scores_p1'].apply(lambda x : len([el for el in x.split(',')])).astype(int)==df['no_moves_p1'].astype(int)):
@@ -336,3 +356,18 @@ def check_additiona_info_hex(df:pd.DataFrame, omit_errors:bool=False):
 
 def check_additiona_info_hive(df:pd.DataFrame, omit_errors:bool=False):
     pass
+
+def transform_games_into_players_stats(df:pd.DataFrame):
+    l = list()
+    for row in df.values:
+        try:
+            p1 = [row[1],row[2], row[4] == 1, row[5], row[6], row[8],  row[9], row[10], row[11], row[12], row[13], row[14], row[15], [int(a) for a in row[16].split(',')], row[17], row[18]]
+            p2 = [row[1],row[3], row[4] == 2, row[5], row[6], row[8], -row[9], row[11], row[10], row[13], row[12], row[15], row[14], [-int(a) for a in row[16].split(',')], row[18], row[17]]
+        except:
+            print(row[0])
+            continue
+        l.append(p1)
+        l.append(p2)
+    df_cols= df.columns
+    cols = [df_cols[1],df_cols[2], 'is_winner', df_cols[5], df_cols[6], df_cols[8],  df_cols[9], 'player_no_moves', 'oponent_no_moves', 'player_no_blocked_moves', 'oponent_no_blocked_moves', 'player_move_income', 'oponent_move_income', df_cols[16], 'player_swithching_stats', 'oponent_swithching_stats']
+    return pd.DataFrame(l, columns=cols)
