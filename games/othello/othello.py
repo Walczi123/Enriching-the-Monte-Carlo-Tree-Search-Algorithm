@@ -211,6 +211,10 @@ class Othello(Game):
         board_scores = []
         while not self.end_condition():
             pos_moves = self.get_all_posible_moves(self.board, self.turn_state)
+            print('====================================')
+            print('board',self.board)
+            print('pos_moves',pos_moves)
+            print('turn_state',self.turn_state)
             if pos_moves == []:
                 if self.turn_state == 1:
                     no_blocked_moves_p1 += 1
@@ -221,6 +225,10 @@ class Othello(Game):
 
             move = self.player_make_move(current_player, pos_moves)
             checked_move = self.check_and_make_move(self.board, move, self.turn_state)
+            print('checked_move',checked_move)
+            print('move',move)
+            print('board',self.board)
+
             if checked_move[0]:
                 s1, s2 = self.get_scores()
                 board_scores.append(s1-s2)

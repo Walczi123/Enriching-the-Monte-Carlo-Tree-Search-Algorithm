@@ -10,7 +10,7 @@ from strategies.strategies import mobility_strategy, mobility_strategy_vs, rando
 
 #TESTS
 SEED = 22020110
-REPETITIONS = 10
+REPETITIONS = 50
 RESULTS_FILE_NAME='no_such_file'
 
 

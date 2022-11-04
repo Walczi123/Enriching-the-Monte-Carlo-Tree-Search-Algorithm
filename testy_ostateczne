@@ -29,3 +29,18 @@ mctsrave10000_v2
 alphabeta12
 
 dodać logowanie liczby strategii 
+
+Zestawienia:
+Bazujące na wyniku końcowym:
+    Średnia różnicy zdobytych punktów 
+    Średnia podczas wygranych/przegranych
+Bazujące na liczbie ruchów, liczbie zablokowanych ruchów oraz przychodów podczas każdego ruchu:
+    Średnia liczba blokowań 
+    Średnia liczba ruchów
+    Średni przychód na ruch
+Bazujące na różnicy punktowej w każdej turze:
+    Średnia liczba tur z przewagą punktową
+    Średnia liczba tur ze stratą punktową
+    Średnia liczba zmian prowadzenia 
+Dla algorytmu MCTS z mechanizmem przełączającym:
+    Średnia liczba wyborów danej strategii

@@ -10,11 +10,11 @@ from strategies.othello_strategies import evaluateothello_strategy, greedyothell
 from strategies.strategies import mobility_strategy, mobility_strategy_vs, random_strategy
 
 if __name__ == "__main__":
-    random.seed(22020137)
+    random.seed(22020111)
     start_time = time.time()
-    p1 = MCTSSwitchingStrategy_Player([mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy], 10)
-    p2 = MCTSSwitchingStrategy_Player([mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy], 10)
-    # p2 = Strategy_Player(greedyothello_strategy)
+    # p1 = MCTSSwitchingStrategy_Player([mobility_strategy_vs,mobility_strategy,mapbaseothello_strategy], 10)
+    p1 = MCTSStrategy_Player(mapbaseothello_strategy, 10)
+    p2 = Strategy_Player(greedyothello_strategy)
     # p1 = Man_Player()
     # p2 = Man_Player()
 
@@ -26,4 +26,3 @@ if __name__ == "__main__":
     print('-----------------')
     print(p2.stats2)
     print(len(p2.stats2))
-
