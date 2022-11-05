@@ -1,6 +1,9 @@
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
+from statistics import mean
+
+from additional_functions import sign, compose, count_foreach_negative, count_foreach_positive, count_foreach_zero, get_negative_values, get_positive_values, join_lists, mean_foreach, sum_lists_elemnet_wise
 
 #Scorre
 WIN_SCORE = 1
@@ -9,7 +12,8 @@ DEFEAT_SCORE = 0
 
 def process_data(file_path, separator, game_name, omit_errors:bool=False):
     df = read_data_of_game(file_path, separator, game_name)
-    result_df = check_data_and_create_result_df(df, omit_errors) #FALSE
+    check_data(df, omit_errors) 
+    result_df = create_result_df(df)
     df_tournament = create_tournament_df(df, list(result_df.index))
     return  df, result_df, df_tournament
 
@@ -19,10 +23,7 @@ def read_data(file_path, separator):
 def read_data_of_game(file_path, separator, game_name):
     df = pd.read_csv(file_path, sep=separator, header=None)
     df.columns = ['game_type','player1','player2','winner','seed','game_time','other']
-    
-    # do usuniecia
-    df.drop(df[df['player1'].str.contains('greedyothello_strategy')|df['player2'].str.contains('greedyothello_strategy')].index, inplace=True)
-    
+        
     df = df[df['game_type']==game_name]
     if game_name == 'othello':
         return transform_other_othello(df)
@@ -99,14 +100,16 @@ def create_results_df(results_dict:dict):
     return df
 
 
-def check_data_and_create_result_df(df:pd.DataFrame, omit_errors:bool=False):
+def check_data(df:pd.DataFrame, omit_errors:bool=False):
+    print(f"Amount data before check: {len(df)}")
     df.drop_duplicates(subset=df.columns.difference(['index','game_time']), inplace=True)
     if not set(df["player2"].unique()) == set(df["player1"].unique()) and not omit_errors:
         raise ValueError('Different players arrays') 
-    print(f"Amount data before check: {len(df)}")
     check_number_players_games(df, omit_errors)
     check_additiona_info(df, omit_errors)
     print(f"Amount data after check: {len(df)}")
+
+def create_result_df(df:pd.DataFrame):
     result_dict = create_results_dict(df)
     return create_results_df(result_dict)
 
@@ -262,9 +265,12 @@ def transform_other_othello(df:pd.DataFrame):
             d_tmp['switching_stats_p2'].append(None)
 
 
-    # df1 = df.drop('other', axis=1).reset_index()
-    df1 = df.reset_index()
-    return pd.concat([df1, pd.DataFrame(d_tmp)], axis=1)
+    df1 = df.drop('other', axis=1).reset_index()
+    df2 = pd.concat([df1, pd.DataFrame(d_tmp)], axis=1)
+    df2.insert(16, "board_scores_monotonicity", df2["board_scores"].apply(lambda x : tuple(([1 if x[i] < x[i+1] else -1 for i in range(len(x)-1)]))))
+    df2.insert(17, "board_scores_leader_change", df2["board_scores"].apply(lambda x : tuple(([1 if (x[i]>0 and x[i+1]<0) or (x[i]<0 and x[i+1]>0) else 0 for i in range(len(x)-1)]))))
+    df2.insert(18, "board_scores_leading", df2["board_scores"].apply(lambda x : tuple(([sign(y) for y in x]))))
+    return df2
 
 def transform_other_hex(df:pd.DataFrame):
     d_tmp = dict()
@@ -287,8 +293,7 @@ def transform_other_hex(df:pd.DataFrame):
         d_tmp['switching_stats_p1'].append(d2[0][1:]+']' if d2[0] != '[[' else None)
         d_tmp['switching_stats_p2'].append('['+d2[1][:-1] if d2[1] != ']]' else None)
 
-    # df1 = df.drop('other', axis=1).reset_index()
-    df1 = df.reset_index()
+    df1 = df.drop('other', axis=1).reset_index()
     return pd.concat([df1, pd.DataFrame(d_tmp)], axis=1)
 
 def check_additiona_info_othello(df:pd.DataFrame, omit_errors:bool=False):
@@ -315,8 +320,7 @@ def check_additiona_info_othello(df:pd.DataFrame, omit_errors:bool=False):
         if not omit_errors: raise ValueError(f'Additional info Othello - invalid board scores ({df_tmp.index[0]})')
         df = df.drop(df_tmp.index)
 
-    df_tmp = df[df["board_scores"]==""]
-    df_monotonic = df["board_scores"].apply(lambda x: [int(el) for el in x.split(",")]).apply(lambda x : [1 if x[i] < x[i+1] else -1 for i in range(len(x)-1)])
+    df_monotonic = df["board_scores_monotonicity"] 
     if not all(df_monotonic.apply(lambda x: abs(sum([el for el in x if el>0 ])) + 1).astype(int) == df["no_moves_p1"].astype(int)):
         if not omit_errors: raise ValueError(f'Additional info Othello - invalid board scores or no player 1 moves ({df[df_monotonic.apply(lambda x: abs(sum([el for el in x if el>0 ])) + 1).astype(int) == df["no_moves_p1"].astype(int)].index[0]})')   
     if not all(df_monotonic.apply(lambda x: abs(sum([el for el in x if el<0]))).astype(int)== df["no_moves_p2"].astype(int)):
@@ -331,15 +335,25 @@ def check_additiona_info_othello(df:pd.DataFrame, omit_errors:bool=False):
         if not omit_errors: raise ValueError(f'Additional info Othello - invalid board scores or no player 2 blocked moves ({index})')
 
     df_tmp = df[df['player1'].str.contains('mctsstrategies')].reset_index()
-    if not all(df_tmp['switching_stats_p1'].apply(lambda x: len([el for el in x.split('], [')])).astype(int) == df_tmp['no_moves_p1'].astype(int)):
+    if not all(df_tmp['switching_stats_p1'].apply(lambda x: len(x)).astype(int) == df_tmp['no_moves_p1'].astype(int)):
         if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 1')
-    if not all(df_tmp['switching_stats_p1'].apply(lambda x: all([all(sum([int(el) for el in y.split(',')]) == df_tmp['player1'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)) for y in x[1:-1].split('], [')]))):
+
+    df_tmp2 = df_tmp.dropna(subset=["switching_stats_p1"])
+    df_tmp2 = df_tmp2[df_tmp2["player1"].str.contains('mctsstrategies')]
+    df_tmp2 = df_tmp2[["switching_stats_p1",'player1']]
+    df_tmp2['no'] = df_tmp2['player1'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)
+    if not all(df_tmp2['switching_stats_p1'].apply(lambda x: all([all(sum(y) == df_tmp2['no']) for y in x]))):
         if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 1 (switching stats sum is incorrect')
 
     df_tmp = df[df['player2'].str.contains('mctsstrategies')].reset_index()
-    if not all(df_tmp['switching_stats_p2'].apply(lambda x: len([el for el in x.split('], [')])).astype(int) == df_tmp['no_moves_p2'].astype(int)):
+    if not all(df_tmp['switching_stats_p2'].apply(lambda x: len(x)).astype(int) == df_tmp['no_moves_p2'].astype(int)):
         if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 2')
-    if not all(df_tmp['switching_stats_p2'].apply(lambda x: all([all(sum([int(el) for el in y.split(',')]) == df_tmp['player2'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)) for y in x[1:-1].split('], [')]))):
+
+    df_tmp2 = df_tmp.dropna(subset=["switching_stats_p2"])
+    df_tmp2 = df_tmp2[df_tmp2["player2"].str.contains('mctsstrategies')]
+    df_tmp2 = df_tmp2[["switching_stats_p2",'player2']]
+    df_tmp2['no'] = df_tmp2['player2'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)
+    if not all(df_tmp2['switching_stats_p2'].apply(lambda x: all([all(sum(y) == df_tmp2['no']) for y in x]))):
         if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 2 (switching stats sum is incorrect')
     
 def check_additiona_info_hex(df:pd.DataFrame, omit_errors:bool=False):
@@ -377,3 +391,62 @@ def transform_games_into_players_stats(df:pd.DataFrame):
     df_cols= df.columns
     cols = [df_cols[1],df_cols[2], 'is_winner', df_cols[5], df_cols[6], df_cols[8],  df_cols[9], 'player_no_moves', 'oponent_no_moves', 'player_no_blocked_moves', 'oponent_no_blocked_moves', 'player_move_income', 'oponent_move_income', df_cols[16], 'player_swithching_stats', 'oponent_swithching_stats']
     return pd.DataFrame(l, columns=cols)
+
+def create_data_agg_by_player_othello(df:pd.DataFrame):
+    l = list()
+    for row in df.values:
+        p1 = [row[1],row[2], row[4] == 1, row[5], row[6], row[7],  row[8], row[9], row[10], row[11], row[12], row[13], row[14], [int(a) for a in row[15]], [int(a) for a in row[16]], row[17], [int(a) for a in row[18]], row[19] if row[19] != None else [], row[20] if row[20] != None else []]
+        p2 = [row[1],row[3], row[4] == 2, row[5], row[6], row[7], -row[8], row[10], row[9], row[12], row[11], row[14], row[13], [-int(a) for a in row[15]], [-int(a) for a in row[16]], row[17], [-int(a) for a in row[18]],row[20] if row[20] != None else [], row[19] if row[19] != None else []]
+        l.append(p1)
+        l.append(p2)
+    df_cols= df.columns
+    return pd.DataFrame(l, columns=[df_cols[1],'player', 'is_winner', df_cols[5], df_cols[6], df_cols[7],  df_cols[8], 'player_no_moves', 'oponent_no_moves', 'player_no_blocked_moves', 'oponent_no_blocked_moves', 'player_move_income', 'oponent_move_income', df_cols[15], df_cols[16], df_cols[17], df_cols[18], 'player_switching_stats', 'oponent_switching_stats'])
+
+def create_aggregate_datas_othello(df:pd.DataFrame):
+    df_player = create_data_agg_by_player_othello(df)
+    
+    df_agg_by_player = df_player.groupby(by=['player'], as_index=True).agg({'is_winner': 'sum',
+                                                                        'game_type': 'count',
+                                                                        'score_result_diff':'mean',
+                                                                        'player_no_moves':'mean',
+                                                                        'oponent_no_blocked_moves':'mean',
+                                                                        'player_move_income': [('mean_playerr_income', compose(mean, join_lists))],
+                                                                        'board_scores': [('mean_board_scores',compose(mean, join_lists)), 
+                                                                                        ('mean_positive_board_scores',compose(mean, get_positive_values, join_lists)), 
+                                                                                        ('mean_negative_board_scores',compose(mean, get_negative_values, join_lists))],
+                                                                        'board_scores_leader_change': [('mean', mean_foreach)],
+                                                                        'board_scores_leading': [('winning', count_foreach_positive),
+                                                                                            ('draw', count_foreach_zero),
+                                                                                            ('losing', count_foreach_negative)],
+                                                                        'player_switching_stats': [('strategies stats',compose(sum_lists_elemnet_wise,join_lists))]    
+                                                                        })
+    df_agg_by_player.columns = ['win_games_count', 'all_game_count', 'mean_score_result_diff', 'mean_player_moves', 'mean_opponent_moves', 'mean_player_income', 'mean_board_score', 'mean_positive_board_scores', 'mean_negative_board_scores','mean_leader_changes', 'mean_board_winning', 'mean_board_draw', 'mean_board_losing','player_switching_stats']
+    df_agg_by_player_winner = df_player.groupby(by=['player','is_winner'], as_index=True).agg({'is_winner': 'sum',
+                                                                            'game_type': 'count',
+                                                                            'score_result_diff':'mean',
+                                                                            'player_no_moves':'mean',
+                                                                            'oponent_no_blocked_moves':'mean',
+                                                                            'player_move_income': [('mean_playerr_income', compose(mean, join_lists))],
+                                                                            'board_scores': [('mean_board_scores',compose(mean, join_lists)), 
+                                                                                            ('mean_positive_board_scores',compose(mean, get_positive_values, join_lists)), 
+                                                                                            ('mean_negative_board_scores',compose(mean, get_negative_values, join_lists))],
+                                                                            'board_scores_leader_change': [('mean', mean_foreach)],
+                                                                            'board_scores_leading': [('winning', count_foreach_positive),
+                                                                                                ('draw', count_foreach_zero),
+                                                                                                ('losing', count_foreach_negative)],
+                                                                            'player_switching_stats': [('strategies stats',compose(sum_lists_elemnet_wise,join_lists))]    
+                                                                            })
+    df_agg_by_player_winner.columns = ['win_games_count', 'all_game_count', 'mean_score_result_diff', 'mean_player_moves', 'mean_opponent_moves', 'mean_player_income', 'mean_board_score', 'mean_positive_board_scores', 'mean_negative_board_scores','mean_leader_changes', 'mean_board_winning', 'mean_board_draw', 'mean_board_losing','player_switching_stats']
+    return df_agg_by_player, df_agg_by_player_winner
+
+def create_data_agg_by_player_hex(df:pd.DataFrame):
+    pass
+
+def create_aggregate_datas_hex(df:pd.DataFrame):
+    pass
+
+def create_data_agg_by_player_hive(df:pd.DataFrame):
+    pass
+
+def create_aggregate_datas_hive(df:pd.DataFrame):
+    pass
