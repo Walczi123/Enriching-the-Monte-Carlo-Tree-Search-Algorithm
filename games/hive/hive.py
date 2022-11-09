@@ -3,10 +3,8 @@ from copy import deepcopy
 import sys
 import os
 
-from sympy import Q
-from config import ROUND_LIMIT
 
-from games.hive.const import ANT_AMOUNT, ANT_ID, BEETLE_AMOUNT, BEETLE_ID, GRASSHOPPER_AMOUNT, GRASSHOPPER_ID, QUEEN_AMOUNT, QUEEN_ID, SPIDER_AMOUNT, SPIDER_ID
+from games.hive.const import ANT_ID, BEETLE_ID, GRASSHOPPER_ID, QUEEN_ID, SPIDER_ID
 
 from games.hive.pieces import Ant, Beetle, Grasshopper, Queen, Spider
 from games.hive.move_checker import check_move
@@ -189,6 +187,20 @@ class Hive():
                 return True
         return False
 
+    def count_queen_neighbours(self, board:dict, player):
+        queen_coordinate = self.find(player, QUEEN_ID, board)
+        if queen_coordinate:
+            a=0
+            o=0
+            for n in neighbours(queen_coordinate[0]):
+                if n in board.keys(): 
+                    if board[n][-1].color[0]//128 == 2 - player:
+                        a+=1
+                    else:
+                        o+=1
+            return (a, o)
+        return 0
+
     def end_condition(self):
         if self.is_looser(self.state.board, 1):
             self.winner = 2
@@ -277,6 +289,9 @@ class Hive():
         available_moves_checked = False
         current_player = self.player1
         self.state.turn_state = 1
+
+        queens_neighbours_list=list()
+        player_avaiable_pieces=list()
         while self.end_condition():
             if self.set_limit and self.state.round_counter > self.round_limit:
                 break
@@ -309,6 +324,10 @@ class Hive():
                 else:
                     available_moves_checked = True
 
+            q1 = self.count_queen_neighbours(self.state.board, 1)
+            q2 = self.count_queen_neighbours(self.state.board, 2)
+            queens_neighbours_list.append((q1,q2))
+            player_avaiable_pieces.append((self.state.amount_available_white_pieces, self.state.amount_available_black_pieces))
 
 
         self.ui.draw_board(self.state.board, self.state.amount_available_white_pieces, self.state.amount_available_black_pieces, selected_piece)
@@ -316,11 +335,15 @@ class Hive():
         pygame.quit()
 
         print(f"Player {self.winner} wins!")
-        return self.winner, None
+        return self.winner, (queens_neighbours_list, player_avaiable_pieces)
                          
     def play_without_ui(self):
         current_player = self.player1
         self.state.turn_state = 1
+
+        queens_neighbours_list=list()
+        player_avaiable_pieces=list()
+        player_pos_moves=list()
         while self.end_condition():
             if self.set_limit and self.state.round_counter > self.round_limit:
                 break
@@ -333,8 +356,13 @@ class Hive():
             move = self.player_make_move(current_player, all_posible_moves=pos_moves)
             if self.check_and_make_move(self.state, move):
                 current_player = self.swich_player()
-
-        return self.winner, None
+                
+            q1 = self.count_queen_neighbours(self.state.board, 1)
+            q2 = self.count_queen_neighbours(self.state.board, 2)
+            queens_neighbours_list.append((q1,q2))
+            player_avaiable_pieces.append((self.state.amount_available_white_pieces, self.state.amount_available_black_pieces))
+            player_pos_moves.append((len(self.get_all_posible_moves(self.state, 1)),len(self.get_all_posible_moves(self.state, 2))))
+        return self.winner, (queens_neighbours_list, player_avaiable_pieces, player_pos_moves)
 
     def play(self):
         if self.use_ui:

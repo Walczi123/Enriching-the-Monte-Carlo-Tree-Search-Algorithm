@@ -10,9 +10,9 @@ import time
 
 if __name__ == "__main__":
     #test_hive50_random_strategy_alphabeta4_22025001
-    random.seed(22025002)
-    p1 = Strategy_Player(greedyhive_strategy)
-    p2 = Strategy_Player(greedyhive_strategy)
+    random.seed(2202500123)
+    p1 = Random_Player()
+    p2 = Random_Player()
     # p2 = Man_Player()
     game = Hive(use_ui=False, player1= p1, player2=p2, round_limit=25)
     
