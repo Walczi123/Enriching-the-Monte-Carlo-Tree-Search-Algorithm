@@ -50,4 +50,5 @@ if __name__ == '__main__':
     game_list = args.game_list
     remove_done = args.remove_done_tests
 
-    count_tests(batch_size, game_list, remove_done)
+    # count_tests(batch_size, game_list, remove_done)
+    count_tests(0, [Hive], remove_done)

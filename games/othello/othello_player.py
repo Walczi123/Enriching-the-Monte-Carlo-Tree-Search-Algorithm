@@ -1,5 +1,3 @@
-import random
-
 from games.othello.common import get_pieces_to_reverse
 from games.player import Player
 from strategies.othello_strategies import mapbaseothello_strategy

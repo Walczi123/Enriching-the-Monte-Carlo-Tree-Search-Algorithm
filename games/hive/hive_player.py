@@ -1,7 +1,3 @@
-# from mcts import MCTS
-from math import inf
-
-
 class Player():
     def __init__(self, is_man):
         self.is_man = is_man

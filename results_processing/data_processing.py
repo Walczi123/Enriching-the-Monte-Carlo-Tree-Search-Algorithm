@@ -1,3 +1,4 @@
+import itertools
 from matplotlib import pyplot as plt
 import numpy as np
 import pandas as pd
@@ -22,15 +23,20 @@ def read_data(file_path, separator):
 
 def read_data_of_game(file_path, separator, game_name):
     df = pd.read_csv(file_path, sep=separator, header=None)
-    df.columns = ['game_type','player1','player2','winner','seed','game_time','other']
-        
-    df = df[df['game_type']==game_name]
-    if game_name == 'othello':
-        return transform_other_othello(df)
-    elif game_name == 'hex':
-        return transform_other_hex(df)
-    elif game_name == 'hive':
+
+    if len(df.columns) == 6:
+        df.columns = ['game_type','player1','player2','winner','seed','game_time']
+        df = df[df['game_type']==game_name]
         return df
+    elif len(df.columns) == 7:
+        df.columns = ['game_type','player1','player2','winner','seed','game_time','other']
+        df = df[df['game_type']==game_name]
+        if game_name == 'othello':
+            return transform_other_othello(df)
+        elif game_name == 'hex':
+            return transform_other_hex(df)
+        elif game_name == 'hive': 
+            return transform_other_hive(df)
 
 def check_number_players_games(df:pd.DataFrame, omit_errors:bool=False):
     n_games1 = len(df.loc[(df['player1'] == df["player1"].unique()[0])])
@@ -106,7 +112,8 @@ def check_data(df:pd.DataFrame, omit_errors:bool=False):
     if not set(df["player2"].unique()) == set(df["player1"].unique()) and not omit_errors:
         raise ValueError('Different players arrays') 
     check_number_players_games(df, omit_errors)
-    check_additiona_info(df, omit_errors)
+    if len(df.columns) == 7 :
+        check_additiona_info(df, omit_errors)
     print(f"Amount data after check: {len(df)}")
 
 def create_result_df(df:pd.DataFrame):
@@ -310,6 +317,76 @@ def transform_other_hex(df:pd.DataFrame):
     df2.insert(12, "dikstra_scores_diff_values_p2", df2['dikstra_scores_p2'].apply(lambda x : tuple(([x[i+1]-x[i] for i in range(len(x)-1)]))))
     return df2
 
+def transform_other_hive(df:pd.DataFrame):
+    d_tmp = dict()
+    columns = ['queens_neighbours_count_player1', 'queens_neighbours_count_player2',
+        'player1_unsed_pieces','player2_unsed_pieces','player1_pos_moves','player2_pos_moves',
+        'switching_stats_p1', 'switching_stats_p2']
+
+    for c in columns:
+        d_tmp[c] = list()
+
+    for r in df['other']:
+        try:
+            d = r[1:-1].strip().split(")], [(")
+
+            d0 = d[0][3:-1].split(")), ((")
+            d1 = d[1].split("]), ([")
+            d20 = d[2].split("],",1)[0]
+            d21 = d[2].split("],",1)[1].strip().replace("None", '[[]]').split(']], [[')
+            
+            l1 = list()
+            l2 = list()
+            for x in d0:
+                y = x.split('), (')
+                y1 = tuple(([int(z) for z in y[0].strip().split(',')]))
+                y2 = tuple(([int(z) for z in y[1].strip().split(',')]))
+
+                l1.append(y1)
+                l2.append(y2)
+            d_tmp['queens_neighbours_count_player1'].append(tuple((l1)))
+            d_tmp['queens_neighbours_count_player2'].append(tuple((l2)))
+
+            l1 = list()
+            l2 = list()
+            for x in d1[1:-1]:
+                y = x.split('], [')
+                y1 = tuple(([int(z) for z in y[0].strip().split(',')]))
+                y2 = tuple(([int(z) for z in y[1].strip().split(',')]))
+
+                l1.append(y1)
+                l2.append(y2)
+            d_tmp['player1_unsed_pieces'].append(tuple((l1)))
+            d_tmp['player2_unsed_pieces'].append(tuple((l2)))
+
+            l1 = list()
+            l2 = list()
+            for x in d20[:-1].split('), ('):
+                y = x.split(',')
+                l1.append(int(y[0]))
+                l2.append(int(y[1]))
+            d_tmp['player1_pos_moves'].append(tuple((l1)))
+            d_tmp['player2_pos_moves'].append(tuple((l2)))
+
+            if d21[0] != '[[':
+                switching_stats = tuple((tuple(([int(elem2) for elem2 in elem.split(',') ])) for elem in d21[0][2:].replace(' ','').split('],[')))
+                d_tmp['switching_stats_p1'].append(switching_stats)
+            else:           
+                d_tmp['switching_stats_p1'].append(None)
+
+            if d21[1] != ']]':
+                switching_stats = tuple((tuple(([int(elem2) for elem2 in elem.split(',') ])) for elem in d21[1][:-2].replace(' ','').split('],[')))
+                d_tmp['switching_stats_p2'].append(switching_stats)
+            else:
+                d_tmp['switching_stats_p2'].append(None)
+        except Exception as e:
+            print(r)
+            return r
+
+    df1 = df.drop('other', axis=1).reset_index()
+    df2 = pd.concat([df1, pd.DataFrame(d_tmp)], axis=1)
+    return df2
+
 def check_additiona_info_othello(df:pd.DataFrame, omit_errors:bool=False):
     df_temp=pd.concat([df['score_result'].str.split(':',1,expand=True).astype(int),df['winner']],axis=1)
     for r in pd.concat([df_temp.iloc[:,0:2].idxmax(axis=1)+1 == df["winner"],df_temp[0]==df_temp[1], df_temp['winner']==0],axis=1).values:
@@ -400,7 +477,44 @@ def check_additiona_info_hex(df:pd.DataFrame, omit_errors:bool=False):
 
 
 def check_additiona_info_hive(df:pd.DataFrame, omit_errors:bool=False):
-    pass
+    if not all(df['queens_neighbours_count_player1'].apply(lambda x : [(y[0]+y[1])>=0 and (y[0]+y[1])<=6 for y in x])):
+        if not omit_errors: raise ValueError('Additional info Hive - invalid queens neighbour count for player1')
+
+    if not all(df['queens_neighbours_count_player2'].apply(lambda x : [(y[0]+y[1])>=0 and (y[0]+y[1])<=6 for y in x])):
+        if not omit_errors: raise ValueError('Additional info Hive - invalid queens neighbour count for player2')
+
+    s_p1_pos_m = set(df['player1_pos_moves'].apply(lambda x : len(x)))
+    s_p2_pos_m = set(df['player1_pos_moves'].apply(lambda x : len(x)))
+    s_p1_queen_n = set(df['queens_neighbours_count_player1'].apply(lambda x : len(x)))
+    s_p2_queen_n = set(df['queens_neighbours_count_player2'].apply(lambda x : len(x)))
+    
+    if not max(s_p1_pos_m) == max(s_p2_pos_m) == max(s_p1_queen_n) == max(s_p2_queen_n):
+        if not omit_errors: raise ValueError('Additional info Hive - max count of other data is invalid')
+    
+    if not min(s_p1_pos_m) == min(s_p2_pos_m) == min(s_p1_queen_n) == min(s_p2_queen_n):
+        if not omit_errors: raise ValueError('Additional info Hive - min count of other data is invalid')
+
+    df_tmp = df[df['player1'].str.contains('mctsstrategies')].reset_index()
+    if not all(df_tmp['switching_stats_p1'].apply(lambda x: len(x)).astype(int) == df_tmp['no_moves_p1'].astype(int)):
+        if not omit_errors: raise ValueError('Additional info Hex - invalid switching stats for player 1')
+    
+    df_tmp2 = df_tmp.dropna(subset=["switching_stats_p1"])
+    df_tmp2 = df_tmp2[df_tmp2["player1"].str.contains('mctsstrategies')]
+    df_tmp2 = df_tmp2[["switching_stats_p1",'player1']]
+    df_tmp2['no'] = df_tmp2['player1'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)
+    if not all(df_tmp2['switching_stats_p1'].apply(lambda x: all([all(sum(y) == df_tmp2['no']) for y in x]))):
+        if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 1 (switching stats sum is incorrect')
+    
+    df_tmp = df[df['player2'].str.contains('mctsstrategies')].reset_index()
+    if not all(df_tmp['switching_stats_p2'].apply(lambda x: len(x)).astype(int) == df_tmp['no_moves_p2'].astype(int)):
+        if not omit_errors: raise ValueError('Additional info Hex - invalid switching stats for player 2')
+
+    df_tmp2 = df_tmp.dropna(subset=["switching_stats_p2"])
+    df_tmp2 = df_tmp2[df_tmp2["player2"].str.contains('mctsstrategies')]
+    df_tmp2 = df_tmp2[["switching_stats_p2",'player2']]
+    df_tmp2['no'] = df_tmp2['player2'].str.replace('mctsstrategies','').apply(lambda x: x.split('(')[0]).astype(int)
+    if not all(df_tmp2['switching_stats_p2'].apply(lambda x: all([all(sum(y) == df_tmp2['no']) for y in x]))):
+        if not omit_errors: raise ValueError('Additional info Othello - invalid switching stats for player 2 (switching stats sum is incorrect')
 
 def transform_games_into_players_stats(df:pd.DataFrame):
     l = list()
@@ -445,11 +559,13 @@ def create_aggregate_datas_othello(df:pd.DataFrame):
                 'player_switching_stats': [('strategies stats',compose(sum_lists_elemnet_wise,join_lists))]    
                 }
     df_agg_by_player = df_player.groupby(by=['player'], as_index=True).agg(agg_dict)
-    columns = ['win_games_count', 'all_games_count', 'mean_score_result_diff', 'mean_player_moves', 'mean_opponent_moves', 'mean_player_income', 'mean_board_score', 'mean_winning_board_scores', 'mean_losing_board_scores','mean_leader_changes_per_game', 'mean_board_winning_states_per_game', 'mean_board_draw_states_per_game', 'mean_board_losing_states_per_game','player_switching_stats']
-    df_agg_by_player.columns = columns
+    # columns = ['win_games_count', 'all_games_count', 'mean_score_result_diff', 'mean_player_moves', 'mean_opponent_blocked_moves', 'mean_player_income', 'mean_board_score', 'mean_winning_board_scores', 'mean_losing_board_scores','mean_leader_changes_per_game', 'mean_board_winning_states_per_game', 'mean_board_draw_states_per_game', 'mean_board_losing_states_per_game','player_switching_stats']
+    # df_agg_by_player.columns = columns
+    df_agg_by_player.columns = ['_'.join(col) for col in df_agg_by_player.columns.values]
     df_agg_by_player_winner = df_player.groupby(by=['player','is_winner'], as_index=True).agg(agg_dict)
-    df_agg_by_player_winner.columns = columns
-    return df_agg_by_player, df_agg_by_player_winner
+    # df_agg_by_player_winner.columns = columns
+    df_agg_by_player_winner.columns = ['_'.join(col) for col in df_agg_by_player_winner.columns.values]
+    return df_player, df_agg_by_player, df_agg_by_player_winner
 
 def create_data_agg_by_player_hex(df:pd.DataFrame):
     l = list()
@@ -484,14 +600,62 @@ def create_aggregate_datas_hex(df:pd.DataFrame):
                 'player_switching_stats': [('strategies stats', compose(sum_lists_elemnet_wise,join_lists))]    
                 }
     df_agg_by_player = df_player.groupby(by=['player'], as_index=True).agg(agg_dict)
-    columns = ['win_games_count', 'all_games_count', 'mean_player_moves', 'mean_opponent_moves', 'mean_of_all_diff_after_player_moves', 'mean_of_means_of_each_game_diff_after_player_moves', 'mean_of_all_diff_after_opponent_moves', 'mean_of_means_of_each_game_diff_after_oponent_moves', 'mean_nonnegative_sequences_lenght', 'mean_nonpositive_sequences_lenght', 'mean_count_nonnegative_sequences', 'count_games_with_none_nonnegative_sequences', 'mean_count_nonpositive_sequences', 'count_games_with_none_nonpositive_sequences', 'player_switching_stats']
-    df_agg_by_player.columns = columns
+    # columns = ['win_games_count', 'all_games_count', 'mean_player_moves', 'mean_opponent_moves', 'mean_of_all_diff_after_player_moves', 'mean_of_means_of_each_game_diff_after_player_moves', 'mean_of_all_diff_after_opponent_moves', 'mean_of_means_of_each_game_diff_after_oponent_moves', 'mean_nonnegative_sequences_lenght', 'mean_nonpositive_sequences_lenght', 'mean_count_nonnegative_sequences', 'count_games_with_none_nonnegative_sequences', 'mean_count_nonpositive_sequences', 'count_games_with_none_nonpositive_sequences', 'player_switching_stats']
+    # df_agg_by_player.columns = columns
+    df_agg_by_player.columns = ['_'.join(col) for col in df_agg_by_player.columns.values]
     df_agg_by_player_winner = df_player.groupby(by=['player', 'is_winner'], as_index=True).agg(agg_dict)
-    df_agg_by_player_winner.columns = columns
-    return df_agg_by_player, df_agg_by_player_winner
+    # df_agg_by_player_winner.columns = columns
+    df_agg_by_player_winner.columns = ['_'.join(col) for col in df_agg_by_player_winner.columns.values]
+    return df_player, df_agg_by_player, df_agg_by_player_winner
 
 def create_data_agg_by_player_hive(df:pd.DataFrame):
-    pass
+    l = list()
+    for row in df.values:
+        p1 = [row[1],row[2], row[4] == 1, row[4] == 0, row[5], row[6], [x[0] for x in row[7]], [x[1] for x in row[7]], [x[0] for x in row[8]], [x[1] for x in row[8]], row[9], row[10], row[11], row[12], row[13] if row[13] != None else [], row[14] if row[14] != None else []]
+        p2 = [row[1],row[3], row[4] == 2, row[4] == 0, row[5], row[6], [x[0] for x in row[8]], [x[1] for x in row[8]], [x[0] for x in row[7]], [x[1] for x in row[7]], row[10], row[9], row[12], row[11], row[14] if row[14] != None else [], row[13] if row[13] != None else []]
+        l.append(p1)
+        l.append(p2)
+    df_cols= df.columns
+    df1 = pd.DataFrame(l, columns=[df_cols[1],'player', 'is_winner', 'is_draw', df_cols[5], df_cols[6], 'player_queens_neighbours_count_p', 'player_queens_neighbours_count_o',  'opponent_queens_neighbours_count_o', 'opponent_queens_neighbours_count_p', 'player_unsed_pieces', 'opponent_unsed_pieces', 'player_pos_moves', 'opponent_pos_moves', 'player_switching_stats', 'opponent_switching_stats'])
+    df1.insert(5, "player_queens_neighbours_count", df1['player_queens_neighbours_count_p']+df1['player_queens_neighbours_count_o'])
+    df1.insert(8, "opponent_queens_neighbours_count", df1['opponent_queens_neighbours_count_p']+df1['opponent_queens_neighbours_count_o'])
+    return df1
 
 def create_aggregate_datas_hive(df:pd.DataFrame):
-    pass
+    df_player = create_data_agg_by_player_hive(df)
+    agg_dict = {'is_winner': 'sum',
+            'is_draw': 'sum',
+            'game_type': 'count',
+            'player_queens_neighbours_count': mean_foreach_sep,
+            'player_queens_neighbours_count_p':mean_foreach_sep,
+            'player_queens_neighbours_count_o':mean_foreach_sep,
+            'opponent_queens_neighbours_count': mean_foreach_sep,
+            'opponent_queens_neighbours_count_p':mean_foreach_sep,
+            'opponent_queens_neighbours_count_o':mean_foreach_sep,
+            'player_pos_moves':[('mean', compose(mean,join_lists)),('mean_foreach_sep', mean_foreach_sep)],
+            'opponent_pos_moves':[('mean', compose(mean,join_lists)),('mean_foreach_sep', mean_foreach_sep)],
+            'player_unsed_pieces': [('sum_element_wise', compose(sum_lists_elemnet_wise,join_lists))],
+            'opponent_unsed_pieces': [('sum_element_wise', compose(sum_lists_elemnet_wise,join_lists))],
+            'player_switching_stats': [('strategies stats', compose(sum_lists_elemnet_wise,join_lists))]
+            }
+    df_agg_by_player = df_player.groupby(by=['player'], as_index=True).agg(agg_dict)
+    # columns = ['win_games_count', 'all_games_count', 'mean_player_moves', 'mean_opponent_moves', 'mean_of_all_diff_after_player_moves', 'mean_of_means_of_each_game_diff_after_player_moves', 'mean_of_all_diff_after_opponent_moves', 'mean_of_means_of_each_game_diff_after_oponent_moves', 'mean_nonnegative_sequences_lenght', 'mean_nonpositive_sequences_lenght', 'mean_count_nonnegative_sequences', 'count_games_with_none_nonnegative_sequences', 'mean_count_nonpositive_sequences', 'count_games_with_none_nonpositive_sequences', 'player_switching_stats']
+    # df_agg_by_player.columns = columns
+    df_agg_by_player.columns = ['_'.join(col) for col in df_agg_by_player.columns.values]
+    df_agg_by_player_winner = df_player.groupby(by=['player', 'is_winner'], as_index=True).agg(agg_dict)
+    # df_agg_by_player_winner.columns = columns
+    df_agg_by_player_winner.columns = ['_'.join(col) for col in df_agg_by_player_winner.columns.values]
+    return df_player, df_agg_by_player, df_agg_by_player_winner
+
+def get_switching_stats(df_player, player_name):
+    df_strategies = df_player[df_player['player']==player_name]
+    switching_stats=df_strategies['player_switching_stats']
+    switching_stats_l = switching_stats.tolist()
+    one_switching_stats_l = list(itertools.chain.from_iterable(switching_stats_l))
+    switching_stats_arr = np.array(one_switching_stats_l).T
+
+    players= [x.replace('_strategy','') for x in player_name.split('(',1)[1][:-1].split(":")]
+    df = pd.DataFrame()
+    for i in range(len(players)):
+        df[str(players[i])] = switching_stats_arr[i]
+    return df

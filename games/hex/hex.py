@@ -8,13 +8,12 @@ from games.hex.common import get_dijkstra_score
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from games.game import Game
-from games.hex.const import BLUE_PLAYER, RED_PLAYER
+from games.hex.const import BLUE_PLAYER
 from games.player import Player
 
 from games.hex.logic import Logic
 from games.hex.ui import UI
 
-# from mcts import MCTS
 
 
 class Hex(Game):
@@ -67,11 +66,8 @@ class Hex(Game):
         return False
 
     def check_move(self, move, player):
-        # Forbid playing on already busy node
         try:
             self.winner = self.logic.check_and_make_action(player, move)
-            # if self.winner:
-            #     print('win')
         except AssertionError:
             print("invalid move")
             return False
@@ -93,7 +89,6 @@ class Hex(Game):
         return self.winner
 
     def swich_player(self):
-        # Next turn
         if self.turn_state == 1:
             self.turn_state = 2
             return self.player2
@@ -103,11 +98,9 @@ class Hex(Game):
 
     def get_winner(self):
         if self.winner:
-            # print("Player {} wins!".format(self.winner))
             return True
 
     def play_with_ui(self):
-        # print(f'{self.name} starts')
         node = None
 
         no_moves_p1 = 0
@@ -117,8 +110,6 @@ class Hex(Game):
 
         current_player = self.player1
         while not self.end_condition():
-            # dist_board = self.logic.manhattan_distance(self.logic.logger, self.turn_state)
-            # self.ui.draw_board(dist_board)
             self.ui.draw_board()
     
             if current_player.is_man:
@@ -155,7 +146,6 @@ class Hex(Game):
 
         current_player = self.player1
         while not self.end_condition():
-            # move = current_player.make_move()
             move = self.player_make_move(current_player)
             self.check_move(move, self.turn_state)
 
@@ -193,7 +183,6 @@ class Hex(Game):
     def board_move(self, state, move, player):
         (x, y) = move
 
-        # assert self.logic.is_node_free((x, y), state), "node is busy"
         if self.logic.logger[x][y] : raise("node is busy")
         state[x][y] = player
         return state

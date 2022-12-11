@@ -14,8 +14,8 @@ if __name__ == "__main__":
     p1 = Random_Player()
     p2 = Random_Player()
     # p2 = Man_Player()
-    game = Hive(use_ui=False, player1= p1, player2=p2, round_limit=25)
-    
+    game = Hive(use_ui=False, player1= p1, player2=p2, round_limit=5)
+
     start_time = time.time()
 
     print(game.play())

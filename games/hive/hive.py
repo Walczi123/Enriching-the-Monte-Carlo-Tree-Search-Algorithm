@@ -12,7 +12,6 @@ from games.hive.common_functions import neighbours, one_hive
 from games.hive.state import State
 from games.player import Player
 
-# # Hide Pygame welcome message
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from games.hive.ui import UI
@@ -79,13 +78,10 @@ class Hive():
                 for n in neighbours(coordinate):
                     if not n in state.board.keys():
                         players[player].add(n)
-        # All neighbours to any tile placed by current player...
         coordinates = players[current_player]
-        # ...except where the opponent is neighbour...
         for p in players:
             if p != current_player:
                 coordinates.difference_update(players[p])
-        # ...and you cannot place on top of another tile.
         coordinates.difference_update(state.board.keys())      
 
         return coordinates   
@@ -119,11 +115,9 @@ class Hive():
         if (self.set_limit and state.round_counter > self.round_limit) or not self.is_end(state.board):
             return []
         if not state.board:
-            # Empty board
             anywhere = (0, 0)
             return self.enumerate_hand(state, [anywhere], player)
         if len(state.board) == 1:
-            # If single tile is placed, opponent places at neighbour
             start_tile = next(iter(state.board))
             return self.enumerate_hand(state, list(neighbours(start_tile)), player)
         
@@ -136,14 +130,10 @@ class Hive():
             placements = self.placeable(state, player)
             if not len(placements):
                 return []
-            # If queen is still on hand...
             if hand[0] > 0:
-                # ...it must be placed on round 4
                 if state.round_counter + 1 == 4:
                     return [(('True', (player-1, QUEEN_ID)), c) for c in placements]
-                # ...otherwise only placements...
                 return list(self.enumerate_hand(state, placements, player))
-            # ...but normally placements and movements
             available += list(self.enumerate_hand(state, placements, player)) + list(self.movements(state, player))
         available += list(self.movements(state, player))
         return available
@@ -160,7 +150,6 @@ class Hive():
                 pygame.quit()
                 sys.exit()
             if (self.player1.is_man or self.player2.is_man) and event.type == pygame.MOUSEBUTTONDOWN :
-            # if event.type == pygame.MOUSEBUTTONDOWN :
                 return self.ui.get_coordiantes(pygame.mouse.get_pos())
         return None
 
@@ -199,7 +188,7 @@ class Hive():
                     else:
                         o+=1
             return (a, o)
-        return 0
+        return (0,0)
 
     def end_condition(self):
         if self.is_looser(self.state.board, 1):
@@ -360,7 +349,7 @@ class Hive():
             q1 = self.count_queen_neighbours(self.state.board, 1)
             q2 = self.count_queen_neighbours(self.state.board, 2)
             queens_neighbours_list.append((q1,q2))
-            player_avaiable_pieces.append((self.state.amount_available_white_pieces, self.state.amount_available_black_pieces))
+            player_avaiable_pieces.append((deepcopy(self.state.amount_available_white_pieces), deepcopy(self.state.amount_available_black_pieces)))
             player_pos_moves.append((len(self.get_all_posible_moves(self.state, 1)),len(self.get_all_posible_moves(self.state, 2))))
         return self.winner, (queens_neighbours_list, player_avaiable_pieces, player_pos_moves)
 

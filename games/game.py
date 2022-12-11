@@ -1,9 +1,8 @@
 import os
 import sys
-# # Hide Pygame welcome message
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
-from pygame.constants import KEYDOWN, QUIT, K_f
+from pygame.constants import KEYDOWN, QUIT
 from games.player import Player
 
 

@@ -140,26 +140,6 @@ def move_does_not_break_hive(state:State, coordinates):
     copy_state.remove_from_board(coordinates, copy_state.board[coordinates][-1])
     return one_hive(copy_state.board.keys())
 
-    # tile_list = list(copy_state.board.keys())
-    # visited = []
-    # queue = []
-
-    # visited.append(tile_list[0])
-    # queue.append(tile_list[0])
-
-    # while queue:
-    #     current = queue.pop(0)
-
-    #     for neighbour in [x for x in neighbours(current) if x in tile_list]:
-    #         if neighbour not in visited:
-    #             visited.append(neighbour)
-    #             queue.append(neighbour)
-
-    # if len(visited) != len(tile_list):
-    #     return False
-    # return True
-
-
 def one_hive(coordinates):
     unvisited = set(coordinates)
     todo = [unvisited.pop()]

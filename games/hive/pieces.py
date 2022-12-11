@@ -1,8 +1,6 @@
 import os
-import numpy as np
-
 from games.hive.const import ANT_AMOUNT, ANT_ID, BEETLE_AMOUNT, BEETLE_ID, GRASSHOPPER_AMOUNT, GRASSHOPPER_ID, QUEEN_AMOUNT, QUEEN_ID, SPIDER_AMOUNT, SPIDER_ID
-from games.hive.common_functions import axial_to_evenr, cube_to_axial, evenr_to_axial, is_hive_adjacent, is_hive_adjacent_coordinates, move_does_not_break_hive, neighbours, find_pieces_around, path_exists
+from games.hive.common_functions import axial_to_evenr, evenr_to_axial, is_hive_adjacent_coordinates, neighbours, find_pieces_around, path_exists
 from games.hive.state import State
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame as pg
@@ -129,12 +127,10 @@ class Grasshopper(Piece):
 def find_contour(state:State, exclude=None):
         """Returns all contour coordinates of the hive"""
         contour = set()
-        # All neighbours
         for coordinate in state.board.keys():
             if coordinate not in exclude:
                 for neighbour in neighbours(coordinate):
                     contour.add(neighbour)
-        # ...except non-free
         contour.difference_update(set(state.board.keys()))
         return contour
 

@@ -40,12 +40,10 @@ class UI:
         self.rects, self.color, self.node = [], [self.white] * (self.board_size ** 2), None
 
     def draw_hexagon(self, surface: object, color: tuple, position: tuple, node: int):
-        # Vertex count and radius
         n = 6
         x, y = position
         offset = 3
 
-        # Outline
         self.hex_lookup[node] = [(x + (self.hex_radius + offset) * cos(radians(90) + 2 * pi * _ / n),
                                   y + (self.hex_radius + offset) * sin(radians(90) + 2 * pi * _ / n))
                                  for _ in range(n)]

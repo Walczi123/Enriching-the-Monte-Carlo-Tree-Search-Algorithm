@@ -11,7 +11,7 @@ from strategies.strategies import mobility_strategy, mobility_strategy_vs, rando
 #TESTS
 SEED = 22020110
 REPETITIONS = 1
-RESULTS_FILE_NAME='hive_final_tests'
+RESULTS_FILE_NAME='hive10_part_tests'
 
 
 RESULTS_FILE_PATH = f'./{RESULTS_FILE_NAME}.csv'
@@ -22,7 +22,7 @@ MCTS_ITERATIONS = 10
 
 #HIVE
 ROUND_LIMIT = 5
-ROUND_LIMITS = [25]
+ROUND_LIMITS = [10]
 
 #HEX
 BOARD_SIZE = 11
@@ -33,22 +33,22 @@ COMMON_PLAYERS = [
 ]
 
 HIVE_PLAYERS = [
-    MCTSStrategy_Player(mobility_strategy_vs, 1000),
-    MCTSStrategy_Player(evaluatehive_strategy, 1000),
-    MCTSStrategy_Player(greedyhive_strategy, 1000),
-    MCTSStrategy_Player(mobility_strategy, 1000),
+    MCTSStrategy_Player(mobility_strategy_vs, 500),
+    MCTSStrategy_Player(evaluatehive_strategy, 500),
+    MCTSStrategy_Player(greedyhive_strategy, 500),
+    MCTSStrategy_Player(mobility_strategy, 500),
     
     Strategy_Player(random_strategy),
     Strategy_Player(greedyhive_strategy),
     Strategy_Player(mobility_strategy_vs),
     Strategy_Player(mobility_strategy),
     
-    MCTS_Player(1000),
-    MCTSRAVE_Player(1000),
-    MCTSRAVEv2_Player(1000),
+    MCTS_Player(500),
+    MCTSRAVE_Player(500),
+    MCTSRAVEv2_Player(500),
 
-    MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehive_strategy, greedyhive_strategy], number_of_iteration=1000),
-    MCTSSwitchingStrategy_Player([mobility_strategy_vs, mobility_strategy, evaluatehive_strategy, greedyhive_strategy], 1000),
+    MCTSSwitchingStrategy_Player([random_strategy, mobility_strategy_vs, mobility_strategy, evaluatehive_strategy, greedyhive_strategy], number_of_iteration=500),
+    MCTSSwitchingStrategy_Player([mobility_strategy_vs, mobility_strategy, evaluatehive_strategy, greedyhive_strategy], 500),
 
     AlphaBeta_Player(hive_evaluate, 10),
     AlphaBeta_Player(hive_evaluate, 12)

@@ -4,11 +4,9 @@ from games.hive.pieces import Ant, Beetle, Grasshopper, Queen, Spider
 from games.hive.state import State
 
 def check_move(state, move):
-    # print(f'Move round {state.round_counter} ',move)
     if move[0][0]:
         return placement_is_allowed(state, move) and queen_is_on_board(state, move)
     else:
-        # if move[0][1] != move[1] and is_hive_adjacent(state, move[1]) and move_does_not_break_hive(state, move[0][1], move[1]) and queen_is_on_board(state):
         if move[0][1] != move[1] and move_does_not_break_hive(state, move[0][1]) and queen_is_on_board(state):
             return piece_valid_move(state, move)
     return False
@@ -43,7 +41,6 @@ def ant_valid_move(state, move):
     return False
 
 def grasshopper_valid_move(state, move):
-    # dist > 1, straight line, must hop over pieces
     if axial_distance(move[0][1], move[1]) > 1 and is_straight_line(move[0][1], move[1]):
         return any(p in state.board.keys() for p in line(move[0][1], move[1]))
     return False
@@ -76,8 +73,6 @@ def placement_is_allowed(state: State, move):
         return False
     if not is_hive_adjacent(state, move[1]):
         return False
-
-    # placed pieces cannot touch other player's pieces to start
     if state.round_counter > 1:
         pieces_around = find_pieces_around(state, move[1])
         for p in pieces_around:

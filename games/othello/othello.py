@@ -5,7 +5,6 @@ from games.game import Game
 from games.othello.common import get_pieces_to_reverse
 from games.player import Player
 
-# # Hide Pygame welcome message
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from games.othello.ui import UI
@@ -59,8 +58,6 @@ class Othello(Game):
 
     def board_move(self, state, move, player):
         return board_move(state, move, player)
-        # self.check_and_make_move(state, move, player)
-        # return state
 
     def handle_events(self):
         for event in pygame.event.get():
@@ -78,7 +75,6 @@ class Othello(Game):
         return None
 
     def swich_player(self):
-        # Next turn
         if self.turn_state == 1:
             self.turn_state = 2
             return self.player2
@@ -110,8 +106,6 @@ class Othello(Game):
             args = clicked
         else:
             args = (self.board, self.turn_state, self.get_result, self.get_all_posible_moves, self.change_player, self.board_move, all_posible_moves)
-            # args = (self.board, self.turn_state, get_result, get_all_posible_moves, change_player, board_move, all_posible_moves)
-
         move = player.make_move(args)
         return move
 
@@ -162,7 +156,6 @@ class Othello(Game):
         current_player = self.player1
         board_scores = []
         while not self.end_condition():
-            # print("start player"+str(self.turn_state))
             pos_moves = self.get_all_posible_moves(self.board, self.turn_state)
             self.ui.draw_board(self.board, pos_moves)
             if pos_moves == []:
@@ -211,10 +204,6 @@ class Othello(Game):
         board_scores = []
         while not self.end_condition():
             pos_moves = self.get_all_posible_moves(self.board, self.turn_state)
-            print('====================================')
-            print('board',self.board)
-            print('pos_moves',pos_moves)
-            print('turn_state',self.turn_state)
             if pos_moves == []:
                 if self.turn_state == 1:
                     no_blocked_moves_p1 += 1
@@ -225,10 +214,6 @@ class Othello(Game):
 
             move = self.player_make_move(current_player, pos_moves)
             checked_move = self.check_and_make_move(self.board, move, self.turn_state)
-            print('checked_move',checked_move)
-            print('move',move)
-            print('board',self.board)
-
             if checked_move[0]:
                 s1, s2 = self.get_scores()
                 board_scores.append(s1-s2)
@@ -264,61 +249,31 @@ def get_result(state, player):
         return 0
 
 def check_for_any_line(state, player, x, y, i, j):
-    """ Check if move creates a line. 
-        So if there is a line from (x,y) to another player's colored disk going through the neighbour (i,j), 
-        where (i,j) has the opponent's color
-
-    Args:
-        colour ([type]): [description]
-        x ([type]): move's x coordinate
-        i ([type]): neighbour's x coordinate 
-
-    Returns:
-        [type]: boolean - true if it forms a correct line
-    """
     neighX = i
     neighY = j
     
     if state[neighX][neighY]==player:
         return False
-
-    #Determine the direction of the line
     deltaX = neighX-x
     deltaY = neighY-y
     tempX = neighX
     tempY = neighY
     
     while 0<=tempX<=7 and 0<=tempY<=7:
-        #If an empty space, no line is formed
         if state[tempX][tempY]==None:
             return False
-        #If it reaches a piece of the player's colour, it forms a line
         if state[tempX][tempY] == player:
             return True
-        #Move the index according to the direction of the line
         tempX+=deltaX
         tempY+=deltaY
     return False
 
 def check_move(state, move, player):
-    """ Check if placing disk on (x,y) is a valid move
-
-    Args:
-        player ([type]): [description]
-        x ([type]): [description]
-        y ([type]): [description]
-
-    Returns:
-        [type]: [description]
-    """
     x, y = move
-    #Sets player colour
     colour = player
-    #If there's already a piece there, it's an invalid move
     if state[x][y] != None:
         return False
     else:
-        #Generating the list of neighbours
         neighbour = False
         neighbours = []
         valid = False
@@ -328,7 +283,6 @@ def check_move(state, move, player):
                     neighbour=True
                     neighbours.append([i,j])
                     valid = valid or check_for_any_line(state, colour, x, y, i, j)
-        #If there's no neighbours, it's an invalid move
         if not neighbour:
             return False
         else:
@@ -349,14 +303,7 @@ def change_player(player):
         return 2
 
 def move(array,  player, x, y):
-    """ Make move and reverse all influenced oponnent's disks 
-
-    Returns:
-        [type]: array - board after move
-    """
-    convert = get_pieces_to_reverse(array,  player, x, y)
-                
-    #Convert all the appropriate tiles
+    convert = get_pieces_to_reverse(array,  player, x, y)                
     for i,j in convert:
         array[i][j]=player
 
@@ -364,9 +311,7 @@ def move(array,  player, x, y):
 
 def check_and_make_move(state, m, player):
     if  check_move(state, m, player):
-        # state[move[0]][move[1]] = player
-        l = move(state, player, m[0], m[1])
-        
+        l = move(state, player, m[0], m[1])   
         return True, l
     return False, 0
 

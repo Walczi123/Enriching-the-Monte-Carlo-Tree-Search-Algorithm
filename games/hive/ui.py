@@ -1,12 +1,11 @@
 import numpy as np
 import os
 
-from games.hive.common_functions import evenr_to_axial
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "hide"
 import pygame
 from games.hive.pieces import Ant, Beetle, Grasshopper, Queen, Spider
 
-from games.othello.const import BACKGROUND_COLOR, BOARD_COLOR, FRIST_PLAYER_COLOR, SECONF_PLAYER_COLOR
+from games.othello.const import BACKGROUND_COLOR
 
 
 class UI:
